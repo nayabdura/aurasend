@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Allow: /features
+Allow: /pricing
+Allow: /about
+Allow: /contact
+Allow: /blog
+Allow: /blog/*
+
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /gmail
+Disallow: /campaigns
+Disallow: /warmup
+Disallow: /api/
+Disallow: /settings
+
+Sitemap: https://outreachos.com/sitemap.xml
