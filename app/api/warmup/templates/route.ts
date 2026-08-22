@@ -22,7 +22,7 @@ export async function GET(req: Request) {
         const templates = db.prepare(query).all(...params);
         return NextResponse.json(templates);
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
 
@@ -58,6 +58,6 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ success: true, id: result.lastInsertRowid });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }

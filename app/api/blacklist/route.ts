@@ -20,7 +20,7 @@ export async function GET() {
         const blacklist = db.prepare(query).all(...params);
         return NextResponse.json(blacklist);
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
 
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
         if (e.message.includes('UNIQUE')) {
             return NextResponse.json({ error: 'Email already blacklisted for this user' }, { status: 400 });
         }
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
 
@@ -63,6 +63,6 @@ export async function DELETE(req: Request) {
         if (result.changes === 0) return NextResponse.json({ error: 'Not found' }, { status: 404 });
         return NextResponse.json({ success: true });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }

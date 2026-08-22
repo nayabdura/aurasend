@@ -77,12 +77,12 @@ const colorMap: Record<string, string> = {
 
 const tagColorMap: Record<string, string> = {
     'Free Tool': 'bg-emerald-100 text-emerald-700',
-    'Dashboard': 'bg-slate-100 text-slate-600',
+    'Dashboard': 'bg-slate-100 dark:bg-zinc-800/50 text-slate-600 dark:text-zinc-400',
 };
 
 export default function ToolsPage() {
     return (
-        <div className="min-h-screen bg-white font-sans">
+        <div className="min-h-screen bg-white dark:bg-zinc-900/60 font-sans">
             <MarketingNav active="/tools" />
             <main className="pt-20">
                 {/* Hero */}
@@ -93,7 +93,7 @@ export default function ToolsPage() {
                         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
                     </div>
                     <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-slate-300 text-sm font-semibold mb-8">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-zinc-900 border border-white/20 text-slate-300 text-sm font-semibold mb-8">
                             ✦ The AuraSend Toolkit
                         </div>
                         <h1 className="text-6xl font-black text-white mb-6 leading-tight">
@@ -109,30 +109,30 @@ export default function ToolsPage() {
                 </section>
 
                 {/* Tools Grid */}
-                <section className="py-24 bg-slate-50">
+                <section className="py-24 bg-slate-50 dark:bg-zinc-900/50">
                     <div className="max-w-7xl mx-auto px-6">
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {TOOLS.map((tool) => {
-                                const colorClass = colorMap[tool.color] || 'bg-slate-50 text-slate-600 border-slate-100';
+                                const colorClass = colorMap[tool.color] || 'bg-slate-50 dark:bg-zinc-900/50 text-slate-600 dark:text-zinc-400 border-slate-100 dark:border-zinc-800/80';
                                 return (
-                                    <div key={tool.href} className="bg-white rounded-3xl border border-slate-200 p-8 hover:border-slate-300 hover:shadow-xl transition-all duration-300 group flex flex-col">
+                                    <div key={tool.href} className="bg-white dark:bg-zinc-900/60 rounded-3xl border border-slate-200 dark:border-zinc-800 p-8 hover:border-slate-300 hover:shadow-xl transition-all duration-300 group flex flex-col">
                                         <div className="flex items-start justify-between mb-6">
                                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border ${colorClass}`}>
                                                 <tool.icon size={28} />
                                             </div>
                                             <span className={`px-3 py-1 rounded-full text-xs font-bold ${tagColorMap[tool.tag]}`}>{tool.tag}</span>
                                         </div>
-                                        <h3 className="text-xl font-black text-slate-900 mb-3">{tool.label}</h3>
-                                        <p className="text-slate-500 leading-relaxed mb-6 flex-1">{tool.desc}</p>
+                                        <h3 className="text-xl font-black text-slate-900 dark:text-zinc-50 mb-3">{tool.label}</h3>
+                                        <p className="text-slate-500 dark:text-zinc-400 leading-relaxed mb-6 flex-1">{tool.desc}</p>
                                         <ul className="space-y-2 mb-6">
                                             {tool.features.map((f) => (
-                                                <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
+                                                <li key={f} className="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-400">
                                                     <CheckCircle className="text-emerald-500 shrink-0" size={15} />
                                                     {f}
                                                 </li>
                                             ))}
                                         </ul>
-                                        <Link href={tool.href} className="flex items-center gap-2 font-bold text-sm text-slate-900 hover:text-indigo-600 group-hover:gap-3 transition-all">
+                                        <Link href={tool.href} className="flex items-center gap-2 font-bold text-sm text-slate-900 dark:text-zinc-50 hover:text-indigo-600 group-hover:gap-3 transition-all">
                                             Learn More <ArrowRight size={16} />
                                         </Link>
                                     </div>
@@ -143,16 +143,16 @@ export default function ToolsPage() {
                 </section>
 
                 {/* Comparison: Free vs Dashboard Tools */}
-                <section className="py-24 bg-white">
+                <section className="py-24 bg-white dark:bg-zinc-900/60">
                     <div className="max-w-4xl mx-auto px-6 text-center">
-                        <h2 className="text-4xl font-black text-slate-900 mb-4">Try before you commit</h2>
-                        <p className="text-xl text-slate-500 mb-12 max-w-2xl mx-auto">Several tools are available for free without an account — limited to 5 uses per day. Sign up to unlock everything.</p>
+                        <h2 className="text-4xl font-black text-slate-900 dark:text-zinc-50 mb-4">Try before you commit</h2>
+                        <p className="text-xl text-slate-500 dark:text-zinc-400 mb-12 max-w-2xl mx-auto">Several tools are available for free without an account — limited to 5 uses per day. Sign up to unlock everything.</p>
                         <div className="grid sm:grid-cols-2 gap-6">
-                            <div className="bg-slate-50 rounded-3xl p-8 border border-slate-200 text-left">
-                                <h3 className="font-black text-xl text-slate-900 mb-5">Free (No account)</h3>
+                            <div className="bg-slate-50 dark:bg-zinc-900/50 rounded-3xl p-8 border border-slate-200 dark:border-zinc-800 text-left">
+                                <h3 className="font-black text-xl text-slate-900 dark:text-zinc-50 mb-5">Free (No account)</h3>
                                 <ul className="space-y-3">
                                     {['Email Verifier (5/day)', 'Spam Checker (5/day)', 'Email Testing Center (5/day)'].map((f) => (
-                                        <li key={f} className="flex items-center gap-3 text-slate-700 font-medium">
+                                        <li key={f} className="flex items-center gap-3 text-slate-700 dark:text-zinc-300 font-medium">
                                             <CheckCircle className="text-emerald-500 shrink-0" size={18} /> {f}
                                         </li>
                                     ))}
@@ -167,7 +167,7 @@ export default function ToolsPage() {
                                         </li>
                                     ))}
                                 </ul>
-                                <Link href="/login" className="mt-6 inline-flex items-center gap-2 h-12 px-6 bg-white text-indigo-700 font-bold rounded-full text-sm hover:shadow-lg transition-all">
+                                <Link href="/login" className="mt-6 inline-flex items-center gap-2 h-12 px-6 bg-white dark:bg-zinc-900/60 text-indigo-700 font-bold rounded-full text-sm hover:shadow-lg transition-all">
                                     Start Free <ArrowRight size={16} />
                                 </Link>
                             </div>

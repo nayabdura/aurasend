@@ -43,13 +43,13 @@ export default function LeadUploader() {
     }
 
     return (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+        <div className="bg-white dark:bg-zinc-900/60 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 mb-8">
             <div className="flex items-center justify-between mb-4">
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-zinc-50 flex items-center gap-2">
                         <Upload size={20} className="text-emerald-600" /> Upload & Verify CSV
                     </h3>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-slate-500 dark:text-zinc-50 mt-1">
                         Columns: name, email, website, company, lead_type (client/agency)
                     </p>
                 </div>
@@ -67,10 +67,10 @@ export default function LeadUploader() {
                         <p className="text-2xl font-bold text-red-700">{stats.invalid}</p>
                         <p className="text-xs text-red-600">Invalid</p>
                     </div>
-                    <div className="bg-gray-50 p-4 rounded-lg text-center">
-                        <FileText className="mx-auto mb-2 text-gray-600" size={24} />
-                        <p className="text-2xl font-bold text-gray-700">{stats.skipped}</p>
-                        <p className="text-xs text-gray-600">Skipped</p>
+                    <div className="bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 p-4 rounded-lg text-center">
+                        <FileText className="mx-auto mb-2 text-slate-600 dark:text-zinc-50" size={24} />
+                        <p className="text-2xl font-bold text-slate-700 dark:text-zinc-50">{stats.skipped}</p>
+                        <p className="text-xs text-slate-600 dark:text-zinc-50">Skipped</p>
                     </div>
                 </div>
             )}

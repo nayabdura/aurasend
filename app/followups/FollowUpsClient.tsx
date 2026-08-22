@@ -153,10 +153,10 @@ export default function FollowUpsClient() {
             <motion.div initial="hidden" animate="visible" custom={0} variants={fadeUp}
                 className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 flex items-center gap-3">
+                    <h1 className="text-3xl font-extrabold text-slate-900 dark:text-zinc-50 flex items-center gap-3">
                         <GitBranch className="text-purple-600" size={32} /> Follow-Up Builder
                     </h1>
-                    <p className="text-gray-500 text-sm mt-1">Visual timeline for unlimited follow-up sequences</p>
+                    <p className="text-slate-500 dark:text-zinc-50 text-sm mt-1">Visual timeline for unlimited follow-up sequences</p>
                 </div>
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                     onClick={saveAll} disabled={saving || !selectedCampaign}
@@ -168,8 +168,8 @@ export default function FollowUpsClient() {
 
             {/* Campaign Selector */}
             <motion.div initial="hidden" animate="visible" custom={1} variants={fadeUp}
-                className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-                <label className="block text-sm font-bold text-gray-700 mb-2">Select Campaign</label>
+                className="bg-white dark:bg-zinc-900/60 rounded-2xl shadow-lg border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 p-6">
+                <label className="block text-sm font-bold text-slate-700 dark:text-zinc-50 mb-2">Select Campaign</label>
                 {campaigns.length === 0 ? (
                     <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 flex items-center gap-3">
                         <Info size={18} className="text-amber-600" />
@@ -177,7 +177,7 @@ export default function FollowUpsClient() {
                     </div>
                 ) : (
                     <select
-                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none bg-white"
+                        className="w-full p-3 border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none bg-white dark:bg-zinc-900/60"
                         value={selectedCampaign}
                         onChange={e => setSelectedCampaign(e.target.value)}
                     >
@@ -232,13 +232,13 @@ export default function FollowUpsClient() {
 
                                 {/* Step Card */}
                                 <div className="flex-1 pb-6 pt-6">
-                                    <div className="bg-white rounded-2xl border-2 border-purple-100 shadow-lg p-6">
+                                    <div className="bg-white dark:bg-zinc-900/60 rounded-2xl border-2 border-purple-100 shadow-lg p-6">
                                         {/* Step Header */}
                                         <div className="flex items-center justify-between mb-5">
                                             <div className="flex items-center gap-2">
                                                 <GitBranch size={18} className="text-purple-600" />
-                                                <span className="font-bold text-gray-900">Follow-Up #{index + 1}</span>
-                                                {fu.id && <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Saved</span>}
+                                                <span className="font-bold text-slate-900 dark:text-zinc-50">Follow-Up #{index + 1}</span>
+                                                {fu.id && <span className="text-xs bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 text-slate-500 dark:text-zinc-50 px-2 py-0.5 rounded-full">Saved</span>}
                                             </div>
                                             <button onClick={() => deleteStep(fu, index)}
                                                 className="p-2 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all">
@@ -253,7 +253,7 @@ export default function FollowUpsClient() {
                                                     <Calendar size={12} /> Delay (Days)
                                                 </label>
                                                 <input type="number" min={0} max={365}
-                                                    className="w-full p-2 border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white"
+                                                    className="w-full p-2 border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white dark:bg-zinc-900/60"
                                                     value={fu.delay_days}
                                                     onChange={e => updateStep(index, { delay_days: parseInt(e.target.value) || 0 })}
                                                 />
@@ -263,7 +263,7 @@ export default function FollowUpsClient() {
                                                     <Clock size={12} /> Delay (Hours)
                                                 </label>
                                                 <input type="number" min={0} max={23}
-                                                    className="w-full p-2 border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white"
+                                                    className="w-full p-2 border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white dark:bg-zinc-900/60"
                                                     value={fu.delay_hours}
                                                     onChange={e => updateStep(index, { delay_hours: parseInt(e.target.value) || 0 })}
                                                 />
@@ -273,7 +273,7 @@ export default function FollowUpsClient() {
                                                     <Clock size={12} /> Send Time
                                                 </label>
                                                 <input type="time"
-                                                    className="w-full p-2 border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white"
+                                                    className="w-full p-2 border border-purple-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white dark:bg-zinc-900/60"
                                                     value={fu.send_time}
                                                     onChange={e => updateStep(index, { send_time: e.target.value })}
                                                 />
@@ -285,30 +285,30 @@ export default function FollowUpsClient() {
                                             <label className="flex items-center gap-2 cursor-pointer">
                                                 <input type="checkbox" checked={fu.stop_on_reply}
                                                     onChange={e => updateStep(index, { stop_on_reply: e.target.checked })}
-                                                    className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
+                                                    className="w-4 h-4 text-purple-600 rounded border-slate-300 dark:border-zinc-700 focus:ring-purple-500"
                                                 />
-                                                <span className="text-sm font-medium text-gray-700">Stop if reply detected</span>
+                                                <span className="text-sm font-medium text-slate-700 dark:text-zinc-50">Stop if reply detected</span>
                                             </label>
                                             <label className="flex items-center gap-2 cursor-pointer">
                                                 <input type="checkbox" checked={fu.stop_on_bounce}
                                                     onChange={e => updateStep(index, { stop_on_bounce: e.target.checked })}
-                                                    className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
+                                                    className="w-4 h-4 text-purple-600 rounded border-slate-300 dark:border-zinc-700 focus:ring-purple-500"
                                                 />
-                                                <span className="text-sm font-medium text-gray-700">Stop if bounced</span>
+                                                <span className="text-sm font-medium text-slate-700 dark:text-zinc-50">Stop if bounced</span>
                                             </label>
                                         </div>
 
                                         {/* Template or Custom */}
                                         <div className="space-y-3">
                                             <div className="flex items-center justify-between">
-                                                <label className="block text-sm font-bold text-gray-700">Email Content</label>
+                                                <label className="block text-sm font-bold text-slate-700 dark:text-zinc-50">Email Content</label>
                                                 <button onClick={() => aiSuggestBody(index)}
                                                     className="flex items-center gap-1 text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full hover:bg-purple-200 transition-colors font-semibold">
                                                     <Sparkles size={12} /> AI Suggest
                                                 </button>
                                             </div>
                                             <select
-                                                className="w-full p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white"
+                                                className="w-full p-2 border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none bg-white dark:bg-zinc-900/60"
                                                 value={fu.template_id || ''}
                                                 onChange={e => {
                                                     const tplId = e.target.value ? parseInt(e.target.value) : undefined;
@@ -320,14 +320,14 @@ export default function FollowUpsClient() {
                                                 {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                                             </select>
                                             <input
-                                                className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+                                                className="w-full p-3 border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 outline-none"
                                                 placeholder="Follow-up email subject..."
                                                 value={fu.subject}
                                                 onChange={e => updateStep(index, { subject: e.target.value })}
                                             />
                                             <textarea
                                                 rows={4}
-                                                className="w-full p-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 outline-none resize-y"
+                                                className="w-full p-3 border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 rounded-xl text-sm focus:ring-2 focus:ring-purple-500 outline-none resize-y"
                                                 placeholder="Hi {{firstName}},&#10;&#10;Just following up on my previous email..."
                                                 value={fu.body}
                                                 onChange={e => updateStep(index, { body: e.target.value })}
@@ -364,13 +364,13 @@ export default function FollowUpsClient() {
                                 <Info size={18} /> Sequence Summary
                             </h3>
                             <div className="flex flex-wrap gap-3">
-                                <div className="text-sm bg-white rounded-xl px-4 py-2 border border-purple-200 font-medium">
+                                <div className="text-sm bg-white dark:bg-zinc-900/60 rounded-xl px-4 py-2 border border-purple-200 font-medium">
                                     📧 {1 + followUps.length} total emails in sequence
                                 </div>
-                                <div className="text-sm bg-white rounded-xl px-4 py-2 border border-purple-200 font-medium">
+                                <div className="text-sm bg-white dark:bg-zinc-900/60 rounded-xl px-4 py-2 border border-purple-200 font-medium">
                                     📅 {followUps.reduce((s, f) => s + f.delay_days, 0)} total days span
                                 </div>
-                                <div className="text-sm bg-white rounded-xl px-4 py-2 border border-purple-200 font-medium">
+                                <div className="text-sm bg-white dark:bg-zinc-900/60 rounded-xl px-4 py-2 border border-purple-200 font-medium">
                                     ✋ {followUps.filter(f => f.stop_on_reply).length}/{followUps.length} stop on reply
                                 </div>
                             </div>

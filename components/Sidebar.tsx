@@ -20,6 +20,7 @@ const Sidebar = () => {
                 </div>
                 <NavItem href="/campaigns" icon={<PlayCircle size={18} />} label="Campaigns" />
                 <NavItem href="/leads" icon={<Users size={18} />} label="Audience" />
+                <NavItem href="/contacts" icon={<Magnet size={18} />} label="CRM Contacts" />
 
                 <div className="pt-4 pb-1">
                     <p className="px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Infrastructure</p>

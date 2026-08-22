@@ -28,6 +28,6 @@ export async function GET() {
             }
         });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message || 'Unauthorized' }, { status: 401 });
+        return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 401 });
     }
 }

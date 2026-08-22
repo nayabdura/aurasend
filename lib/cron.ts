@@ -1,99 +1,115 @@
-import cron from 'node-cron';
+/**
+ * Cron Jobs — Uses setInterval instead of node-cron to avoid
+ * the "missed execution" spam that blocks server startup.
+ */
+
 import { processQueue, checkReplies, checkAndResetDailyLimits } from './gmail';
 import { processWarmupQueue } from './warmupEngine';
 import { pollAllInboxes } from './imapMonitor';
-import { log } from './logging';
+import { logger } from './logger';
+import { walCheckpoint } from './db';
+import { cache } from './cache';
 import { initQueueWorker } from './queue';
 import db from './db';
 
+const MIN = 60 * 1000;
+
 export function startCronJobs() {
-    // Prevent multiple instantiations in dev mode
-    if ((global as any).cronStarted) return;
+    // ── Singleton guard ──────────────────────────────────────────────────────
+    // (global as any) is keyed per Node.js process — survives Next.js module
+    // re-evaluations but resets on a true process restart. Using the PID makes
+    // this unique per process so a crashed/restarted server starts fresh.
+    const guardKey = `cronStarted_${process.pid}`;
+    if ((global as any)[guardKey]) return;
+    (global as any)[guardKey] = true;
+    // Also set the legacy key so older checks still work
     (global as any).cronStarted = true;
 
-    log('info', 'Starting all cron jobs...');
+    logger.info('Starting all cron jobs (setInterval mode)...');
 
     // Run the rolling reset immediately on startup
     try {
         checkAndResetDailyLimits();
     } catch (e: any) {
-        log('error', `Startup Reset Error: ${e.message}`);
+        logger.error(`Startup Reset Error: ${e.message}`, undefined, 'system');
     }
 
-    // BullMQ Worker — initialise lazily (connects to Redis only when available)
+    // Queue worker (no Redis needed)
     initQueueWorker().catch(() => { });
 
-    // Process cold email queue every 2 minutes
-    cron.schedule('*/2 * * * *', async () => {
-        try {
-            await processQueue();
-        } catch (e: any) {
-            log('error', `Cron Queue Error: ${e.message}`);
-        }
-    }, { runOnInit: false } as any);
+    // ─── Email queue — every 2 minutes ───────────────────────────────────────
+    setInterval(async () => {
+        try { await processQueue(); }
+        catch (e: any) { logger.error(`Cron Queue Error: ${e.message}`, undefined, 'email'); }
+    }, 2 * MIN);
 
-    // Run warmup engine every 15 minutes — per-account time windows checked inside engine
-    cron.schedule('*/15 * * * *', async () => {
+    // ─── Warmup engine — every 15 minutes ────────────────────────────────────
+    setInterval(async () => {
         try {
             const result = await processWarmupQueue();
             if (result.processed > 0 || result.errors > 0) {
-                log('info', `Cron Warmup: ${result.processed} sent, ${result.errors} errors`);
+                logger.info(`Cron Warmup: ${result.processed} sent, ${result.errors} errors`, undefined, 'warmup');
             }
-        } catch (e: any) {
-            log('error', `Cron Warmup Error: ${e.message}`);
-        }
-    });
+        } catch (e: any) { logger.error(`Cron Warmup Error: ${e.message}`, undefined, 'warmup'); }
+    }, 15 * MIN);
 
-    // Poll IMAP inboxes every 10 minutes
-    cron.schedule('*/10 * * * *', async () => {
+    // ─── IMAP inbox poll — every 10 minutes ──────────────────────────────────
+    setInterval(async () => {
         try {
             const result = await pollAllInboxes();
             if (result.totalReplies > 0 || result.totalBounces > 0) {
-                log('info', `Cron IMAP: ${result.totalReplies} replies, ${result.totalBounces} bounces`);
+                logger.info(`Cron IMAP: ${result.totalReplies} replies, ${result.totalBounces} bounces`, undefined, 'email');
             }
-        } catch (e: any) {
-            log('error', `Cron IMAP Error: ${e.message}`);
-        }
-    });
+        } catch (e: any) { logger.error(`Cron IMAP Error: ${e.message}`, undefined, 'email'); }
+    }, 10 * MIN);
 
-    // Run autopilot check every 30 minutes for all enabled users
-    cron.schedule('*/30 * * * *', async () => {
+    // ─── Autopilot — every 30 minutes ────────────────────────────────────────
+    setInterval(async () => {
         try {
-            // Dynamically import to avoid circular deps
             const { runAutopilot } = require('./autopilot');
-            const enabledUsers = db.prepare(`
-                SELECT user_id FROM autopilot_config WHERE enabled = 1
-            `).all() as { user_id: number }[];
-
+            const enabledUsers = db.prepare(
+                'SELECT user_id FROM autopilot_config WHERE enabled = 1'
+            ).all() as { user_id: number }[];
             for (const { user_id } of enabledUsers) {
-                try {
-                    await runAutopilot(user_id);
-                } catch (e: any) {
-                    log('error', `Autopilot error for user ${user_id}: ${e.message}`);
-                }
+                try { await runAutopilot(user_id); }
+                catch (e: any) { logger.error(`Autopilot error for user ${user_id}: ${e.message}`, undefined, 'system'); }
             }
-        } catch (e: any) {
-            log('error', `Cron Autopilot Error: ${e.message}`);
-        }
-    });
+        } catch (e: any) { logger.error(`Cron Autopilot Error: ${e.message}`, undefined, 'system'); }
+    }, 30 * MIN);
 
-    // Check legacy replies every 5 minutes
-    cron.schedule('*/5 * * * *', async () => {
+    // ─── Reply checker — every 5 minutes ─────────────────────────────────────
+    setInterval(async () => {
+        try { await checkReplies(); }
+        catch (e: any) { logger.error(`Cron Reply Error: ${e.message}`, undefined, 'email'); }
+    }, 5 * MIN);
+
+    // ─── Rolling daily limit reset — every 5 minutes ─────────────────────────
+    setInterval(() => {
+        try { checkAndResetDailyLimits(); }
+        catch (e: any) { logger.error(`Cron Rolling Reset Error: ${e.message}`, undefined, 'system'); }
+    }, 5 * MIN);
+
+    // ─── WAL checkpoint + cache stats — every 6 hours ────────────────────────
+    setInterval(() => {
         try {
-            await checkReplies();
+            walCheckpoint();
+            logger.info(`WAL checkpoint done. Cache: ${cache.size()} entries`, undefined, 'db');
         } catch (e: any) {
-            log('error', `Cron Reply Error: ${e.message}`);
+            logger.warn(`WAL checkpoint failed: ${e.message}`, undefined, 'db');
         }
-    });
+    }, 6 * 60 * MIN);
 
-    // Check for 24-hour rolling daily limits every 5 minutes
-    cron.schedule('*/5 * * * *', () => {
+    // ─── Log pruning — keep last 10,000 log entries ───────────────────────────
+    setInterval(() => {
         try {
-            checkAndResetDailyLimits();
-        } catch (e: any) {
-            log('error', `Cron Rolling Reset Error: ${e.message}`);
-        }
-    });
+            db.prepare(`
+                DELETE FROM system_logs
+                WHERE id NOT IN (
+                    SELECT id FROM system_logs ORDER BY id DESC LIMIT 10000
+                )
+            `).run();
+        } catch { }
+    }, 24 * 60 * MIN);
 
-    log('info', 'All cron jobs started ✅');
+    logger.info('All cron jobs started ✅');
 }

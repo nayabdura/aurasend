@@ -44,14 +44,14 @@ export default async function SuppressionCenter() {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                    <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <div className="bg-white dark:bg-zinc-900/60 rounded-xl shadow-lg border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 overflow-hidden">
+                    <div className="p-6 border-b border-slate-200 dark:border-zinc-800 dark:border-zinc-800 flex justify-between items-center bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30">
                         <div className="relative w-96">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                             <input
                                 type="text"
                                 placeholder="Search email or domain..."
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                                className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
                             />
                         </div>
                         <button className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium flex items-center gap-2 transition-colors">
@@ -60,8 +60,8 @@ export default async function SuppressionCenter() {
                     </div>
 
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left bg-white">
-                            <thead className="bg-gray-100 text-gray-600 font-semibold text-sm">
+                        <table className="w-full text-left bg-white dark:bg-zinc-900/60">
+                            <thead className="bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 text-slate-600 dark:text-zinc-50 font-semibold text-sm">
                                 <tr>
                                     <th className="py-4 px-6">Domain / Email</th>
                                     <th className="py-4 px-6">Reason</th>
@@ -70,23 +70,23 @@ export default async function SuppressionCenter() {
                                     <th className="py-4 px-6 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100 text-gray-700 text-sm">
+                            <tbody className="divide-y divide-gray-100 text-slate-700 dark:text-zinc-50 text-sm">
                                 {suppressions.length === 0 ? (
                                     <tr>
-                                        <td colSpan={user.role === 'master' ? 5 : 4} className="py-12 text-center text-gray-500">
+                                        <td colSpan={user.role === 'master' ? 5 : 4} className="py-12 text-center text-slate-500 dark:text-zinc-50">
                                             No blocks found. Your lists are clean!
                                         </td>
                                     </tr>
                                 ) : (
                                     suppressions.map((s: any) => (
-                                        <tr key={s.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="py-4 px-6 font-medium text-gray-900">{s.domain_or_email}</td>
+                                        <tr key={s.id} className="hover:bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 transition-colors">
+                                            <td className="py-4 px-6 font-medium text-slate-900 dark:text-zinc-50">{s.domain_or_email}</td>
                                             <td className="py-4 px-6">
                                                 <Badge reason={s.reason} />
                                             </td>
-                                            <td className="py-4 px-6 text-gray-500">{new Date(s.created_at).toLocaleDateString()}</td>
+                                            <td className="py-4 px-6 text-slate-500 dark:text-zinc-50">{new Date(s.created_at).toLocaleDateString()}</td>
                                             {user.role === 'master' && (
-                                                <td className="py-4 px-6 text-gray-500">{s.workspace_name || 'Global'}</td>
+                                                <td className="py-4 px-6 text-slate-500 dark:text-zinc-50">{s.workspace_name || 'Global'}</td>
                                             )}
                                             <td className="py-4 px-6 text-right">
                                                 <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
@@ -110,12 +110,12 @@ function StatCard({ icon, title, value, subtitle, color }: any) {
         red: 'bg-red-50 text-red-600 border-red-100',
         orange: 'bg-orange-50 text-orange-600 border-orange-100',
         purple: 'bg-purple-50 text-purple-600 border-purple-100',
-        gray: 'bg-gray-50 text-gray-600 border-gray-200'
+        gray: 'bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 text-slate-600 dark:text-zinc-50 border-slate-200 dark:border-zinc-800 dark:border-zinc-800'
     };
 
     return (
         <div className={`p-6 rounded-2xl border ${colorMap[color]} flex items-center gap-4`}>
-            <div className={`p-4 bg-white rounded-xl shadow-sm ${colorMap[color].split(' ')[1]}`}>
+            <div className={`p-4 bg-white dark:bg-zinc-900/60 rounded-xl shadow-sm ${colorMap[color].split(' ')[1]}`}>
                 {icon}
             </div>
             <div>
@@ -130,5 +130,5 @@ function StatCard({ icon, title, value, subtitle, color }: any) {
 function Badge({ reason }: { reason: string }) {
     if (reason === 'hard_bounce') return <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold uppercase">Hard Bounce</span>;
     if (reason === 'unsubscribed') return <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold uppercase">Unsubscribed</span>;
-    return <span className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-xs font-bold uppercase">Manual block</span>;
+    return <span className="px-3 py-1 bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-50 rounded-full text-xs font-bold uppercase">Manual block</span>;
 }

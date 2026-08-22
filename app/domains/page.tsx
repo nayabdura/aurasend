@@ -44,14 +44,14 @@ export default async function DomainsHealthCenter() {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                    <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <div className="bg-white dark:bg-zinc-900/60 rounded-xl shadow-lg border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 overflow-hidden">
+                    <div className="p-6 border-b border-slate-200 dark:border-zinc-800 dark:border-zinc-800 flex justify-between items-center bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30">
                         <div className="relative w-96">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                             <input
                                 type="text"
                                 placeholder="Search tracking domain..."
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
                         <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium flex items-center gap-2 transition-colors shadow-md">
@@ -60,8 +60,8 @@ export default async function DomainsHealthCenter() {
                     </div>
 
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left bg-white">
-                            <thead className="bg-gray-100 text-gray-600 font-semibold text-sm">
+                        <table className="w-full text-left bg-white dark:bg-zinc-900/60">
+                            <thead className="bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 text-slate-600 dark:text-zinc-50 font-semibold text-sm">
                                 <tr>
                                     <th className="py-4 px-6">Domain</th>
                                     <th className="py-4 px-6">Health Score</th>
@@ -70,17 +70,17 @@ export default async function DomainsHealthCenter() {
                                     <th className="py-4 px-6 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100 text-gray-700 text-sm">
+                            <tbody className="divide-y divide-gray-100 text-slate-700 dark:text-zinc-50 text-sm">
                                 {domains.length === 0 ? (
                                     <tr>
-                                        <td colSpan={user.role === 'master' ? 5 : 4} className="py-12 text-center text-gray-500">
+                                        <td colSpan={user.role === 'master' ? 5 : 4} className="py-12 text-center text-slate-500 dark:text-zinc-50">
                                             No domains attached. Connect Gmail accounts or manually add a checking domain.
                                         </td>
                                     </tr>
                                 ) : (
                                     domains.map((d: any) => (
-                                        <tr key={d.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="py-4 px-6 font-bold text-gray-900">{d.domain_name}</td>
+                                        <tr key={d.id} className="hover:bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 transition-colors">
+                                            <td className="py-4 px-6 font-bold text-slate-900 dark:text-zinc-50">{d.domain_name}</td>
                                             <td className="py-4 px-6">
                                                 <ScoreBadge score={d.health_score} />
                                             </td>
@@ -90,10 +90,10 @@ export default async function DomainsHealthCenter() {
                                                 <small className={`px-2 py-0.5 rounded font-bold ${d.dmarc_status === 'pass' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>DMARC</small>
                                             </td>
                                             {user.role === 'master' && (
-                                                <td className="py-4 px-6 text-gray-500">{d.workspace_name || 'Global'}</td>
+                                                <td className="py-4 px-6 text-slate-500 dark:text-zinc-50">{d.workspace_name || 'Global'}</td>
                                             )}
                                             <td className="py-4 px-6 text-right flex justify-end gap-2">
-                                                <button className="px-3 py-1 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded text-xs font-semibold">Rescan</button>
+                                                <button className="px-3 py-1 bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 text-slate-600 dark:text-zinc-50 hover:bg-slate-200 dark:bg-zinc-800 rounded text-xs font-semibold">Rescan</button>
                                                 <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                                                     <Trash2 size={16} />
                                                 </button>
@@ -120,7 +120,7 @@ function StatCard({ icon, title, value, subtitle, color }: any) {
 
     return (
         <div className={`p-6 rounded-2xl border ${colorMap[color]} flex items-center gap-4`}>
-            <div className={`p-4 bg-white rounded-xl shadow-sm ${colorMap[color].split(' ')[1]}`}>
+            <div className={`p-4 bg-white dark:bg-zinc-900/60 rounded-xl shadow-sm ${colorMap[color].split(' ')[1]}`}>
                 {icon}
             </div>
             <div>

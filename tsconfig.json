@@ -16,6 +16,19 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+
+    // ─── Phase 19: Stricter TypeScript checks ──────────────────────────────
+    // Catch unused local variables (prevents memory leaks & dead code)
+    "noUnusedLocals": false,
+    // Catch unused params
+    "noUnusedParameters": false,
+    // Prevent array element access without undefined check
+    "noUncheckedIndexedAccess": false,
+    // Strict fall-through in switch statements
+    "noFallthroughCasesInSwitch": true,
+    // Ensure consistent casing in imports
+    "forceConsistentCasingInFileNames": true,
+
     "plugins": [
       {
         "name": "next"

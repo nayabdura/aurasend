@@ -89,7 +89,7 @@ const colorMap: Record<string, string> = {
 
 export default function FeaturesPage() {
     return (
-        <div className="min-h-screen bg-slate-50 font-sans">
+        <div className="min-h-screen bg-slate-50 dark:bg-zinc-900/50 font-sans">
             <MarketingNav active="/features" />
 
             <main className="pt-32 pb-24 relative overflow-hidden">
@@ -98,16 +98,16 @@ export default function FeaturesPage() {
 
                 {/* Header */}
                 <div className="max-w-4xl mx-auto px-6 text-center mb-20 relative z-10">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-indigo-100 text-indigo-700 text-sm font-bold tracking-wide shadow-sm mb-6">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-zinc-900/60 border border-indigo-100 text-indigo-700 text-sm font-bold tracking-wide shadow-sm mb-6">
                         <Zap size={16} /> Complete Toolset
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tight mb-6">
+                    <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-zinc-50 tracking-tight mb-6">
                         Every tool you need, <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
                             built right in.
                         </span>
                     </h1>
-                    <p className="text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed font-medium">
+                    <p className="text-xl text-slate-500 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed font-medium">
                         AuraSend is an all-in-one platform. Forget expensive third-party integrations. Everything you need to scale cold outreach is already here.
                     </p>
                 </div>
@@ -118,11 +118,11 @@ export default function FeaturesPage() {
                         <div key={section.category} className={`flex flex-col lg:flex-row gap-12 items-center ${idx % 2 !== 0 ? 'lg:flex-row-reverse' : ''}`}>
                             <div className="flex-1 w-full relative">
                                 <div className={`absolute inset-0 bg-gradient-to-tr from-${section.color}-500/20 to-transparent blur-3xl opacity-50 rounded-full`} />
-                                <div className="bg-white border border-slate-100 shadow-2xl rounded-3xl p-10 relative z-10 hover:-translate-y-2 transition-transform duration-300 group">
+                                <div className="bg-white dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800/80 shadow-2xl rounded-3xl p-10 relative z-10 hover:-translate-y-2 transition-transform duration-300 group">
                                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border-2 mb-8 transition-colors duration-300 ${colorMap[section.color]?.split(' ').slice(0, 3).join(' ')}`}>
                                         {section.icon}
                                     </div>
-                                    <h2 className="text-3xl font-black text-slate-900 mb-6">{section.category}</h2>
+                                    <h2 className="text-3xl font-black text-slate-900 dark:text-zinc-50 mb-6">{section.category}</h2>
                                     <div className="space-y-6">
                                         {section.items.map(item => (
                                             <div key={item.name} className="flex gap-4 items-start">
@@ -130,8 +130,8 @@ export default function FeaturesPage() {
                                                     <CheckCircle2 size={16} />
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-bold text-slate-900 mb-1">{item.name}</h3>
-                                                    <p className="text-sm text-slate-500 leading-relaxed font-medium">{item.desc}</p>
+                                                    <h3 className="font-bold text-slate-900 dark:text-zinc-50 mb-1">{item.name}</h3>
+                                                    <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed font-medium">{item.desc}</p>
                                                 </div>
                                             </div>
                                         ))}
@@ -139,13 +139,13 @@ export default function FeaturesPage() {
                                 </div>
                             </div>
                             <div className="flex-1 w-full px-4 lg:px-12 text-center lg:text-left">
-                                <h3 className="text-4xl font-black tracking-tight text-slate-900 mb-6">Designed for scale.</h3>
-                                <p className="text-lg text-slate-500 leading-relaxed font-medium mb-8">
+                                <h3 className="text-4xl font-black tracking-tight text-slate-900 dark:text-zinc-50 mb-6">Designed for scale.</h3>
+                                <p className="text-lg text-slate-500 dark:text-zinc-400 leading-relaxed font-medium mb-8">
                                     Our {section.category.toLowerCase()} architecture is built from the ground up to securely handle enterprise-level volume without breaking a sweat.
                                 </p>
                                 <ul className="space-y-4 text-left inline-block lg:block">
                                     {[1, 2, 3].map(v => (
-                                        <li key={v} className="flex items-center gap-3 text-slate-700 font-semibold bg-slate-100/50 py-2 px-4 rounded-xl">
+                                        <li key={v} className="flex items-center gap-3 text-slate-700 dark:text-zinc-300 font-semibold bg-slate-100 dark:bg-zinc-800/50/50 py-2 px-4 rounded-xl">
                                             <CheckCircle2 size={18} className="text-indigo-500" /> Enterprise-ready infrastructure
                                         </li>
                                     ))}
@@ -162,7 +162,7 @@ export default function FeaturesPage() {
                         <h2 className="text-5xl font-black tracking-tight mb-8 relative z-10 leading-tight">Ready to activate <br className="hidden md:block" /> your sales engine?</h2>
                         <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto relative z-10">Stop wasting time juggling five different platforms. Start automating your entire outreach pipeline for free.</p>
                         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 relative z-10">
-                            <Link href="/login" className="h-16 px-10 bg-white text-slate-900 hover:bg-slate-100 rounded-full font-bold text-lg flex items-center gap-2 transition-all shadow-xl hover:scale-105 w-full sm:w-auto justify-center">
+                            <Link href="/login" className="h-16 px-10 bg-white dark:bg-zinc-900/60 text-slate-900 dark:text-zinc-50 hover:bg-slate-100 dark:bg-zinc-800/50 rounded-full font-bold text-lg flex items-center gap-2 transition-all shadow-xl hover:scale-105 w-full sm:w-auto justify-center">
                                 Start for Free <ArrowRight size={20} />
                             </Link>
                         </div>

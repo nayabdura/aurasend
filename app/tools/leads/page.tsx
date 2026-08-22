@@ -6,7 +6,7 @@ import { Users, CheckCircle, ArrowRight, Filter, Tag, Upload, Download, BarChart
 
 export default function LeadsToolPage() {
     return (
-        <div className="min-h-screen bg-white font-sans">
+        <div className="min-h-screen bg-white dark:bg-zinc-900/60 font-sans">
             <MarketingNav active="/tools/leads" />
             <main className="pt-20">
                 {/* Hero */}
@@ -35,7 +35,7 @@ export default function LeadsToolPage() {
                             </div>
                             {/* Visual */}
                             <div className="flex-1 w-full max-w-lg">
-                                <div className="bg-white/5 backdrop-blur border border-white/10 rounded-3xl p-6">
+                                <div className="bg-white dark:bg-zinc-900 backdrop-blur border border-white/10 rounded-3xl p-6">
                                     <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
                                         <span className="text-white font-bold">Lead List: SaaS Founders</span>
                                         <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-300 text-xs font-bold">2,450 leads</span>
@@ -47,7 +47,7 @@ export default function LeadsToolPage() {
                                             { name: 'Emma Davis', co: 'Growify', status: 'Pending', color: 'slate' },
                                             { name: 'James Wilson', co: 'SalesHub', status: 'Bounced', color: 'red' },
                                         ].map((lead) => (
-                                            <div key={lead.name} className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3 border border-white/10">
+                                            <div key={lead.name} className="flex items-center justify-between bg-white dark:bg-zinc-900 rounded-xl px-4 py-3 border border-white/10">
                                                 <div>
                                                     <p className="text-white font-semibold text-sm">{lead.name}</p>
                                                     <p className="text-slate-400 text-xs">{lead.co}</p>
@@ -63,11 +63,11 @@ export default function LeadsToolPage() {
                 </section>
 
                 {/* Feature grid */}
-                <section className="py-24 bg-slate-50">
+                <section className="py-24 bg-slate-50 dark:bg-zinc-900/50">
                     <div className="max-w-7xl mx-auto px-6">
                         <div className="text-center mb-16">
-                            <h2 className="text-4xl font-black text-slate-900 mb-4">Complete Lead Management System</h2>
-                            <p className="text-xl text-slate-500 max-w-2xl mx-auto">From import to conversion — manage every lead across your entire sales pipeline.</p>
+                            <h2 className="text-4xl font-black text-slate-900 dark:text-zinc-50 mb-4">Complete Lead Management System</h2>
+                            <p className="text-xl text-slate-500 dark:text-zinc-400 max-w-2xl mx-auto">From import to conversion — manage every lead across your entire sales pipeline.</p>
                         </div>
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[
@@ -78,12 +78,12 @@ export default function LeadsToolPage() {
                                 { icon: CheckCircle, title: 'Verification Status', desc: 'See real-time email validity status next to each lead. Filter down to only valid, safe-to-send emails automatically.', color: 'text-indigo-600', bg: 'bg-indigo-50' },
                                 { icon: BarChart2, title: 'Per-Lead Analytics', desc: 'See open rate, reply rate, and email sequences sent for every individual lead. Know exactly where in the funnel they are.', color: 'text-pink-600', bg: 'bg-pink-50' },
                             ].map((f, i) => (
-                                <div key={i} className="bg-white rounded-2xl p-6 border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
+                                <div key={i} className="bg-white dark:bg-zinc-900/60 rounded-2xl p-6 border border-slate-200 dark:border-zinc-800 hover:border-slate-300 hover:shadow-md transition-all">
                                     <div className={`w-12 h-12 ${f.bg} ${f.color} rounded-xl flex items-center justify-center mb-4`}>
                                         <f.icon size={24} />
                                     </div>
-                                    <h3 className="text-lg font-bold text-slate-900 mb-2">{f.title}</h3>
-                                    <p className="text-slate-500 text-sm leading-relaxed">{f.desc}</p>
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-zinc-50 mb-2">{f.title}</h3>
+                                    <p className="text-slate-500 dark:text-zinc-400 text-sm leading-relaxed">{f.desc}</p>
                                 </div>
                             ))}
                         </div>
@@ -95,7 +95,7 @@ export default function LeadsToolPage() {
                     <div className="max-w-4xl mx-auto px-6 text-center">
                         <h2 className="text-4xl font-black text-white mb-4">Start organizing your leads today.</h2>
                         <p className="text-xl text-orange-50 mb-8">Import your first list free. No credit card required.</p>
-                        <Link href="/login" className="inline-flex items-center gap-2 h-14 px-8 bg-white text-orange-600 font-bold rounded-full text-base shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
+                        <Link href="/login" className="inline-flex items-center gap-2 h-14 px-8 bg-white dark:bg-zinc-900/60 text-orange-600 font-bold rounded-full text-base shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
                             Import Leads Free <ArrowRight size={18} />
                         </Link>
                     </div>

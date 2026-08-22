@@ -32,7 +32,7 @@ export default function TestingCenterPage() {
     }
 
     return (
-        <div className="min-h-screen bg-white font-sans">
+        <div className="min-h-screen bg-white dark:bg-zinc-900/60 font-sans">
             <MarketingNav active="/tools/testing-center" />
             <main className="pt-20">
                 {/* Hero */}
@@ -52,36 +52,36 @@ export default function TestingCenterPage() {
                         <p className="text-xl text-slate-400 mb-4 leading-relaxed max-w-2xl mx-auto">
                             Run real deliverability tests on your email content. Detect spam trigger words, missing unsubscribe links, and inbox placement issues before your campaign goes live.
                         </p>
-                        <p className="text-sm text-slate-500 mb-10">Free tool — 5 tests/day without an account. <Link href="/login" className="text-teal-400 font-bold hover:underline">Sign up for unlimited.</Link></p>
+                        <p className="text-sm text-slate-500 dark:text-zinc-400 mb-10">Free tool — 5 tests/day without an account. <Link href="/login" className="text-teal-400 font-bold hover:underline">Sign up for unlimited.</Link></p>
                     </div>
                 </section>
 
                 {/* Interactive Tester */}
-                <section className="py-20 bg-slate-50">
+                <section className="py-20 bg-slate-50 dark:bg-zinc-900/50">
                     <div className="max-w-3xl mx-auto px-6">
-                        <div className="bg-white rounded-3xl shadow-xl border border-slate-200 p-8">
-                            <h2 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
+                        <div className="bg-white dark:bg-zinc-900/60 rounded-3xl shadow-xl border border-slate-200 dark:border-zinc-800 p-8">
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-zinc-50 mb-6 flex items-center gap-3">
                                 <TestTube className="text-teal-600" size={28} /> Quick Email Analyzer
                             </h2>
                             <div className="space-y-5">
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">Email Subject Line</label>
+                                    <label className="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">Email Subject Line</label>
                                     <input
                                         type="text"
                                         value={subject}
                                         onChange={e => setSubject(e.target.value)}
                                         placeholder="e.g. Quick question about your sales process"
-                                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none text-slate-900 bg-white"
+                                        className="w-full px-4 py-3 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none text-slate-900 dark:text-zinc-50 bg-white dark:bg-zinc-900/60"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2">Email Body</label>
+                                    <label className="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">Email Body</label>
                                     <textarea
                                         value={emailContent}
                                         onChange={e => setEmailContent(e.target.value)}
                                         placeholder="Paste your full email body here..."
                                         rows={8}
-                                        className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none text-slate-900 bg-white resize-none"
+                                        className="w-full px-4 py-3 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 outline-none text-slate-900 dark:text-zinc-50 bg-white dark:bg-zinc-900/60 resize-none"
                                     />
                                 </div>
                                 <button
@@ -102,13 +102,13 @@ export default function TestingCenterPage() {
                                     <div className={`rounded-2xl p-6 flex items-center gap-6 border ${result.score >= 80 ? 'bg-emerald-50 border-emerald-200' : result.score >= 50 ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200'}`}>
                                         <div className={`text-center shrink-0`}>
                                             <span className={`text-5xl font-black  ${result.score >= 80 ? 'text-emerald-600' : result.score >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>{result.score}</span>
-                                            <p className="text-sm font-bold text-slate-600 mt-1">/ 100 Score</p>
+                                            <p className="text-sm font-bold text-slate-600 dark:text-zinc-400 mt-1">/ 100 Score</p>
                                         </div>
                                         <div>
                                             <h3 className={`font-bold text-lg ${result.score >= 80 ? 'text-emerald-700' : result.score >= 50 ? 'text-yellow-700' : 'text-red-700'}`}>
                                                 {result.score >= 80 ? '✓ Good to send!' : result.score >= 50 ? '⚠ Review suggested' : '✗ Needs fixes'}
                                             </h3>
-                                            <p className="text-slate-600 text-sm mt-1">
+                                            <p className="text-slate-600 dark:text-zinc-400 text-sm mt-1">
                                                 {result.issues.length === 0 ? 'No issues detected. This email is ready to go!' : `${result.issues.length} issue${result.issues.length > 1 ? 's' : ''} detected.`}
                                             </p>
                                         </div>
@@ -118,13 +118,13 @@ export default function TestingCenterPage() {
                                             {result.issues.map((issue, i) => (
                                                 <div key={i} className="flex items-start gap-3 p-4 bg-orange-50 border border-orange-100 rounded-xl">
                                                     <AlertCircle className="text-orange-500 shrink-0 mt-0.5" size={18} />
-                                                    <span className="text-slate-700 text-sm font-medium">{issue}</span>
+                                                    <span className="text-slate-700 dark:text-zinc-300 text-sm font-medium">{issue}</span>
                                                 </div>
                                             ))}
                                         </div>
                                     )}
-                                    <div className="pt-4 border-t border-slate-100 text-center">
-                                        <p className="text-sm text-slate-500 mb-3">Want SMTP-level inbox placement testing?</p>
+                                    <div className="pt-4 border-t border-slate-100 dark:border-zinc-800/80 text-center">
+                                        <p className="text-sm text-slate-500 dark:text-zinc-400 mb-3">Want SMTP-level inbox placement testing?</p>
                                         <Link href="/login" className="inline-flex items-center gap-2 text-teal-600 font-bold hover:text-teal-700">
                                             Sign up for full testing suite <ArrowRight size={16} />
                                         </Link>
@@ -136,11 +136,11 @@ export default function TestingCenterPage() {
                 </section>
 
                 {/* Features */}
-                <section className="py-24 bg-white">
+                <section className="py-24 bg-white dark:bg-zinc-900/60">
                     <div className="max-w-7xl mx-auto px-6">
                         <div className="text-center mb-16">
-                            <h2 className="text-4xl font-black text-slate-900 mb-4">What AuraSend's Testing Center checks</h2>
-                            <p className="text-xl text-slate-500 max-w-2xl mx-auto">The complete pre-send checklist so nothing slips through the cracks.</p>
+                            <h2 className="text-4xl font-black text-slate-900 dark:text-zinc-50 mb-4">What AuraSend's Testing Center checks</h2>
+                            <p className="text-xl text-slate-500 dark:text-zinc-400 max-w-2xl mx-auto">The complete pre-send checklist so nothing slips through the cracks.</p>
                         </div>
                         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
                             {[
@@ -149,12 +149,12 @@ export default function TestingCenterPage() {
                                 { icon: Mail, title: 'HTML Structure', desc: 'Validates your HTML is correctly formed, has proper fallbacks, and renders well on mobile clients.', color: 'text-purple-600', bg: 'bg-purple-50' },
                                 { icon: CheckCircle, title: 'Compliance Check', desc: 'Verifies CAN-SPAM and GDPR compliance: unsubscribe link, physical address, and consent language.', color: 'text-emerald-600', bg: 'bg-emerald-50' },
                             ].map((f, i) => (
-                                <div key={i} className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
+                                <div key={i} className="bg-slate-50 dark:bg-zinc-900/50 rounded-2xl p-6 border border-slate-200 dark:border-zinc-800">
                                     <div className={`w-12 h-12 ${f.bg} ${f.color} rounded-xl flex items-center justify-center mb-4`}>
                                         <f.icon size={24} />
                                     </div>
-                                    <h3 className="font-bold text-slate-900 mb-2">{f.title}</h3>
-                                    <p className="text-sm text-slate-500 leading-relaxed">{f.desc}</p>
+                                    <h3 className="font-bold text-slate-900 dark:text-zinc-50 mb-2">{f.title}</h3>
+                                    <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">{f.desc}</p>
                                 </div>
                             ))}
                         </div>
@@ -166,7 +166,7 @@ export default function TestingCenterPage() {
                     <div className="max-w-4xl mx-auto px-6 text-center">
                         <h2 className="text-4xl font-black text-white mb-4">Get the full testing suite.</h2>
                         <p className="text-xl text-teal-100 mb-8">Sign up free and run unlimited tests with real SMTP checks.</p>
-                        <Link href="/login" className="inline-flex items-center gap-2 h-14 px-8 bg-white text-teal-700 font-bold rounded-full text-base shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
+                        <Link href="/login" className="inline-flex items-center gap-2 h-14 px-8 bg-white dark:bg-zinc-900/60 text-teal-700 font-bold rounded-full text-base shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
                             Start Free <ArrowRight size={18} />
                         </Link>
                     </div>

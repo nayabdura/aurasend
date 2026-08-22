@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/campaigns",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/warmup",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/inbox",
+      "schedule": "*/10 * * * *"
+    }
+  ]
+}

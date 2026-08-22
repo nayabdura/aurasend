@@ -4,12 +4,54 @@
     "next/typescript"
   ],
   "rules": {
+    // ─── TypeScript ────────────────────────────────────────────────────────────
+    // Allow any only where explicitly needed (legacy code)
     "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-unused-vars": "warn",
+    // Warn on unused vars but allow underscore-prefix to silence intentionally
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    // Allow require() for dynamic imports in server code
     "@typescript-eslint/no-require-imports": "off",
     "@typescript-eslint/no-unused-expressions": "off",
-    "prefer-const": "off",
+    // Prefer interfaces over types for objects (consistency)
+    "@typescript-eslint/consistent-type-definitions": ["warn", "interface"],
+
+    // ─── React ────────────────────────────────────────────────────────────────
+    // Enforce exhaustive deps in hooks
     "react-hooks/exhaustive-deps": "warn",
-    "react/no-unescaped-entities": "off"
-  }
+    // Allow <> in JSX (unescaped entities)
+    "react/no-unescaped-entities": "off",
+    // Disallow array index as key (performance)
+    "react/no-array-index-key": "warn",
+    // Require display name for memo/forwardRef components
+    "react/display-name": "warn",
+
+    // ─── General JS ───────────────────────────────────────────────────────────
+    // Prefer const but don't enforce (too noisy for legacy code)
+    "prefer-const": "warn",
+    // Warn on console.log in production code
+    "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
+    // No debugger left in
+    "no-debugger": "error",
+    // Disallow eval
+    "no-eval": "error",
+    // Disallow var
+    "no-var": "error"
+  },
+  "overrides": [
+    {
+      // Relax rules in scripts and config files
+      "files": ["scripts/**/*.ts", "*.config.*"],
+      "rules": {
+        "no-console": "off",
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    },
+    {
+      // DB init files can use console.log freely
+      "files": ["lib/db.ts", "instrumentation.ts"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
 }

@@ -1,3 +1,4 @@
+import 'server-only';
 import { EventEmitter } from 'events';
 import db from './db';
 import { log } from './logging';

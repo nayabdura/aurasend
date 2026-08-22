@@ -105,7 +105,7 @@ export default function AutopilotClient() {
                     <motion.div animate={pulse} className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center">
                         <Bot size={32} className="text-white" />
                     </motion.div>
-                    <p className="text-gray-500">Loading AI Autopilot...</p>
+                    <p className="text-slate-500 dark:text-zinc-50">Loading AI Autopilot...</p>
                 </div>
             </div>
         );
@@ -123,12 +123,12 @@ export default function AutopilotClient() {
                 <div>
                     <div className="flex items-center gap-3 mb-2">
                         <motion.div animate={config.enabled ? pulse : {}}
-                            className={`w-12 h-12 rounded-xl flex items-center justify-center ${config.enabled ? 'bg-gradient-to-br from-violet-500 to-purple-700' : 'bg-gray-200'}`}>
+                            className={`w-12 h-12 rounded-xl flex items-center justify-center ${config.enabled ? 'bg-gradient-to-br from-violet-500 to-purple-700' : 'bg-slate-200 dark:bg-zinc-800'}`}>
                             <Bot size={24} className={config.enabled ? 'text-white' : 'text-gray-400'} />
                         </motion.div>
                         <div>
-                            <h1 className="text-3xl font-extrabold text-gray-900">AI Autopilot</h1>
-                            <p className="text-gray-500 text-sm">100% local rule-based automation engine</p>
+                            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-zinc-50">AI Autopilot</h1>
+                            <p className="text-slate-500 dark:text-zinc-50 text-sm">100% local rule-based automation engine</p>
                         </div>
                     </div>
                 </div>
@@ -138,7 +138,7 @@ export default function AutopilotClient() {
                         whileTap={{ scale: 0.95 }}
                         onClick={runNow}
                         disabled={running}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all border border-gray-200 disabled:opacity-50"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 hover:bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-50 rounded-xl font-semibold transition-all border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 disabled:opacity-50"
                     >
                         <RefreshCw size={18} className={running ? 'animate-spin' : ''} />
                         {running ? 'Running...' : 'Run Now'}
@@ -196,12 +196,12 @@ export default function AutopilotClient() {
                         { label: 'Recommendations', value: report.recommendations?.length || 0, icon: <Target size={24} />, color: 'bg-amber-50 text-amber-600' },
                         { label: 'Next Run', value: report.nextRunAt ? new Date(report.nextRunAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--', icon: <Clock size={24} />, color: 'bg-green-50 text-green-600' },
                     ].map((stat, i) => (
-                        <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-md">
+                        <div key={i} className="bg-white dark:bg-zinc-900/60 rounded-2xl p-6 border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 shadow-md">
                             <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center mb-3`}>
                                 {stat.icon}
                             </div>
-                            <p className="text-3xl font-black text-gray-900">{stat.value}</p>
-                            <p className="text-sm text-gray-500">{stat.label}</p>
+                            <p className="text-3xl font-black text-slate-900 dark:text-zinc-50">{stat.value}</p>
+                            <p className="text-sm text-slate-500 dark:text-zinc-50">{stat.label}</p>
                         </div>
                     ))}
                 </motion.div>
@@ -210,8 +210,8 @@ export default function AutopilotClient() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Config Panel */}
                 <motion.div initial="hidden" animate="visible" custom={2} variants={fadeUp}
-                    className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    className="bg-white dark:bg-zinc-900/60 rounded-2xl shadow-lg border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 p-8">
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-zinc-50 mb-6 flex items-center gap-2">
                         <Settings2 size={20} className="text-violet-600" /> Autopilot Configuration
                     </h2>
 
@@ -222,10 +222,10 @@ export default function AutopilotClient() {
                             { key: 'auto_follow_ups', label: '📬 Smart Follow-Ups', desc: 'Automatically schedule follow-up emails' },
                             { key: 'auto_inbox_monitor', label: '📥 Inbox Monitoring', desc: 'Detect replies and bounces via IMAP' },
                         ].map(item => (
-                            <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                            <div key={item.key} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 rounded-xl">
                                 <div>
-                                    <p className="font-semibold text-gray-800">{item.label}</p>
-                                    <p className="text-xs text-gray-500">{item.desc}</p>
+                                    <p className="font-semibold text-slate-800 dark:text-zinc-50">{item.label}</p>
+                                    <p className="text-xs text-slate-500 dark:text-zinc-50">{item.desc}</p>
                                 </div>
                                 <button
                                     onClick={() => {
@@ -233,12 +233,12 @@ export default function AutopilotClient() {
                                         setConfig(updated);
                                         saveConfig(updated);
                                     }}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${(config as any)[item.key] ? 'bg-violet-600' : 'bg-gray-200'}`}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${(config as any)[item.key] ? 'bg-violet-600' : 'bg-slate-200 dark:bg-zinc-800'}`}
                                 >
                                     <motion.span
                                         animate={{ x: (config as any)[item.key] ? 20 : 2 }}
                                         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                                        className="inline-block h-4 w-4 rounded-full bg-white shadow-md"
+                                        className="inline-block h-4 w-4 rounded-full bg-white dark:bg-zinc-900/60 shadow-md"
                                     />
                                 </button>
                             </div>
@@ -246,44 +246,44 @@ export default function AutopilotClient() {
 
                         <div className="grid grid-cols-2 gap-4 pt-2">
                             <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">Risk Threshold (%)</label>
+                                <label className="block text-xs font-semibold text-slate-600 dark:text-zinc-50 mb-1">Risk Threshold (%)</label>
                                 <input
                                     type="number" min={10} max={100}
                                     value={config.risk_threshold}
                                     onChange={e => setConfig({ ...config, risk_threshold: parseInt(e.target.value) })}
                                     onBlur={() => saveConfig()}
-                                    className="w-full p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500 outline-none"
+                                    className="w-full p-2 border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 rounded-lg text-sm focus:ring-2 focus:ring-violet-500 outline-none"
                                 />
                                 <p className="text-xs text-gray-400 mt-1">Pause campaigns above this</p>
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">Max Daily Sends</label>
+                                <label className="block text-xs font-semibold text-slate-600 dark:text-zinc-50 mb-1">Max Daily Sends</label>
                                 <input
                                     type="number" min={1} max={500}
                                     value={config.daily_send_limit}
                                     onChange={e => setConfig({ ...config, daily_send_limit: parseInt(e.target.value) })}
                                     onBlur={() => saveConfig()}
-                                    className="w-full p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500 outline-none"
+                                    className="w-full p-2 border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 rounded-lg text-sm focus:ring-2 focus:ring-violet-500 outline-none"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">Send Window Start</label>
+                                <label className="block text-xs font-semibold text-slate-600 dark:text-zinc-50 mb-1">Send Window Start</label>
                                 <input
                                     type="time"
                                     value={config.send_window_start}
                                     onChange={e => setConfig({ ...config, send_window_start: e.target.value })}
                                     onBlur={() => saveConfig()}
-                                    className="w-full p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500 outline-none"
+                                    className="w-full p-2 border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 rounded-lg text-sm focus:ring-2 focus:ring-violet-500 outline-none"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-gray-600 mb-1">Send Window End</label>
+                                <label className="block text-xs font-semibold text-slate-600 dark:text-zinc-50 mb-1">Send Window End</label>
                                 <input
                                     type="time"
                                     value={config.send_window_end}
                                     onChange={e => setConfig({ ...config, send_window_end: e.target.value })}
                                     onBlur={() => saveConfig()}
-                                    className="w-full p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500 outline-none"
+                                    className="w-full p-2 border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 rounded-lg text-sm focus:ring-2 focus:ring-violet-500 outline-none"
                                 />
                             </div>
                         </div>
@@ -292,8 +292,8 @@ export default function AutopilotClient() {
 
                 {/* Recommendations */}
                 <motion.div initial="hidden" animate="visible" custom={3} variants={fadeUp}
-                    className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    className="bg-white dark:bg-zinc-900/60 rounded-2xl shadow-lg border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 p-8">
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-zinc-50 mb-6 flex items-center gap-2">
                         <TrendingUp size={20} className="text-amber-500" /> AI Recommendations
                     </h2>
 
@@ -325,8 +325,8 @@ export default function AutopilotClient() {
 
             {/* Recent Actions Log */}
             <motion.div initial="hidden" animate="visible" custom={4} variants={fadeUp}
-                className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                className="bg-white dark:bg-zinc-900/60 rounded-2xl shadow-lg border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 p-8">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-zinc-50 mb-6 flex items-center gap-2">
                     <Activity size={20} className="text-blue-600" /> Recent Autopilot Actions
                 </h2>
 
@@ -346,17 +346,17 @@ export default function AutopilotClient() {
                             };
                             return (
                                 <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }}
-                                    className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                                    className="flex items-center justify-between p-4 bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 rounded-xl hover:bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 transition-colors">
                                     <div className="flex items-center gap-3">
                                         <ChevronRight size={16} className="text-gray-400" />
                                         <div>
-                                            <p className="text-sm font-semibold text-gray-900">{details.description || action.type}</p>
-                                            {details.result && <p className="text-xs text-gray-500">{details.result}</p>}
+                                            <p className="text-sm font-semibold text-slate-900 dark:text-zinc-50">{details.description || action.type}</p>
+                                            {details.result && <p className="text-xs text-slate-500 dark:text-zinc-50">{details.result}</p>}
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         {details.priority && (
-                                            <span className={`text-xs font-bold px-2 py-1 rounded-full border ${priorityColors[details.priority] || 'bg-gray-100 text-gray-600'}`}>
+                                            <span className={`text-xs font-bold px-2 py-1 rounded-full border ${priorityColors[details.priority] || 'bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 text-slate-600 dark:text-zinc-50'}`}>
                                                 {details.priority.toUpperCase()}
                                             </span>
                                         )}

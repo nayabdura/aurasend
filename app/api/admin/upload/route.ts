@@ -31,6 +31,6 @@ export async function POST(req: Request) {
         // Return URL
         return NextResponse.json({ url: `/uploads/${filename}` });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }

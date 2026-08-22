@@ -20,7 +20,7 @@ export default function ContactPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans">
+        <div className="min-h-screen bg-slate-50 dark:bg-zinc-900/50 font-sans">
             <MarketingNav active="/contact" />
 
             <main className="pt-32 pb-24 relative overflow-hidden">
@@ -34,13 +34,13 @@ export default function ContactPage() {
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm font-bold tracking-wide shadow-sm mb-6 w-fit">
                                 <MessageSquareHeart size={16} /> Contact Us
                             </div>
-                            <h1 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tight mb-5 leading-tight">
+                            <h1 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-zinc-50 tracking-tight mb-5 leading-tight">
                                 Let's talk about <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-cyan-500">
                                     your growth.
                                 </span>
                             </h1>
-                            <p className="text-lg text-slate-500 mb-12 leading-relaxed font-medium">
+                            <p className="text-lg text-slate-500 dark:text-zinc-400 mb-12 leading-relaxed font-medium">
                                 Have a question, feedback, or need help scaling your account? We're here for you and respond to every single message.
                             </p>
 
@@ -50,8 +50,8 @@ export default function ContactPage() {
                                         <Mail size={24} />
                                     </div>
                                     <div className="pt-1">
-                                        <p className="font-bold text-slate-900 mb-1">Email Support</p>
-                                        <p className="text-base text-slate-500 font-medium">support@aurasend.co</p>
+                                        <p className="font-bold text-slate-900 dark:text-zinc-50 mb-1">Email Support</p>
+                                        <p className="text-base text-slate-500 dark:text-zinc-400 font-medium">support@aurasend.co</p>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-5">
@@ -59,8 +59,8 @@ export default function ContactPage() {
                                         <Clock size={24} />
                                     </div>
                                     <div className="pt-1">
-                                        <p className="font-bold text-slate-900 mb-1">Guaranteed Response Time</p>
-                                        <p className="text-base text-slate-500 font-medium">Within 24 hours, Mon–Fri</p>
+                                        <p className="font-bold text-slate-900 dark:text-zinc-50 mb-1">Guaranteed Response Time</p>
+                                        <p className="text-base text-slate-500 dark:text-zinc-400 font-medium">Within 24 hours, Mon–Fri</p>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-5">
@@ -68,8 +68,8 @@ export default function ContactPage() {
                                         <MapPin size={24} />
                                     </div>
                                     <div className="pt-1">
-                                        <p className="font-bold text-slate-900 mb-1">Global Headquarters</p>
-                                        <p className="text-base text-slate-500 font-medium">Lahore, Pakistan</p>
+                                        <p className="font-bold text-slate-900 dark:text-zinc-50 mb-1">Global Headquarters</p>
+                                        <p className="text-base text-slate-500 dark:text-zinc-400 font-medium">Lahore, Pakistan</p>
                                     </div>
                                 </div>
                             </div>
@@ -77,7 +77,7 @@ export default function ContactPage() {
 
                         {/* Right column — form */}
                         <div className="lg:col-span-3">
-                            <div className="bg-white border border-slate-100 shadow-2xl shadow-slate-200/50 rounded-[2.5rem] p-10 md:p-14 relative overflow-hidden">
+                            <div className="bg-white dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800/80 shadow-2xl shadow-slate-200/50 rounded-[2.5rem] p-10 md:p-14 relative overflow-hidden">
                                 {/* Decorative blur behind form */}
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-indigo-500/10 to-transparent blur-3xl opacity-50 rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
@@ -86,61 +86,61 @@ export default function ContactPage() {
                                         <div className="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center mb-8 border-4 border-emerald-100">
                                             <CheckCircle2 className="text-emerald-500" size={48} />
                                         </div>
-                                        <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">Message Received!</h2>
-                                        <p className="text-lg text-slate-500 font-medium mb-10 max-w-sm mx-auto">Thank you for reaching out. A real human from our team will get back to you shortly.</p>
+                                        <h2 className="text-4xl font-black text-slate-900 dark:text-zinc-50 mb-4 tracking-tight">Message Received!</h2>
+                                        <p className="text-lg text-slate-500 dark:text-zinc-400 font-medium mb-10 max-w-sm mx-auto">Thank you for reaching out. A real human from our team will get back to you shortly.</p>
                                         <button
                                             onClick={() => { setSent(false); setForm({ name: '', email: '', subject: '', message: '' }); }}
-                                            className="px-8 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition-colors shadow-sm"
+                                            className="px-8 py-4 bg-slate-100 dark:bg-zinc-800/50 hover:bg-slate-200 text-slate-700 dark:text-zinc-300 font-bold rounded-2xl transition-colors shadow-sm"
                                         >
                                             Send another message
                                         </button>
                                     </div>
                                 ) : (
                                     <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
-                                        <h2 className="text-3xl font-black text-slate-900 mb-8 tracking-tight">Drop us a line</h2>
+                                        <h2 className="text-3xl font-black text-slate-900 dark:text-zinc-50 mb-8 tracking-tight">Drop us a line</h2>
                                         <div className="grid sm:grid-cols-2 gap-6">
                                             <div>
-                                                <label className="block text-sm font-bold text-slate-700 mb-2">Your Name</label>
+                                                <label className="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">Your Name</label>
                                                 <input
                                                     type="text"
                                                     required
                                                     value={form.name}
                                                     onChange={e => setForm({ ...form, name: e.target.value })}
-                                                    className="w-full h-14 px-5 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-900 bg-slate-50 focus:bg-white"
+                                                    className="w-full h-14 px-5 rounded-2xl border border-slate-200 dark:border-zinc-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-900 dark:text-zinc-50 bg-slate-50 dark:bg-zinc-900/50 focus:bg-white dark:bg-zinc-900/60"
                                                     placeholder="John Smith"
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-bold text-slate-700 mb-2">Work Email</label>
+                                                <label className="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">Work Email</label>
                                                 <input
                                                     type="email"
                                                     required
                                                     value={form.email}
                                                     onChange={e => setForm({ ...form, email: e.target.value })}
-                                                    className="w-full h-14 px-5 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-900 bg-slate-50 focus:bg-white"
+                                                    className="w-full h-14 px-5 rounded-2xl border border-slate-200 dark:border-zinc-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-900 dark:text-zinc-50 bg-slate-50 dark:bg-zinc-900/50 focus:bg-white dark:bg-zinc-900/60"
                                                     placeholder="you@company.com"
                                                 />
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold text-slate-700 mb-2">Subject</label>
+                                            <label className="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">Subject</label>
                                             <input
                                                 type="text"
                                                 required
                                                 value={form.subject}
                                                 onChange={e => setForm({ ...form, subject: e.target.value })}
-                                                className="w-full h-14 px-5 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-900 bg-slate-50 focus:bg-white"
+                                                className="w-full h-14 px-5 rounded-2xl border border-slate-200 dark:border-zinc-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-900 dark:text-zinc-50 bg-slate-50 dark:bg-zinc-900/50 focus:bg-white dark:bg-zinc-900/60"
                                                 placeholder="How can we help you scale?"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold text-slate-700 mb-2">Message</label>
+                                            <label className="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">Message</label>
                                             <textarea
                                                 required
                                                 rows={6}
                                                 value={form.message}
                                                 onChange={e => setForm({ ...form, message: e.target.value })}
-                                                className="w-full p-5 rounded-2xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all resize-none text-slate-900 bg-slate-50 focus:bg-white"
+                                                className="w-full p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all resize-none text-slate-900 dark:text-zinc-50 bg-slate-50 dark:bg-zinc-900/50 focus:bg-white dark:bg-zinc-900/60"
                                                 placeholder="Please provide as much detail as possible..."
                                             />
                                         </div>

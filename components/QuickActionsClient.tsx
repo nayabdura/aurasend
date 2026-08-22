@@ -54,8 +54,8 @@ export default function QuickActionsClient() {
     }
 
     return (
-        <div className="bg-gradient-to-r from-slate-50 to-gray-100 p-6 rounded-2xl border-2 border-gray-300 shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <div className="bg-gradient-to-r from-slate-50 to-gray-100 p-6 rounded-2xl border-2 border-slate-300 dark:border-zinc-700 shadow-lg">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-zinc-50 mb-4 flex items-center gap-2">
                 <Lucide.Zap className="text-yellow-500" size={28} /> Quick Actions & Manual Controls
             </h2>
 
@@ -87,8 +87,8 @@ export default function QuickActionsClient() {
             </div>
 
             {/* Test Email */}
-            <div className="mt-6 p-5 bg-white rounded-xl border border-gray-300 shadow-sm">
-                <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <div className="mt-6 p-5 bg-white dark:bg-zinc-900/60 rounded-xl border border-slate-300 dark:border-zinc-700 shadow-sm">
+                <h3 className="font-semibold text-slate-700 dark:text-zinc-50 mb-3 flex items-center gap-2">
                     <Lucide.FlaskConical size={18} className="text-indigo-500" /> Test Email Sender
                 </h3>
                 <div className="flex gap-3">
@@ -97,7 +97,7 @@ export default function QuickActionsClient() {
                         value={testEmail}
                         onChange={(e) => setTestEmail(e.target.value)}
                         placeholder="your.email@example.com"
-                        className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                        className="flex-1 px-4 py-2.5 border border-slate-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
                     />
                     <button
                         onClick={sendTest}
@@ -107,7 +107,7 @@ export default function QuickActionsClient() {
                         {sending ? 'Sending...' : 'Test'}
                     </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">Send a test email to verify your Gmail API connection</p>
+                <p className="text-xs text-slate-500 dark:text-zinc-50 mt-2">Send a test email to verify your Gmail API connection</p>
             </div>
         </div>
     );

@@ -3,12 +3,26 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MarketingNav, MarketingFooter } from '@/components/MarketingLayout';
-import { CheckCircle2, Shield, SearchCheck, ArrowRight, Zap, Target, Loader2, XCircle } from 'lucide-react';
+import { CheckCircle2, Shield, SearchCheck, ArrowRight, Loader2, XCircle, AlertTriangle, Server, Mail } from 'lucide-react';
+
+interface VerificationDetails {
+    isValid: boolean;
+    score: number;
+    status: 'valid' | 'invalid' | 'catch-all' | 'unknown' | 'disabled';
+    isRoleAccount: boolean;
+    isDisposable: boolean;
+    isCatchAll: boolean;
+    isFullInbox: boolean;
+    mxRecords: string[];
+    reason?: string;
+    canConnectSmtp: boolean;
+    isDeliverable: boolean;
+}
 
 export default function EmailVerifierPage() {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<'valid' | 'invalid' | null>(null);
+    const [result, setResult] = useState<VerificationDetails | null>(null);
     const [error, setError] = useState('');
     const [usesLeft, setUsesLeft] = useState(5);
 
@@ -27,7 +41,10 @@ export default function EmailVerifierPage() {
     }, []);
 
     const handleVerify = async () => {
-        if (!email) return;
+        if (!email || !email.includes('@')) {
+            setError('Please enter a valid email address.');
+            return;
+        }
         if (usesLeft <= 0) {
             setError('Daily limit reached. Please log in to verify more emails.');
             return;
@@ -37,21 +54,33 @@ export default function EmailVerifierPage() {
         setResult(null);
         setLoading(true);
 
-        const dateKey = new Date().toISOString().split('T')[0];
-        const currentCount = parseInt(localStorage.getItem('verifier_count') || '0', 10);
-        localStorage.setItem('verifier_count', (currentCount + 1).toString());
-        setUsesLeft(Math.max(0, 5 - (currentCount + 1)));
+        try {
+            const res = await fetch('/api/verify-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email.trim() }),
+            });
 
-        // Simulate real validation delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
+            const data = await res.json();
 
-        const isValidFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        setResult(isValidFormat ? 'valid' : 'invalid');
-        setLoading(false);
+            if (!res.ok) {
+                setError(data.error || 'Verification failed. Please try again.');
+            } else {
+                setResult(data);
+                const dateKey = new Date().toISOString().split('T')[0];
+                const currentCount = parseInt(localStorage.getItem('verifier_count') || '0', 10);
+                localStorage.setItem('verifier_count', (currentCount + 1).toString());
+                setUsesLeft(Math.max(0, 5 - (currentCount + 1)));
+            }
+        } catch (err: any) {
+            setError('Network error. Please check your connection.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans">
+        <div className="min-h-screen bg-slate-50 dark:bg-zinc-900/50 font-sans">
             <MarketingNav active="/features" />
 
             <main className="pt-28 pb-32">
@@ -65,22 +94,22 @@ export default function EmailVerifierPage() {
                     <div className="max-w-7xl mx-auto px-6 relative z-10">
                         <div className="text-center max-w-4xl mx-auto mb-16">
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-sm font-bold tracking-wide shadow-sm mb-6">
-                                <Shield size={16} /> Advanced Deliverability Tool
+                                <Shield size={16} /> Real-Time 7-Tier Verification Engine
                             </div>
-                            <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 mb-6 leading-tight">
+                            <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 dark:text-zinc-50 mb-6 leading-tight">
                                 Never bounce an <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
                                     email again.
                                 </span>
                             </h1>
-                            <p className="text-xl text-slate-500 max-w-2xl mx-auto font-medium leading-relaxed mb-4">
-                                Protect your sender reputation. Upload your lead lists and instantly verify 100% of the emails. Catch typos, hard bounces, and catch-all domains before you hit send.
+                            <p className="text-xl text-slate-500 dark:text-zinc-400 max-w-2xl mx-auto font-medium leading-relaxed mb-4">
+                                Protect your sender reputation. Verify syntax, DNS MX records, role accounts, disposable inboxes, and exact SMTP mailbox responses live.
                             </p>
                             <p className="text-sm text-slate-400 font-semibold">{usesLeft} free verifications remaining today</p>
                         </div>
 
-                        {/* Simulated App Verifier Bar */}
-                        <div className="max-w-3xl mx-auto bg-white rounded-3xl p-4 md:p-6 shadow-2xl border border-slate-200 flex flex-col items-center gap-4 mb-10 relative transform hover:-translate-y-1 transition-all duration-300">
+                        {/* App Verifier Input & Card */}
+                        <div className="max-w-3xl mx-auto bg-white dark:bg-zinc-900/60 rounded-3xl p-4 md:p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 flex flex-col items-center gap-4 mb-10 relative">
                             <div className="flex w-full flex-col sm:flex-row items-center gap-4">
                                 <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
                                     <SearchCheck size={24} />
@@ -91,7 +120,7 @@ export default function EmailVerifierPage() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
-                                    className="flex-1 h-16 w-full px-6 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 text-lg transition-all"
+                                    className="flex-1 h-16 w-full px-6 bg-slate-50 dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 rounded-2xl outline-none focus:bg-white dark:bg-zinc-900/60 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 text-lg transition-all"
                                 />
                                 {usesLeft > 0 || result ? (
                                     <button
@@ -111,16 +140,69 @@ export default function EmailVerifierPage() {
                             {error && (
                                 <div className="w-full p-4 mt-2 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-sm font-bold flex items-center justify-between">
                                     <span>{error}</span>
-                                    <Link href="/login" className="px-4 py-1.5 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition">Log In</Link>
+                                    {usesLeft <= 0 && (
+                                        <Link href="/login" className="px-4 py-1.5 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition">Log In</Link>
+                                    )}
                                 </div>
                             )}
 
                             {result && !error && (
-                                <div className={`w-full p-4 mt-2 border rounded-xl flex items-center gap-3 ${result === 'valid' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-rose-50 border-rose-100 text-rose-700'}`}>
-                                    {result === 'valid' ? <CheckCircle2 size={24} className="text-emerald-500" /> : <XCircle size={24} className="text-rose-500" />}
-                                    <div>
-                                        <p className="font-bold text-lg">{result === 'valid' ? 'Email is Valid & Safe' : 'Invalid or Bounced Email'}</p>
-                                        <p className="text-sm opacity-80">{result === 'valid' ? 'This inbox exists and is safe to receive your campaign.' : 'Do not send to this address. It will negatively impact your sender health.'}</p>
+                                <div className="w-full mt-4 space-y-4 text-left">
+                                    {/* Main Status Header */}
+                                    <div className={`p-5 rounded-2xl border flex items-start gap-4 ${
+                                        result.isValid
+                                            ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900 dark:bg-emerald-950/20 dark:border-emerald-800 dark:text-emerald-300'
+                                            : 'bg-rose-50/80 border-rose-200 text-rose-900 dark:bg-rose-950/20 dark:border-rose-800 dark:text-rose-300'
+                                    }`}>
+                                        {result.isValid ? (
+                                            <CheckCircle2 size={28} className="text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
+                                        ) : (
+                                            <XCircle size={28} className="text-rose-600 dark:text-rose-400 mt-0.5 shrink-0" />
+                                        )}
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <h3 className="font-extrabold text-xl">
+                                                    {result.isValid ? 'Valid & Deliverable' : 'Invalid / Undeliverable Address'}
+                                                </h3>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                                                    result.isValid ? 'bg-emerald-200 text-emerald-800' : 'bg-rose-200 text-rose-800'
+                                                }`}>
+                                                    Score: {result.score}%
+                                                </span>
+                                            </div>
+                                            <p className="text-sm font-medium mt-1 opacity-90">{result.reason}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Technical Breakdown Badges */}
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                        <div className="p-3 bg-slate-100 dark:bg-zinc-800/80 rounded-xl">
+                                            <span className="text-xs text-slate-500 dark:text-zinc-400 font-semibold block mb-1">MX Records</span>
+                                            <span className="text-sm font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-1.5">
+                                                <Server size={14} className="text-indigo-500" />
+                                                {result.mxRecords.length > 0 ? `${result.mxRecords.length} Found` : 'None'}
+                                            </span>
+                                        </div>
+                                        <div className="p-3 bg-slate-100 dark:bg-zinc-800/80 rounded-xl">
+                                            <span className="text-xs text-slate-500 dark:text-zinc-400 font-semibold block mb-1">Disposable</span>
+                                            <span className={`text-sm font-bold flex items-center gap-1.5 ${result.isDisposable ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                                {result.isDisposable ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
+                                                {result.isDisposable ? 'Yes' : 'No'}
+                                            </span>
+                                        </div>
+                                        <div className="p-3 bg-slate-100 dark:bg-zinc-800/80 rounded-xl">
+                                            <span className="text-xs text-slate-500 dark:text-zinc-400 font-semibold block mb-1">Role Account</span>
+                                            <span className={`text-sm font-bold flex items-center gap-1.5 ${result.isRoleAccount ? 'text-amber-600' : 'text-slate-800 dark:text-zinc-200'}`}>
+                                                <Mail size={14} />
+                                                {result.isRoleAccount ? 'Role (admin/info)' : 'Personal / Standard'}
+                                            </span>
+                                        </div>
+                                        <div className="p-3 bg-slate-100 dark:bg-zinc-800/80 rounded-xl">
+                                            <span className="text-xs text-slate-500 dark:text-zinc-400 font-semibold block mb-1">SMTP Connection</span>
+                                            <span className={`text-sm font-bold flex items-center gap-1.5 ${result.canConnectSmtp ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                                {result.canConnectSmtp ? 'Connected' : 'Handshake Deferred'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -133,10 +215,10 @@ export default function EmailVerifierPage() {
                                 { title: 'Catch-All Detection', desc: 'Identify domains that accept all emails to prevent silent spam filtering from corporate firewalls.' },
                                 { title: 'Instant Bulk Processing', desc: 'Upload a CSV of 10,000 leads and clean it in minutes. Export only the 100% valid contacts.' },
                             ].map((f) => (
-                                <div key={f.title} className="bg-white rounded-3xl p-8 border border-slate-200">
+                                <div key={f.title} className="bg-white dark:bg-zinc-900/60 rounded-3xl p-8 border border-slate-200 dark:border-zinc-800">
                                     <CheckCircle2 size={32} className="text-emerald-500 mb-6" />
-                                    <h3 className="text-xl font-bold text-slate-900 mb-3">{f.title}</h3>
-                                    <p className="text-slate-500 leading-relaxed">{f.desc}</p>
+                                    <h3 className="text-xl font-bold text-slate-900 dark:text-zinc-50 mb-3">{f.title}</h3>
+                                    <p className="text-slate-500 dark:text-zinc-400 leading-relaxed">{f.desc}</p>
                                 </div>
                             ))}
                         </div>
@@ -149,7 +231,7 @@ export default function EmailVerifierPage() {
                         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-500 via-slate-950 to-slate-950"></div>
                         <h2 className="text-4xl font-black mb-6 relative z-10">Clean lists = higher replies.</h2>
                         <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto relative z-10">AuraSend’s verifier is built directly into your cold email workflow. Upload an unverified list into your campaign, and we'll check every email automatically before sending.</p>
-                        <Link href="/login" className="inline-flex items-center justify-center gap-2 h-16 px-10 bg-white text-slate-900 rounded-full font-bold text-lg hover:bg-slate-100 transition-colors relative z-10 w-full sm:w-auto">
+                        <Link href="/login" className="inline-flex items-center justify-center gap-2 h-16 px-10 bg-white dark:bg-zinc-900/60 text-slate-900 dark:text-zinc-50 rounded-full font-bold text-lg hover:bg-slate-100 dark:bg-zinc-800/50 transition-colors relative z-10 w-full sm:w-auto">
                             Sign up and start verifying <ArrowRight size={20} />
                         </Link>
                     </div>

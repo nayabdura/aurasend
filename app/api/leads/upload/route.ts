@@ -11,10 +11,30 @@ export async function POST(req: Request) {
         const type = formData.get('type') as string; // 'client' or 'agency'
         const campaign_id = formData.get('campaign_id') as string;
 
-        const userId = await getUserId();
+        let userId: number;
+        try {
+            userId = await getUserId();
+        } catch (authErr: any) {
+            // Re-throw Next.js redirect() errors so the framework can handle them
+            if (authErr?.digest?.startsWith('NEXT_REDIRECT')) throw authErr;
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const ip = req.headers.get('x-forwarded-for') || req.headers.get('remote-addr') || 'unknown';
+        const { checkRateLimit } = await import('@/lib/rateLimit');
+        
+        const allowed = checkRateLimit(`upload_${userId}_${ip}`, 5, 60 * 1000);
+        if (!allowed) {
+             return NextResponse.json({ error: 'Too many uploads. Please wait a minute.' }, { status: 429 });
+        }
 
         if (!file) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+        }
+
+        // Prevent memory overload (OOM crashes) stringifying massive buffers
+        if (file.size > 10 * 1024 * 1024) { 
+            return NextResponse.json({ error: 'File is too large. Maximum 10MB allowed per upload.' }, { status: 413 });
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
@@ -42,17 +62,19 @@ export async function POST(req: Request) {
         const updateStmt = db.prepare(`
             UPDATE leads SET 
                 campaign_id = COALESCE(@campaign_id, campaign_id),
-                status = CASE WHEN status IN ('bounced','unsubscribed','invalid') THEN status ELSE 'pending' END,
+                status = 'pending',
                 is_valid = 1,
                 name = CASE WHEN @name != '' THEN @name ELSE name END,
                 company = CASE WHEN @company != '' THEN @company ELSE company END,
-                current_role = CASE WHEN @current_role != '' THEN @current_role ELSE current_role END
+                current_role = CASE WHEN @current_role != '' THEN @current_role ELSE current_role END,
+                niche = CASE WHEN @niche != '' THEN @niche ELSE niche END,
+                previous_work = CASE WHEN @previous_work != '' THEN @previous_work ELSE previous_work END
             WHERE id = @id
         `);
 
         const insertStmt = db.prepare(`
-            INSERT INTO leads (user_id, name, email, website, company, intro, lead_type, status, campaign_id, current_role)
-            VALUES (@user_id, @name, @email, @website, @company, @intro, @type, 'pending', @campaign_id, @current_role)
+            INSERT INTO leads (user_id, name, email, website, company, intro, lead_type, status, campaign_id, current_role, niche, previous_work)
+            VALUES (@user_id, @name, @email, @website, @company, @intro, @type, 'pending', @campaign_id, @current_role, @niche, @previous_work)
         `);
 
         const insertTransaction = db.transaction((rows: any[]) => {
@@ -72,6 +94,12 @@ export async function POST(req: Request) {
                 const company = (row.company || row.Company || row.COMPANY || row['Company Name'] || '').trim();
                 const website = (row.website || row.Website || row.WEBSITE || row['Website URL'] || '').trim();
                 const currentRole = (row.current_role || row['current_role'] || row['Current Role'] || row.role || row.Role || '').trim();
+                const niche = (row.niche || row.Niche || row.NICHE || row.industry || row.Industry || '').trim();
+                const previousWork = (
+                    row.previous_work || row['Previous Work'] || row.prev_work ||
+                    row.previous_or_current_work || row['Previous or Current Work'] ||
+                    row['Previous Work'] || row['Current Work'] || row.previousWork || ''
+                ).trim();
 
                 let intro = (row.intro || row.Intro || '').trim();
                 if (!intro) {
@@ -90,7 +118,9 @@ export async function POST(req: Request) {
                             campaign_id: campaignIdInt,
                             name,
                             company,
-                            current_role: currentRole
+                            current_role: currentRole,
+                            niche,
+                            previous_work: previousWork,
                         });
                         addedCount++;
                     } else {
@@ -104,7 +134,9 @@ export async function POST(req: Request) {
                             intro,
                             type: type || 'client',
                             campaign_id: campaignIdInt,
-                            current_role: currentRole
+                            current_role: currentRole,
+                            niche,
+                            previous_work: previousWork,
                         });
                         addedCount++;
                     }
@@ -119,6 +151,8 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ success: true, added: result.addedCount, total: result.total });
     } catch (e: any) {
+        // Re-throw Next.js internal errors (redirect, notFound, etc.) so the framework handles them
+        if (e?.digest?.startsWith('NEXT_REDIRECT') || e?.digest?.startsWith('NEXT_NOT_FOUND')) throw e;
         console.error('Upload error:', e);
         return NextResponse.json({ error: `Failed to upload: ${e.message}` }, { status: 500 });
     }

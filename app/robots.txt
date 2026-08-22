@@ -15,4 +15,4 @@ Disallow: /warmup
 Disallow: /api/
 Disallow: /settings
 
-Sitemap: https://outreachos.com/sitemap.xml
+Sitemap: https://aurasend.com/sitemap.xml

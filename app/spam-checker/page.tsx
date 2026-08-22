@@ -54,7 +54,7 @@ export default function SpamCheckerPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans">
+        <div className="min-h-screen bg-slate-50 dark:bg-zinc-900/50 font-sans">
             <MarketingNav active="/features" />
 
             <main className="pt-28 pb-32">
@@ -69,31 +69,31 @@ export default function SpamCheckerPage() {
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-sm font-bold tracking-wide shadow-sm mb-6">
                                 <ShieldAlert size={16} /> Content Reputation Tool
                             </div>
-                            <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 mb-6 leading-tight">
+                            <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 dark:text-zinc-50 mb-6 leading-tight">
                                 Don&apos;t end up in the <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">
                                     Spam Folder.
                                 </span>
                             </h1>
-                            <p className="text-xl text-slate-500 max-w-2xl mx-auto font-medium leading-relaxed mb-4">
+                            <p className="text-xl text-slate-500 dark:text-zinc-400 max-w-2xl mx-auto font-medium leading-relaxed mb-4">
                                 Test your email copy before sending. Our spam checker scans your content against the latest ISP filters to score your likelihood of reaching the primary inbox.
                             </p>
                             <p className="text-sm text-slate-400 font-semibold">{usesLeft} free checks remaining today</p>
                         </div>
 
-                        <div className="max-w-3xl mx-auto bg-white rounded-3xl p-6 shadow-2xl border border-slate-200 flex flex-col gap-4 mb-10 relative transform hover:-translate-y-1 transition-all duration-300">
+                        <div className="max-w-3xl mx-auto bg-white dark:bg-zinc-900/60 rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-zinc-800 flex flex-col gap-4 mb-10 relative transform hover:-translate-y-1 transition-all duration-300">
                             <div className="flex items-center gap-4 mb-2">
                                 <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
                                     <ShieldAlert size={24} />
                                 </div>
-                                <h3 className="font-bold text-lg text-slate-900">Paste your email copy</h3>
+                                <h3 className="font-bold text-lg text-slate-900 dark:text-zinc-50">Paste your email copy</h3>
                             </div>
 
                             <textarea
                                 placeholder="Hi {{First Name}},\n\nI wanted to reach out because..."
                                 value={emailContent}
                                 onChange={(e) => setEmailContent(e.target.value)}
-                                className="w-full h-48 p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 text-base transition-all resize-none"
+                                className="w-full h-48 p-4 bg-slate-50 dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 rounded-2xl outline-none focus:bg-white dark:bg-zinc-900/60 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 text-base transition-all resize-none"
                             />
 
                             <div className="flex justify-end">
@@ -127,16 +127,16 @@ export default function SpamCheckerPage() {
                                                 <path className="text-slate-200" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                                 <path className={result.score > 80 ? 'text-emerald-500' : result.score > 50 ? 'text-amber-500' : 'text-rose-500'} strokeDasharray={`${result.score}, 100`} strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                             </svg>
-                                            <span className="absolute text-xl font-black text-slate-900">{result.score}</span>
+                                            <span className="absolute text-xl font-black text-slate-900 dark:text-zinc-50">{result.score}</span>
                                         </div>
                                         <div className="flex-1 text-center md:text-left">
                                             <p className={`font-black text-2xl mb-2 ${result.score > 80 ? 'text-emerald-700' : result.score > 50 ? 'text-amber-700' : 'text-rose-700'}`}>
                                                 {result.score > 80 ? 'Excellent Deliverability' : result.score > 50 ? 'Moderate Spam Risk' : 'High Spam Risk'}
                                             </p>
                                             {result.words.length > 0 ? (
-                                                <p className="text-sm text-slate-700 font-medium">Trigger words detected: <strong className="text-rose-600 uppercase tracking-widest">{result.words.join(', ')}</strong>. Consider replacing these to improve your score.</p>
+                                                <p className="text-sm text-slate-700 dark:text-zinc-300 font-medium">Trigger words detected: <strong className="text-rose-600 uppercase tracking-widest">{result.words.join(', ')}</strong>. Consider replacing these to improve your score.</p>
                                             ) : (
-                                                <p className="text-sm text-slate-700 font-medium tracking-wide">Awesome! No major spam trigger words detected in your copy.</p>
+                                                <p className="text-sm text-slate-700 dark:text-zinc-300 font-medium tracking-wide">Awesome! No major spam trigger words detected in your copy.</p>
                                             )}
                                         </div>
                                     </div>
@@ -152,7 +152,7 @@ export default function SpamCheckerPage() {
                         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-500 via-slate-950 to-slate-950"></div>
                         <h2 className="text-4xl font-black mb-6 relative z-10">Avoid the Promotions tab.</h2>
                         <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto relative z-10">Checking your content is only half the battle. Sign up for AuraSend to automatically monitor inbox health, rotate sending IP's, and perform automated email warmups.</p>
-                        <Link href="/login" className="inline-flex items-center justify-center gap-2 h-16 px-10 bg-white text-slate-900 rounded-full font-bold text-lg hover:bg-slate-100 transition-colors relative z-10 w-full sm:w-auto">
+                        <Link href="/login" className="inline-flex items-center justify-center gap-2 h-16 px-10 bg-white dark:bg-zinc-900/60 text-slate-900 dark:text-zinc-50 rounded-full font-bold text-lg hover:bg-slate-100 dark:bg-zinc-800/50 transition-colors relative z-10 w-full sm:w-auto">
                             Start for free <ArrowRight size={20} />
                         </Link>
                     </div>

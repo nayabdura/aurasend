@@ -38,9 +38,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     try {
         const { id } = params;
         const userId = await getEffectiveUserId();
-        const { name, status, template_id, template_id_b, account_ids, send_start, send_end,
-            followup1_delay_hours, followup2_delay_hours,
-            followup1_template_id, followup2_template_id, followup_enabled } = await req.json();
+        const body = await req.json();
+        const { account_ids } = body;
 
         // Security check
         if (userId) {
@@ -48,33 +47,48 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             if (!exists) return NextResponse.json({ error: 'Unauthorized or Not Found' }, { status: 404 });
         }
 
-        // Update basic info
-        db.prepare(`
-            UPDATE campaigns SET 
-            name = COALESCE(?, name),
-            status = COALESCE(?, status),
-            template_id = ?,
-            template_id_b = ?,
-            send_window_start = COALESCE(?, send_window_start),
-            send_window_end = COALESCE(?, send_window_end),
-            followup1_delay_hours = COALESCE(?, followup1_delay_hours),
-            followup2_delay_hours = COALESCE(?, followup2_delay_hours),
-            followup1_template_id = ?,
-            followup2_template_id = ?,
-            followup_enabled = COALESCE(?, followup_enabled)
-            WHERE id = ?
-        `).run(name, status, template_id || null, template_id_b || null,
-            send_start || null, send_end || null,
-            followup1_delay_hours || null, followup2_delay_hours || null,
-            followup1_template_id || null, followup2_template_id || null,
-            followup_enabled !== undefined ? (followup_enabled ? 1 : 0) : null,
-            id);
+        // Update basic info dynamically
+        const updates: string[] = [];
+        const values: any[] = [];
+
+        const mapping: Record<string, string> = {
+            name: 'name',
+            status: 'status',
+            template_id: 'template_id',
+            template_id_b: 'template_id_b',
+            send_start: 'send_window_start',
+            send_end: 'send_window_end',
+            followup1_delay_hours: 'followup1_delay_hours',
+            followup2_delay_hours: 'followup2_delay_hours',
+            followup1_template_id: 'followup1_template_id',
+            followup2_template_id: 'followup2_template_id',
+            followup_enabled: 'followup_enabled'
+        };
+
+        for (const [key, col] of Object.entries(mapping)) {
+            if (body[key] !== undefined) {
+                updates.push(`${col} = ?`);
+                if (key === 'followup_enabled') {
+                    values.push(body[key] ? 1 : 0);
+                } else if (body[key] === '' || body[key] === null) {
+                    values.push(null);
+                } else {
+                    values.push(body[key]);
+                }
+            }
+        }
+
+        if (updates.length > 0) {
+            const query = `UPDATE campaigns SET ${updates.join(', ')} WHERE id = ?`;
+            values.push(id);
+            db.prepare(query).run(...values);
+        }
 
         // Update accounts if provided
         if (account_ids && Array.isArray(account_ids)) {
             db.prepare("DELETE FROM campaign_accounts WHERE campaign_id = ?").run(id);
             const insert = db.prepare("INSERT INTO campaign_accounts (campaign_id, gmail_account_id) VALUES (?, ?)");
-            const insertMany = db.transaction((ids) => {
+            const insertMany = db.transaction((ids: any[]) => {
                 for (const accId of ids) insert.run(id, accId);
             });
             insertMany(account_ids);
@@ -82,7 +96,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
         return NextResponse.json({ success: true });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
 
@@ -105,6 +119,6 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
         db.prepare("UPDATE leads SET campaign_id = NULL WHERE campaign_id = ?").run(id);
         return NextResponse.json({ success: true });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }

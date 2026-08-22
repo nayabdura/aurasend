@@ -13,7 +13,7 @@ export async function POST(req: Request) {
         });
     } catch (e: any) {
         log('error', 'Warmup tick failed', e.message);
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
 
@@ -27,6 +27,6 @@ export async function GET() {
             errors: result.errors,
         });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }

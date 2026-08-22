@@ -24,7 +24,7 @@ export async function GET() {
 
         return NextResponse.json({ config, recentActions: actions });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
 
@@ -39,7 +39,7 @@ export async function PUT(req: Request) {
 
         return NextResponse.json({ config, success: true });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
 
@@ -50,6 +50,6 @@ export async function POST() {
         const report = await runAutopilot(user.id);
         return NextResponse.json({ report, success: true });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }

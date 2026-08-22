@@ -43,7 +43,7 @@ export default function AnalyticsPage() {
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header */}
             <motion.div initial="hidden" animate="visible" custom={0} variants={fadeUp} className="bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 rounded-3xl p-10 shadow-[0_8px_30px_rgb(0,0,0,0.12)] text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/3 blur-2xl"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white dark:bg-zinc-900/60 opacity-5 rounded-full -translate-y-1/2 translate-x-1/3 blur-2xl"></div>
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-400 opacity-20 rounded-full translate-y-1/3 -translate-x-1/4 blur-3xl"></div>
                 <div className="relative z-10">
                     <h1 className="text-4xl font-extrabold mb-3 flex items-center gap-4 tracking-tight">
@@ -94,8 +94,8 @@ export default function AnalyticsPage() {
 
             {/* Lead Status Breakdown & Performance Tips */}
             <motion.div initial="hidden" animate="visible" custom={2} variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all">
-                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-gray-900 tracking-tight">
+                <div className="lg:col-span-2 bg-white dark:bg-zinc-900/60 p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all">
+                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-slate-900 dark:text-zinc-50 tracking-tight">
                         <Users size={28} className="text-indigo-500" /> Lead Status Breakdown
                     </h2>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -111,7 +111,7 @@ export default function AnalyticsPage() {
                     <h3 className="font-bold text-xl mb-4 flex items-center gap-3 tracking-tight">
                         <Zap className="text-yellow-600 fill-yellow-600" size={26} /> Performance Tips
                     </h3>
-                    <ul className="space-y-4 text-sm text-gray-700">
+                    <ul className="space-y-4 text-sm text-slate-700 dark:text-zinc-50">
                         <li className="flex items-start gap-3">
                             <span className="bg-green-100 p-1 rounded-full text-green-700 mt-0.5"><ArrowUpRight size={14} /></span>
                             <div><strong>Open Rate {'>'}20%:</strong> Excellent! Your subject lines are working.</div>
@@ -133,20 +133,20 @@ export default function AnalyticsPage() {
             </motion.div>
 
             {/* Campaign Performance Table */}
-            <motion.div initial="hidden" animate="visible" custom={3} variants={fadeUp} className="bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all">
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-gray-900 tracking-tight">
+            <motion.div initial="hidden" animate="visible" custom={3} variants={fadeUp} className="bg-white dark:bg-zinc-900/60 p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all">
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-slate-900 dark:text-zinc-50 tracking-tight">
                     <TrendingUp size={28} className="text-green-500" /> Campaign Performance
                 </h2>
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-gray-50 border-b-2 border-gray-200">
+                        <thead className="bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 border-b-2 border-slate-200 dark:border-zinc-800 dark:border-zinc-800">
                             <tr>
-                                <th className="text-left p-3 font-semibold text-gray-700">Campaign</th>
-                                <th className="text-center p-3 font-semibold text-gray-700">Status</th>
-                                <th className="text-center p-3 font-semibold text-gray-700">Leads</th>
-                                <th className="text-center p-3 font-semibold text-gray-700">Sent</th>
-                                <th className="text-center p-3 font-semibold text-gray-700">Opened</th>
-                                <th className="text-center p-3 font-semibold text-gray-700">Replied</th>
+                                <th className="text-left p-3 font-semibold text-slate-700 dark:text-zinc-50">Campaign</th>
+                                <th className="text-center p-3 font-semibold text-slate-700 dark:text-zinc-50">Status</th>
+                                <th className="text-center p-3 font-semibold text-slate-700 dark:text-zinc-50">Leads</th>
+                                <th className="text-center p-3 font-semibold text-slate-700 dark:text-zinc-50">Sent</th>
+                                <th className="text-center p-3 font-semibold text-slate-700 dark:text-zinc-50">Opened</th>
+                                <th className="text-center p-3 font-semibold text-slate-700 dark:text-zinc-50">Replied</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -156,10 +156,10 @@ export default function AnalyticsPage() {
                                 </tr>
                             ) : (
                                 campaigns.map(c => (
-                                    <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                    <tr key={c.id} className="border-b border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 hover:bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30">
                                         <td className="p-3 font-medium">{c.name}</td>
                                         <td className="p-3 text-center">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${c.status === 'running' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${c.status === 'running' ? 'bg-green-100 text-green-700' : 'bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 text-slate-700 dark:text-zinc-50'}`}>
                                                 {c.status}
                                             </span>
                                         </td>
@@ -182,12 +182,12 @@ function MetricCard({ icon, title, value, subtitle, bgColor, iconBg, borderColor
     return (
         <div className={`${bgColor} p-6 rounded-3xl border ${borderColor} hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all flex flex-col justify-between min-h-[140px]`}>
             <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-gray-600 tracking-tight">{title}</h3>
+                <h3 className="font-semibold text-slate-600 dark:text-zinc-50 tracking-tight">{title}</h3>
                 <div className={`${iconBg} p-2 rounded-xl`}>{icon}</div>
             </div>
             <div>
-                <span className="text-4xl font-extrabold text-gray-900 tracking-tight">{value.toLocaleString()}</span>
-                {subtitle && <p className="text-sm font-medium text-gray-500 mt-1">{subtitle}</p>}
+                <span className="text-4xl font-extrabold text-slate-900 dark:text-zinc-50 tracking-tight">{value.toLocaleString()}</span>
+                {subtitle && <p className="text-sm font-medium text-slate-500 dark:text-zinc-50 mt-1">{subtitle}</p>}
             </div>
         </div>
     );
@@ -197,7 +197,7 @@ function StatusCard({ label, count, color, bg, border }: any) {
     return (
         <div className={`${bg} p-6 rounded-2xl border ${border} text-center hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all`}>
             <p className={`text-3xl font-extrabold ${color} tracking-tight`}>{count.toLocaleString()}</p>
-            <p className="text-sm font-semibold text-gray-600 mt-1 uppercase tracking-wider">{label}</p>
+            <p className="text-sm font-semibold text-slate-600 dark:text-zinc-50 mt-1 uppercase tracking-wider">{label}</p>
         </div>
     );
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogIn, Mail, Lock, User, AlertCircle, CheckCircle, Eye, EyeOff, Zap } from 'lucide-react';
+import { LogIn, Mail, Lock, User, AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
     const [mode, setMode] = useState<'login' | 'signup'>('login');
@@ -32,7 +32,15 @@ export default function LoginPage() {
                 body: JSON.stringify({ userId, code: otpCode })
             });
 
-            const data = await res.json();
+            let data: any = {};
+            try {
+                data = await res.json();
+            } catch (_) {
+                setError('Server error (500). Please try again.');
+                setLoading(false);
+                return;
+            }
+
             if (!res.ok) {
                 setError(data.error || 'Verification failed');
                 setLoading(false);
@@ -69,7 +77,14 @@ export default function LoginPage() {
                 body: JSON.stringify(body)
             });
 
-            const data = await res.json();
+            let data: any = {};
+            try {
+                data = await res.json();
+            } catch (_) {
+                setError('Server error (500). Please try again.');
+                setLoading(false);
+                return;
+            }
 
             if (!res.ok) {
                 setError(data.error || 'Authentication failed');
@@ -87,10 +102,9 @@ export default function LoginPage() {
                     setSuccess('Verification code sent to your email.');
                 }
                 setLoading(false);
-                return; // Stop here and wait for OTP
+                return;
             }
 
-            // Normal login routing
             setTimeout(() => {
                 if (data.user?.role === 'master') {
                     window.location.href = '/admin';
@@ -104,6 +118,14 @@ export default function LoginPage() {
             setLoading(false);
         }
     }
+
+    // Shared input class — always dark so text is always visible
+    const inputClass = `
+        w-full py-3 rounded-xl outline-none transition-all
+        bg-slate-800 border border-slate-700
+        text-white placeholder-slate-500
+        focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/60
+    `;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
@@ -141,40 +163,46 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                {/* Card */}
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-8">
-                    {isVerifying ? (
+                {/* Card — always dark */}
+                <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/60 rounded-3xl shadow-2xl p-8">
+                    {/* Tab switcher */}
+                    {!isVerifying && (
+                        <div className="flex gap-1 mb-8 bg-slate-800/80 p-1 rounded-xl border border-slate-700/50">
+                            <button
+                                onClick={() => { setMode('login'); setError(''); }}
+                                className={`flex-1 py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                                    mode === 'login'
+                                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                                        : 'text-slate-400 hover:text-white'
+                                }`}
+                            >
+                                Login
+                            </button>
+                            <button
+                                onClick={() => { setMode('signup'); setError(''); }}
+                                className={`flex-1 py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                                    mode === 'signup'
+                                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                                        : 'text-slate-400 hover:text-white'
+                                }`}
+                            >
+                                Sign Up
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Verification header */}
+                    {isVerifying && (
                         <div className="text-center mb-8">
                             <h2 className="text-2xl font-bold text-white mb-2">Check your email</h2>
                             <p className="text-slate-400 text-sm mb-4">We sent a 6-digit confirmation code to <span className="text-blue-400">{email}</span></p>
                             {devOtp && (
                                 <div className="bg-blue-500/20 border border-blue-500/30 rounded-xl p-4 text-blue-200 text-sm mt-4">
                                     <strong className="block text-white mb-1">Development Notice</strong>
-                                    Google blocked the real email from sending. To continue testing, use this code:<br />
+                                    Google blocked the real email. Use this code for testing:<br />
                                     <span className="text-2xl font-black tracking-widest text-white mt-2 block">{devOtp}</span>
                                 </div>
                             )}
-                        </div>
-                    ) : (
-                        <div className="flex gap-1 mb-8 bg-white/5 p-1 rounded-xl border border-white/10">
-                            <button
-                                onClick={() => { setMode('login'); setError(''); }}
-                                className={`flex-1 py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 ${mode === 'login'
-                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                                    : 'text-slate-400 hover:text-white'
-                                    }`}
-                            >
-                                Login
-                            </button>
-                            <button
-                                onClick={() => { setMode('signup'); setError(''); }}
-                                className={`flex-1 py-2.5 px-4 rounded-lg font-semibold text-sm transition-all duration-200 ${mode === 'signup'
-                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                                    : 'text-slate-400 hover:text-white'
-                                    }`}
-                            >
-                                Sign Up
-                            </button>
                         </div>
                     )}
 
@@ -203,7 +231,7 @@ export default function LoginPage() {
                                         maxLength={6}
                                         value={otpCode}
                                         onChange={(e) => setOtpCode(e.target.value)}
-                                        className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 outline-none transition-all tracking-widest text-center text-xl font-mono"
+                                        className={`${inputClass} pl-11 pr-4 tracking-widest text-center text-xl font-mono`}
                                         placeholder="000000"
                                         required
                                     />
@@ -242,7 +270,7 @@ export default function LoginPage() {
                                                 id="name"
                                                 value={name}
                                                 onChange={(e) => setName(e.target.value)}
-                                                className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 outline-none transition-all"
+                                                className={`${inputClass} pl-11 pr-4`}
                                                 placeholder="Your Name"
                                                 required
                                             />
@@ -259,7 +287,7 @@ export default function LoginPage() {
                                             id="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 outline-none transition-all"
+                                            className={`${inputClass} pl-11 pr-4`}
                                             placeholder="you@example.com"
                                             required
                                         />
@@ -275,7 +303,7 @@ export default function LoginPage() {
                                             id="password"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            className="w-full pl-11 pr-12 py-3 bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 outline-none transition-all"
+                                            className={`${inputClass} pl-11 pr-12`}
                                             placeholder="••••••••"
                                             required
                                             minLength={6}
@@ -307,9 +335,9 @@ export default function LoginPage() {
 
                             {/* Divider */}
                             <div className="flex items-center gap-3 my-6">
-                                <div className="flex-1 h-px bg-white/10" />
+                                <div className="flex-1 h-px bg-slate-700" />
                                 <span className="text-slate-500 text-xs font-medium">OR</span>
-                                <div className="flex-1 h-px bg-white/10" />
+                                <div className="flex-1 h-px bg-slate-700" />
                             </div>
 
                             {/* Google Sign-In Button */}
@@ -320,7 +348,7 @@ export default function LoginPage() {
                                     setError('');
                                     window.location.href = '/api/auth/google';
                                 }}
-                                className="w-full flex items-center justify-center gap-3 py-3.5 border border-white/10 bg-white/5 hover:bg-white/10 text-white rounded-xl font-semibold text-sm transition-all duration-200 group"
+                                className="w-full flex items-center justify-center gap-3 py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 text-white rounded-xl font-semibold text-sm transition-all duration-200"
                             >
                                 <svg width="18" height="18" viewBox="0 0 24 24" className="shrink-0">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -333,10 +361,9 @@ export default function LoginPage() {
                         </>
                     )}
 
-                    {/* Info box about Google sign-in */}
-                    <p className="text-center text-xs text-slate-500 mt-4">
+                    <p className="text-center text-xs text-slate-600 mt-4">
                         Google Sign-In requires configuration in Settings.{' '}
-                        <span className="text-slate-400">Use email/password for now.</span>
+                        <span className="text-slate-500">Use email/password for now.</span>
                     </p>
                 </div>
 
@@ -344,6 +371,6 @@ export default function LoginPage() {
                     By continuing, you agree to our Terms of Service and Privacy Policy.
                 </p>
             </div>
-        </div >
+        </div>
     );
 }

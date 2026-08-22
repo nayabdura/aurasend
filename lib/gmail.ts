@@ -1,3 +1,4 @@
+import 'server-only';
 
 import db from './db';
 import { log } from './logging';
@@ -6,6 +7,16 @@ import { eventBus } from './events';
 import { enqueueSend } from './queue';
 
 // ─── Template Renderer ───────────────────────────────────────────────────────
+export function processHtmlBody(htmlText: string): string {
+    if (!htmlText) return '';
+    // If it already contains structural HTML tags, it's rich text - avoid double spacing
+    if (/<(?:p|div|br|h[1-6]|ul|ol|li|table|blockquote)[>\s]/i.test(htmlText)) {
+        return htmlText;
+    }
+    // Otherwise it's plain text, so preserve newlines by converting to <br>
+    return htmlText.replace(/\n/g, '<br>');
+}
+
 export function renderTemplate(text: string, lead: any, account: any, introLine: string = ''): string {
     if (!text) return '';
 
@@ -13,21 +24,53 @@ export function renderTemplate(text: string, lead: any, account: any, introLine:
     const lastName = lead.name && lead.name.includes(' ') ? lead.name.split(' ').slice(1).join(' ') : '';
     const safeAccountName = account.name || account.email.split('@')[0];
 
-    // 1. Process standard variables
+    // ── Fallback helpers for new personalization variables ──────────────────────
+    // Name: use first name, full name, or a natural greeting
+    const nameValue = lead.name || firstName || 'there';
+    const firstNameValue = firstName || lead.name || 'there';
+
+    // Company: use company name or a context-aware fallback
+    const companyValue = lead.company || (lead.website ? `your company` : 'your organization');
+
+    // Role: use current role or a seniority-neutral fallback
+    const roleValue = lead.current_role || lead.role || 'your current role';
+
+    // Niche / Industry: use niche field, then industry, then a generic phrase
+    const nicheValue = lead.niche || lead.industry || 'your sector';
+
+    // Previous Work: use previous_work, then a smart fallback that doesn't look empty
+    const previousWorkValue = lead.previous_work || lead.previous_or_current_work || lead.prev_work || '';
+    // If missing, build a graceful contextual phrase instead of leaving a blank
+    const previousWorkFallback = previousWorkValue ||
+        (lead.current_role ? `your background before ${lead.current_role}` : 'your previous experience');
+
+    // 1. Process standard variables (supports both {var} and {{var}})
     let rendered = text
-        .replace(/{{first_name}}/gi, firstName || 'there')
-        .replace(/{{last_name}}/gi, lastName)
-        .replace(/{{name}}/gi, lead.name || 'there')
-        .replace(/{{company_name}}/gi, lead.company || 'your company')
-        .replace(/{{company}}/gi, lead.company || 'your company')
-        .replace(/{{industry}}/gi, lead.industry || 'your industry')
-        .replace(/{{personalized_point}}/gi, introLine || 'the great work you are doing')
-        .replace(/{{intro}}/gi, introLine || 'the great work you are doing')
-        .replace(/{{your_name}}/gi, safeAccountName)
-        .replace(/{{website}}/gi, lead.website || '')
-        .replace(/{{email}}/gi, lead.email || '')
-        .replace(/{{current_role}}/gi, lead.current_role || 'your role')
-        .replace(/{{role}}/gi, lead.current_role || 'your role');
+        // Core identity variables
+        .replace(/(?:\{{1,2})\s*first_name\s*(?:\}{1,2})/gi, firstNameValue)
+        .replace(/(?:\{{1,2})\s*last_name\s*(?:\}{1,2})/gi, lastName)
+        .replace(/(?:\{{1,2})\s*name\s*(?:\}{1,2})/gi, nameValue)
+        .replace(/(?:\{{1,2})\s*email\s*(?:\}{1,2})/gi, lead.email || '')
+        // Company variables
+        .replace(/(?:\{{1,2})\s*company_name\s*(?:\}{1,2})/gi, companyValue)
+        .replace(/(?:\{{1,2})\s*company\s*(?:\}{1,2})/gi, companyValue)
+        // Role / position variables
+        .replace(/(?:\{{1,2})\s*current_role\s*(?:\}{1,2})/gi, roleValue)
+        .replace(/(?:\{{1,2})\s*role\s*(?:\}{1,2})/gi, roleValue)
+        // Niche / industry variables
+        .replace(/(?:\{{1,2})\s*niche\s*(?:\}{1,2})/gi, nicheValue)
+        .replace(/(?:\{{1,2})\s*industry\s*(?:\}{1,2})/gi, nicheValue)
+        // Previous / current work variables
+        .replace(/(?:\{{1,2})\s*previous_or_current_work\s*(?:\}{1,2})/gi, previousWorkFallback)
+        .replace(/(?:\{{1,2})\s*previous_work\s*(?:\}{1,2})/gi, previousWorkFallback)
+        .replace(/(?:\{{1,2})\s*prev_work\s*(?:\}{1,2})/gi, previousWorkFallback)
+        .replace(/(?:\{{1,2})\s*previous work\s*(?:\}{1,2})/gi, previousWorkFallback)
+        // Intro / personalized point variables
+        .replace(/(?:\{{1,2})\s*personalized_point\s*(?:\}{1,2})/gi, introLine || 'the great work you are doing')
+        .replace(/(?:\{{1,2})\s*intro\s*(?:\}{1,2})/gi, introLine || 'the great work you are doing')
+        // Sender / website variables
+        .replace(/(?:\{{1,2})\s*your_name\s*(?:\}{1,2})/gi, safeAccountName)
+        .replace(/(?:\{{1,2})\s*website\s*(?:\}{1,2})/gi, lead.website || '');
 
     // 2. Process Spintax (e.g., {Hi|Hello|Hey})
     // Uses a regex to find curly braces without nested curly braces
@@ -80,6 +123,12 @@ export interface Lead {
     website: string;
     company: string;
     current_role?: string;
+    role?: string;
+    niche?: string;
+    industry?: string;
+    previous_work?: string;
+    previous_or_current_work?: string;
+    prev_work?: string;
     intro: string;
     status: string;
     opened: number;
@@ -175,7 +224,8 @@ export async function refreshAccessToken(account: GmailAccount): Promise<string>
         return newAccessToken;
     } catch (error: any) {
         log('error', `Failed to refresh token: ${error.message}`);
-        db.prepare("UPDATE gmail_accounts SET status = 'auth_error' WHERE id = ?").run(account.id);
+        // Mark as auth_error AND set is_connected = 0 so the UI shows the reconnect button
+        db.prepare("UPDATE gmail_accounts SET status = 'auth_error', is_connected = 0 WHERE id = ?").run(account.id);
         throw error;
     }
 }
@@ -383,14 +433,14 @@ async function processCampaign(campaign: any, ignoreWindow: boolean) {
             continue; // Account busy with follow-up, move to next account
         }
 
-        // B. New Lead
+        // B. New Leads (Bulk Scheduling with Throttling)
         const campaignFilter = campaign.id ? "AND campaign_id = ?" : "AND campaign_id IS NULL";
         const args = campaign.id ? [campaign.id] : [];
 
-        // Find a pending lead
-        const lead = db.prepare(`SELECT * FROM leads WHERE status = 'pending' AND is_valid = 1 ${campaignFilter} LIMIT 1`).get(...args) as Lead | undefined;
+        // Fetch up to 3 pending leads per account per cycle to accelerate sending
+        const leads = db.prepare(`SELECT * FROM leads WHERE status = 'pending' AND (is_valid = 1 OR is_valid IS NULL) ${campaignFilter} LIMIT 3`).all(...args) as Lead[];
 
-        if (lead) {
+        for (const lead of leads) {
             // Atomic Lock to avoid double scheduling
             const lock = db.prepare("UPDATE leads SET status = 'processing_queue' WHERE id = ? AND status = 'pending'").run(lead.id);
             if (lock.changes > 0) {
@@ -436,46 +486,42 @@ async function checkAndSendFollowUp(account: GmailAccount, campaignId: number | 
     // BUT correctly, we should limit to leads where we know this account is the owner.
     // Let's rely on finding a lead assigned to this campaign generally, but for threading, using the same account is best.
 
-    // Query leads that sent_at is old enough
+    // Query leads that sent_at is old enough and joined purely to this account
+    // Solves N+1 query performance bottleneck
     const validF1 = db.prepare(`
         SELECT l.* FROM leads l
-        WHERE l.status = 'sent' AND l.replied = 0 AND l.follow_up_count = 0 
+        INNER JOIN email_logs el ON el.lead_id = l.id AND el.gmail_id = ? AND el.type = 'sent'
+        WHERE l.status IN ('sent', 'bounced') AND l.replied = 0 AND l.follow_up_count = 0 
         AND l.sent_at < ?
         ${campaignFilter}
-        LIMIT 50
-    `).all(nowTime - (followup1Delay * 3600000), ...args) as Lead[];
+        LIMIT 1
+    `).all(account.id, nowTime - (followup1Delay * 3600000), ...args) as Lead[];
 
-    for (const f1 of validF1) {
-        // Init check: did THIS account send it?
-        const log = db.prepare("SELECT id FROM email_logs WHERE lead_id = ? AND gmail_id = ? AND type='sent'").get(f1.id, account.id);
-
-        if (log) {
-            // Yes, this account sent the original. Lock and send.
-            const lock = db.prepare("UPDATE leads SET status = 'processing_f1' WHERE id = ? AND status = 'sent'").run(f1.id);
-            if (lock.changes > 0) {
-                await sendFollowUp(account, f1, 1);
-                return true;
-            }
+    if (validF1.length > 0) {
+        const f1 = validF1[0];
+        const lock = db.prepare("UPDATE leads SET status = 'processing_f1' WHERE id = ? AND status IN ('sent', 'bounced')").run(f1.id);
+        if (lock.changes > 0) {
+            await sendFollowUp(account, f1, 1);
+            return true;
         }
     }
 
     // Follow-up 2
     const validF2 = db.prepare(`
         SELECT l.* FROM leads l
-        WHERE l.status = 'sent' AND l.replied = 0 AND l.follow_up_count = 1
+        INNER JOIN email_logs el ON el.lead_id = l.id AND el.gmail_id = ? AND el.type='followup'
+        WHERE l.status IN ('sent', 'bounced') AND l.replied = 0 AND l.follow_up_count = 1
         AND l.followup1_sent_at < ?
         ${campaignFilter}
-        LIMIT 50
-    `).all(nowTime - (followup2Delay * 3600000), ...args) as Lead[];
+        LIMIT 1
+    `).all(account.id, nowTime - (followup2Delay * 3600000), ...args) as Lead[];
 
-    for (const f2 of validF2) {
-        const log = db.prepare("SELECT id FROM email_logs WHERE lead_id = ? AND gmail_id = ? AND type='sent'").get(f2.id, account.id);
-        if (log) {
-            const lock = db.prepare("UPDATE leads SET status = 'processing_f2' WHERE id = ? AND status = 'sent'").run(f2.id);
-            if (lock.changes > 0) {
-                await sendFollowUp(account, f2, 2);
-                return true;
-            }
+    if (validF2.length > 0) {
+        const f2 = validF2[0];
+        const lock = db.prepare("UPDATE leads SET status = 'processing_f2' WHERE id = ? AND status IN ('sent', 'bounced')").run(f2.id);
+        if (lock.changes > 0) {
+            await sendFollowUp(account, f2, 2);
+            return true;
         }
     }
 
@@ -487,9 +533,9 @@ async function sendNewEmail(account: GmailAccount, lead: Lead, template: Templat
         // 0. Verify Email (Proactive)
         const verification = await verifyEmail(lead.email);
         if (!verification.isValid) {
-            db.prepare("UPDATE leads SET status = 'invalid', is_valid = 0 WHERE id = ?").run(lead.id);
-            log('error', `Skipping invalid email ${lead.email}: ${verification.reason}`);
-            return;
+            log('warn', `Email ${lead.email} failed proactive verification (${verification.reason}), but sending anyway as per override.`);
+            // Removed: db.prepare("UPDATE leads SET status = 'invalid'...
+            // Removed: return;
         }
 
         // Determine Introduction
@@ -497,28 +543,41 @@ async function sendNewEmail(account: GmailAccount, lead: Lead, template: Templat
         const intros = db.prepare("SELECT content FROM training_blocks WHERE type = ?").all(type === 'agency' ? 'agency_intro' : 'client_intro') as { content: string }[];
         let introLine = intros.length > 0 ? intros[Math.floor(Math.random() * intros.length)].content : (lead.intro || "I noticed your work.");
 
-        // Template Selection
-        let subject = "Hello {{name}}";
-        let body = "Hi {{name}}";
-
-        if (template) {
-            subject = template.subject;
-            body = template.body;
-        } else {
-            // Legacy global settings
-            const s = db.prepare("SELECT value FROM settings WHERE key = 'template_subject_1'").get() as { value: string };
-            const b = db.prepare("SELECT value FROM settings WHERE key = 'template_body_1'").get() as { value: string };
-            if (s) subject = s.value;
-            if (b) body = b.value;
+        // Template Selection — require an actual template, never use placeholder fallback
+        if (!template || !template.subject || !template.body) {
+            log('error', `No template assigned for lead ${lead.email} — skipping to prevent sending placeholder content.`);
+            db.prepare("UPDATE leads SET status = 'pending' WHERE id = ?").run(lead.id);
+            return;
         }
+
+        let subject = template.subject;
+        let body = template.body;
 
         subject = renderTemplate(subject, lead, account, introLine);
         body = renderTemplate(body, lead, account, introLine);
 
-        const signature = account.signature ? `<br><br>${account.signature.replace(/\n/g, '<br>')}` : '';
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
-        const trackingHtml = `<img src="${baseUrl}/api/track/open/${lead.id}" width="1" height="1" style="display:none;" />`;
-        const fullBody = `<div>${body}</div>${signature}${trackingHtml}`;
+        // Convert any stray \n to <br> to ensure proper spacing in plain-text template formats
+        if (!/<[a-z][\s\S]*>/i.test(body)) {
+            body = body.replace(/\n/g, '<br>');
+        }
+
+        let formattedSignature = '';
+        if (account.signature) {
+            formattedSignature = /<[a-z][\s\S]*>/i.test(account.signature)
+                ? account.signature
+                : account.signature.replace(/\n/g, '<br>');
+        }
+
+        const signature = account.signature ? `<div class="email-signature" style="margin-top: 16px;">${formattedSignature}</div>` : '';
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+        // Disabled open tracking pixel to improve deliverability
+        // const trackingHtml = baseUrl ? `<img src="${baseUrl}/api/track/open/${lead.id}" width="1" height="1" style="display:none;" />` : '';
+        const trackingHtml = '';
+
+        // Combine body, signature, and tracking without forcing a specific font wrapper
+        const fullBody = `${body}
+${signature}
+${trackingHtml}`;
 
         const result = await sendEmailViaGmail(account, lead.email, subject, fullBody);
         const now = Date.now();
@@ -559,21 +618,72 @@ export async function sendFollowUp(account: GmailAccount, lead: Lead, number: nu
     try {
         log('info', `Sending Follow-up ${number} to ${lead.email}`, { account: account.email });
 
-        let body = "Just checking in...";
-        // For now, follow-up templates are still global in settings. 
-        // Future: Add follow-up logic to Campaigns table (followup_template_id).
-        let templateKey = lead.opened ? 'template_followup_opened' : 'template_followup_unread';
-        const rowBody = db.prepare("SELECT value FROM settings WHERE key = ?").get(templateKey) as { value: string };
-        if (rowBody) body = rowBody.value;
+        // ── Determine subject (MUST match original to thread like a chat) ────────
+        // We re-render the campaign's main template subject and prefix with "Re:"
+        // This makes the follow-up appear inside the original email thread.
+        let followupSubject = 'Re: Following Up'; // safe fallback
+        let body = "Just checking in \u2014 wanted to make sure you received my last message. Let me know if you have any questions!";
+
+        if (lead.campaign_id) {
+            const camp = db.prepare("SELECT * FROM campaigns WHERE id = ?").get(lead.campaign_id) as any;
+            if (camp) {
+                // Build "Re: {original subject}" from the main campaign template
+                if (camp.template_id) {
+                    const mainTpl = db.prepare("SELECT subject FROM templates WHERE id = ?").get(camp.template_id) as any;
+                    if (mainTpl?.subject) {
+                        followupSubject = `Re: ${renderTemplate(mainTpl.subject, lead, account)}`;
+                    }
+                }
+
+                // Use per-follow-up template body if configured on the campaign
+                const fuTemplateId = number === 1
+                    ? (camp.followup1_template_id || null)
+                    : (camp.followup2_template_id || camp.followup1_template_id || null);
+
+                if (fuTemplateId) {
+                    const fuTpl = db.prepare("SELECT * FROM templates WHERE id = ?").get(fuTemplateId) as any;
+                    if (fuTpl?.body) body = fuTpl.body;
+                } else {
+                    // Fall back to global settings templates
+                    const templateKey = lead.opened ? 'template_followup_opened' : 'template_followup_unread';
+                    const rowBody = db.prepare("SELECT value FROM settings WHERE key = ?").get(templateKey) as { value: string } | undefined;
+                    if (rowBody?.value) body = rowBody.value;
+                }
+            }
+        } else {
+            // No campaign — fall back to global settings templates
+            const templateKey = lead.opened ? 'template_followup_opened' : 'template_followup_unread';
+            const rowBody = db.prepare("SELECT value FROM settings WHERE key = ?").get(templateKey) as { value: string } | undefined;
+            if (rowBody?.value) body = rowBody.value;
+        }
 
         body = renderTemplate(body, lead, account);
 
-        const signature = account.signature ? `<br><br>${account.signature.replace(/\n/g, '<br>')}` : '';
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
-        const trackingHtml = `<img src="${baseUrl}/api/track/open/${lead.id}" width="1" height="1" style="display:none;" />`;
-        const fullBody = `<div>${body}</div>${signature}${trackingHtml}`;
+        // Convert any stray \n to <br> to ensure proper spacing in plain-text template formats
+        if (!/<[a-z][\s\S]*>/i.test(body)) {
+            body = body.replace(/\n/g, '<br>');
+        }
 
-        const result = await sendEmailViaGmail(account, lead.email, "Re: Follow Up", fullBody, lead.thread_id);
+        let formattedSignature = '';
+        if (account.signature) {
+            formattedSignature = /<[a-z][\s\S]*>/i.test(account.signature)
+                ? account.signature
+                : account.signature.replace(/\n/g, '<br>');
+        }
+
+        const signature = account.signature ? `<div class="email-signature" style="margin-top: 16px;">${formattedSignature}</div>` : '';
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+        // Disabled open tracking pixel to improve deliverability
+        // const trackingHtml = baseUrl ? `<img src="${baseUrl}/api/track/open/${lead.id}" width="1" height="1" style="display:none;" />` : '';
+        const trackingHtml = '';
+
+        // Combine body, signature, and tracking without forcing a specific font wrapper
+        const fullBody = `${body}
+${signature}
+${trackingHtml}`;
+
+        // Pass lead.thread_id so Gmail/SMTP places this reply in the same thread
+        const result = await sendEmailViaGmail(account, lead.email, followupSubject, fullBody, lead.thread_id);
         const now = Date.now();
 
         let updateSql = "UPDATE leads SET follow_up_count = ?, last_sent_at = ?, status = 'sent' WHERE id = ?";

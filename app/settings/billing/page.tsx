@@ -23,11 +23,11 @@ export default function BillingSettings() {
         return (
             <div>
                 <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-semibold text-slate-700">{label}</span>
-                    <span className="text-sm text-slate-500">{used.toLocaleString()} / {formatted}</span>
+                    <span className="text-sm font-semibold text-slate-700 dark:text-zinc-300">{label}</span>
+                    <span className="text-sm text-slate-500 dark:text-zinc-400">{used.toLocaleString()} / {formatted}</span>
                 </div>
                 {!isUnlimited && (
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-2 bg-slate-100 dark:bg-zinc-800/50 rounded-full overflow-hidden">
                         <div
                             className={`h-full rounded-full transition-all ${isWarning ? 'bg-rose-500' : 'bg-indigo-600'}`}
                             style={{ width: `${pct}%` }}
@@ -51,21 +51,21 @@ export default function BillingSettings() {
                         <CreditCard size={24} />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Billing & Plan</h1>
-                        <p className="text-slate-500">Manage your subscription, limits, and features.</p>
+                        <h1 className="text-3xl font-black text-slate-900 dark:text-zinc-50 tracking-tight">Billing & Plan</h1>
+                        <p className="text-slate-500 dark:text-zinc-400">Manage your subscription, limits, and features.</p>
                     </div>
                 </div>
 
                 {loading ? (
-                    <div className="bg-white border border-slate-200 rounded-3xl p-10 animate-pulse h-32" />
+                    <div className="bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-3xl p-10 animate-pulse h-32" />
                 ) : plan ? (
                     <>
                         {/* Current plan card */}
-                        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="bg-white dark:bg-zinc-900/60 p-8 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div>
                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Current Plan</p>
                                 <div className="flex items-center gap-3">
-                                    <span className="text-3xl font-black text-slate-900">{plan.planName}</span>
+                                    <span className="text-3xl font-black text-slate-900 dark:text-zinc-50">{plan.planName}</span>
                                     <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider ${plan.planStatus === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
                                         {plan.planStatus}
                                     </span>
@@ -80,8 +80,8 @@ export default function BillingSettings() {
                         </div>
 
                         {/* Usage */}
-                        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-                            <h2 className="text-lg font-bold text-slate-900 mb-6">Usage This Month</h2>
+                        <div className="bg-white dark:bg-zinc-900/60 p-8 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-sm">
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-50 mb-6">Usage This Month</h2>
                             <div className="space-y-6">
                                 <UsageBar label="Gmail / SMTP Accounts" {...plan.limits.gmailAccounts} />
                                 <UsageBar label="Emails Sent" {...plan.limits.monthlyEmails} />
@@ -91,8 +91,8 @@ export default function BillingSettings() {
                         </div>
 
                         {/* Feature access */}
-                        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-                            <h2 className="text-lg font-bold text-slate-900 mb-6">Feature Access</h2>
+                        <div className="bg-white dark:bg-zinc-900/60 p-8 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-sm">
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-50 mb-6">Feature Access</h2>
                             <div className="grid grid-cols-2 gap-4">
                                 {[
                                     { label: 'AI Autopilot', enabled: plan.features.canUseAI },
@@ -101,13 +101,13 @@ export default function BillingSettings() {
                                     { label: 'Per-Gmail Lead Sheets', enabled: plan.features.canUsePerAccountLeads },
                                     { label: 'Advanced Analytics', enabled: plan.features.canUseAnalytics },
                                 ].map(f => (
-                                    <div key={f.label} className={`flex items-center gap-3 p-4 rounded-xl border ${f.enabled ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-slate-50'}`}>
+                                    <div key={f.label} className={`flex items-center gap-3 p-4 rounded-xl border ${f.enabled ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50'}`}>
                                         {f.enabled ? (
                                             <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
                                         ) : (
                                             <AlertCircle size={18} className="text-slate-400 shrink-0" />
                                         )}
-                                        <span className={`text-sm font-semibold ${f.enabled ? 'text-emerald-800' : 'text-slate-500'}`}>{f.label}</span>
+                                        <span className={`text-sm font-semibold ${f.enabled ? 'text-emerald-800' : 'text-slate-500 dark:text-zinc-400'}`}>{f.label}</span>
                                     </div>
                                 ))}
                             </div>
@@ -144,18 +144,18 @@ export default function BillingSettings() {
 
 function PlanCard({ name, price, tagline, features, active, featured }: any) {
     return (
-        <div className={`p-8 rounded-3xl border ${featured ? 'border-indigo-600 shadow-xl shadow-indigo-100' : 'border-slate-200 bg-white shadow-sm'}`}>
+        <div className={`p-8 rounded-3xl border ${featured ? 'border-indigo-600 shadow-xl shadow-indigo-100' : 'border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 shadow-sm'}`}>
             {active && (
                 <span className="inline-block px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider rounded-full mb-4">
                     Current Plan
                 </span>
             )}
-            <h3 className="text-xl font-bold text-slate-900 mb-1">{name}</h3>
-            <p className="text-3xl font-black text-slate-900 tracking-tight mb-1">{price}<span className="text-sm font-semibold text-slate-400">/mo</span></p>
-            <p className="text-sm text-slate-500 mb-6">{tagline}</p>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-zinc-50 mb-1">{name}</h3>
+            <p className="text-3xl font-black text-slate-900 dark:text-zinc-50 tracking-tight mb-1">{price}<span className="text-sm font-semibold text-slate-400">/mo</span></p>
+            <p className="text-sm text-slate-500 dark:text-zinc-400 mb-6">{tagline}</p>
             <ul className="space-y-3 mb-8">
                 {features.map((f: string, i: number) => (
-                    <li key={i} className="flex items-center gap-3 text-sm text-slate-600 font-medium">
+                    <li key={i} className="flex items-center gap-3 text-sm text-slate-600 dark:text-zinc-400 font-medium">
                         <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
                         {f}
                     </li>

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function AnalyticsToolPage() {
     return (
-        <div className="min-h-screen bg-white font-sans">
+        <div className="min-h-screen bg-white dark:bg-zinc-900/60 font-sans">
             <MarketingNav active="/tools/analytics" />
             <main className="pt-20">
                 {/* Hero */}
@@ -39,7 +39,7 @@ export default function AnalyticsToolPage() {
                             </div>
                             {/* Mock Analytics Dashboard */}
                             <div className="flex-1 w-full max-w-lg">
-                                <div className="bg-white/5 backdrop-blur border border-white/10 rounded-3xl p-6">
+                                <div className="bg-white dark:bg-zinc-900 backdrop-blur border border-white/10 rounded-3xl p-6">
                                     <div className="flex items-center justify-between mb-6">
                                         <h3 className="text-white font-bold">Campaign: SaaS Founders Q1</h3>
                                         <span className="text-xs text-slate-400">Last 30 days</span>
@@ -51,7 +51,7 @@ export default function AnalyticsToolPage() {
                                             { label: 'Click Rate', val: '12.1%', icon: MousePointerClick, color: 'text-purple-400' },
                                             { label: 'Replies', val: '342', icon: RefreshCw, color: 'text-emerald-400' },
                                         ].map((s) => (
-                                            <div key={s.label} className="bg-white/5 rounded-xl p-4 border border-white/10">
+                                            <div key={s.label} className="bg-white dark:bg-zinc-900 rounded-xl p-4 border border-white/10">
                                                 <s.icon size={18} className={`${s.color} mb-2`} />
                                                 <p className={`text-2xl font-black ${s.color}`}>{s.val}</p>
                                                 <p className="text-xs text-slate-400 mt-1">{s.label}</p>
@@ -64,7 +64,7 @@ export default function AnalyticsToolPage() {
                                             <div key={i} className="flex-1 bg-gradient-to-t from-cyan-600 to-blue-500 rounded-t-sm" style={{ height: `${h}%`, opacity: 0.6 + (i * 0.04) }} />
                                         ))}
                                     </div>
-                                    <p className="text-xs text-slate-500 mt-2 text-center">Daily opens over the last 10 days</p>
+                                    <p className="text-xs text-slate-500 dark:text-zinc-400 mt-2 text-center">Daily opens over the last 10 days</p>
                                 </div>
                             </div>
                         </div>
@@ -72,11 +72,11 @@ export default function AnalyticsToolPage() {
                 </section>
 
                 {/* Feature grid */}
-                <section className="py-24 bg-slate-50">
+                <section className="py-24 bg-slate-50 dark:bg-zinc-900/50">
                     <div className="max-w-7xl mx-auto px-6">
                         <div className="text-center mb-16">
-                            <h2 className="text-4xl font-black text-slate-900 mb-4">Every metric you need to scale your outreach</h2>
-                            <p className="text-xl text-slate-500 max-w-2xl mx-auto">From high-level campaign overviews to individual email tracking — all in one dashboard.</p>
+                            <h2 className="text-4xl font-black text-slate-900 dark:text-zinc-50 mb-4">Every metric you need to scale your outreach</h2>
+                            <p className="text-xl text-slate-500 dark:text-zinc-400 max-w-2xl mx-auto">From high-level campaign overviews to individual email tracking — all in one dashboard.</p>
                         </div>
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[
@@ -87,12 +87,12 @@ export default function AnalyticsToolPage() {
                                 { icon: Clock, title: 'Best Send Time', desc: 'AI-powered analysis of when your specific audience is most likely to open based on your historical data.', color: 'text-orange-600', bg: 'bg-orange-50' },
                                 { icon: BarChart2, title: 'Account Health', desc: 'Monitor sending health per connected inbox. See bounce rates, spam complaints, and sending limits at a glance.', color: 'text-cyan-600', bg: 'bg-cyan-50' },
                             ].map((f, i) => (
-                                <div key={i} className="bg-white rounded-2xl p-6 border border-slate-200 hover:shadow-md transition-shadow">
+                                <div key={i} className="bg-white dark:bg-zinc-900/60 rounded-2xl p-6 border border-slate-200 dark:border-zinc-800 hover:shadow-md transition-shadow">
                                     <div className={`w-12 h-12 ${f.bg} ${f.color} rounded-xl flex items-center justify-center mb-4`}>
                                         <f.icon size={24} />
                                     </div>
-                                    <h3 className="font-bold text-slate-900 mb-2">{f.title}</h3>
-                                    <p className="text-sm text-slate-500 leading-relaxed">{f.desc}</p>
+                                    <h3 className="font-bold text-slate-900 dark:text-zinc-50 mb-2">{f.title}</h3>
+                                    <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">{f.desc}</p>
                                 </div>
                             ))}
                         </div>
@@ -104,7 +104,7 @@ export default function AnalyticsToolPage() {
                     <div className="max-w-4xl mx-auto px-6 text-center">
                         <h2 className="text-4xl font-black text-white mb-4">Make every campaign smarter than the last.</h2>
                         <p className="text-xl text-cyan-100 mb-8">Start analyzing your campaign data for free today.</p>
-                        <Link href="/login" className="inline-flex items-center gap-2 h-14 px-8 bg-white text-cyan-700 font-bold rounded-full text-base shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
+                        <Link href="/login" className="inline-flex items-center gap-2 h-14 px-8 bg-white dark:bg-zinc-900/60 text-cyan-700 font-bold rounded-full text-base shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
                             View Analytics Free <ArrowRight size={18} />
                         </Link>
                     </div>

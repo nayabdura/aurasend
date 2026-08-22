@@ -5,7 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 export default function DashboardChartClient({ rawData }: { rawData: any[] }) {
     if (!rawData || rawData.length === 0) {
         return (
-            <div className="h-[300px] flex items-center justify-center bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+            <div className="h-[300px] flex items-center justify-center bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30/50 rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800 dark:border-zinc-800">
                 <p className="text-gray-400 font-medium">No sending data for the last 7 days.</p>
             </div>
         );

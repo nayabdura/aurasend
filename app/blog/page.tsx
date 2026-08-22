@@ -15,12 +15,13 @@ export const metadata: Metadata = {
     },
 };
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
-export default function BlogPage() {
+export default async function BlogPage() {
     let posts: any[] = [];
     try {
-        posts = db.prepare('SELECT id, title, slug, excerpt, author, created_at FROM blog_posts WHERE is_published = 1 ORDER BY created_at DESC').all() as any[];
+        const result = await db.prepare('SELECT id, title, slug, excerpt, author, created_at FROM blog_posts WHERE is_published = 1 ORDER BY created_at DESC').all();
+        posts = Array.isArray(result) ? result : [];
     } catch (e) {
         posts = [];
     }
@@ -29,7 +30,7 @@ export default function BlogPage() {
     const rest = posts.slice(1);
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans">
+        <div className="min-h-screen bg-slate-50 dark:bg-zinc-900/50 font-sans">
             <MarketingNav active="/blog" />
 
             <main className="pt-32 pb-24 relative overflow-hidden">
@@ -42,20 +43,20 @@ export default function BlogPage() {
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm font-bold tracking-wide shadow-sm mb-6">
                             <BookOpen size={16} /> AuraSend Journal
                         </div>
-                        <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tight mb-6">
+                        <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-zinc-50 tracking-tight mb-6">
                             Growth insights & <br className="hidden md:block" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">outreach guides.</span>
                         </h1>
-                        <p className="text-xl text-slate-500 leading-relaxed font-medium">Strategic resources, sequence teardowns, deliverability frameworks, and platform updates to help you close more deals.</p>
+                        <p className="text-xl text-slate-500 dark:text-zinc-400 leading-relaxed font-medium">Strategic resources, sequence teardowns, deliverability frameworks, and platform updates to help you close more deals.</p>
                     </div>
 
                     {posts.length === 0 ? (
-                        <div className="text-center py-32 border border-dashed border-slate-300 rounded-[3rem] bg-white shadow-sm">
-                            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <div className="text-center py-32 border border-dashed border-slate-300 rounded-[3rem] bg-white dark:bg-zinc-900/60 shadow-sm">
+                            <div className="w-20 h-20 bg-slate-50 dark:bg-zinc-900/50 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <Bookmark size={32} className="text-slate-400" />
                             </div>
-                            <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">We're writing our first article</h3>
-                            <p className="text-lg text-slate-500 font-medium">Our growth team is working on high-quality guides for you. Check back soon.</p>
+                            <h3 className="text-2xl font-black text-slate-900 dark:text-zinc-50 mb-3 tracking-tight">We're writing our first article</h3>
+                            <p className="text-lg text-slate-500 dark:text-zinc-400 font-medium">Our growth team is working on high-quality guides for you. Check back soon.</p>
                         </div>
                     ) : (
                         <div className="space-y-12">
@@ -89,7 +90,7 @@ export default function BlogPage() {
                                                 </div>
                                             </div>
                                             <div className="hidden md:flex justify-end">
-                                                <div className="w-16 h-16 rounded-full bg-white text-slate-900 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 shadow-xl">
+                                                <div className="w-16 h-16 rounded-full bg-white dark:bg-zinc-900/60 text-slate-900 dark:text-zinc-50 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 shadow-xl">
                                                     <ArrowRight size={24} />
                                                 </div>
                                             </div>
@@ -103,7 +104,7 @@ export default function BlogPage() {
                                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                                     {rest.map((post: any) => (
                                         <Link key={post.id} href={`/blog/${post.slug}`} className="group block">
-                                            <article className="bg-white border border-slate-100 rounded-[2rem] p-8 hover:border-indigo-100 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 h-full flex flex-col relative overflow-hidden focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 hover:-translate-y-2">
+                                            <article className="bg-white dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800/80 rounded-[2rem] p-8 hover:border-indigo-100 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 h-full flex flex-col relative overflow-hidden focus:outline-none focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 hover:-translate-y-2">
                                                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl rounded-full group-hover:bg-indigo-500/10 transition-colors duration-500" />
 
                                                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 mb-6 relative z-10">
@@ -113,17 +114,17 @@ export default function BlogPage() {
                                                     </time>
                                                 </div>
 
-                                                <h2 className="text-2xl font-black text-slate-900 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-blue-500 transition-all mb-4 leading-tight flex-1 relative z-10">
+                                                <h2 className="text-2xl font-black text-slate-900 dark:text-zinc-50 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-blue-500 transition-all mb-4 leading-tight flex-1 relative z-10">
                                                     {post.title}
                                                 </h2>
 
                                                 {post.excerpt && (
-                                                    <p className="text-slate-500 text-base leading-relaxed font-medium mb-8 line-clamp-3 relative z-10">{post.excerpt}</p>
+                                                    <p className="text-slate-500 dark:text-zinc-400 text-base leading-relaxed font-medium mb-8 line-clamp-3 relative z-10">{post.excerpt}</p>
                                                 )}
 
-                                                <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-100 relative z-10">
-                                                    <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-                                                        <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                                                <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-100 dark:border-zinc-800/80 relative z-10">
+                                                    <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-zinc-300">
+                                                        <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-zinc-800/50 flex items-center justify-center text-slate-400">
                                                             <UserCircle2 size={14} />
                                                         </div>
                                                         {post.author || 'AuraSend'}

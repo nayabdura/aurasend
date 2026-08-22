@@ -81,7 +81,7 @@ export async function POST(req: Request) {
         });
     } catch (e: any) {
         return NextResponse.json(
-            { error: e.message || 'Signup failed' },
+            { error: 'An internal server error occurred.' },
             { status: 500 }
         );
     }

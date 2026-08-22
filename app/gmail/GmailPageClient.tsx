@@ -46,7 +46,7 @@ export default function GmailPageClient() {
             }`}>
             {banner.type === 'success' ? <CheckCircle size={18} className="shrink-0 mt-0.5" /> : <AlertCircle size={18} className="shrink-0 mt-0.5" />}
             <span className="flex-1">{banner.text}</span>
-            <button onClick={() => setBanner(null)} className="text-gray-400 hover:text-gray-600 ml-2">
+            <button onClick={() => setBanner(null)} className="text-gray-400 hover:text-slate-600 dark:text-zinc-50 ml-2">
                 <X size={16} />
             </button>
         </div>

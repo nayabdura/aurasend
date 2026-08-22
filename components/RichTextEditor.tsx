@@ -1,101 +1,98 @@
 'use client';
 import dynamic from 'next/dynamic';
-import React, { useMemo } from 'react';
-import 'react-quill/dist/quill.snow.css';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 
-// Dynamically import ReactQuill to prevent SSR issues
-const ReactQuill = dynamic(
-    async () => {
-        const { default: RQ } = await import('react-quill');
-        return function Comp({ forwardedRef, ...props }: any) {
-            return <RQ ref={forwardedRef} {...props} />;
-        };
-    },
-    { ssr: false, loading: () => <p>Loading editor...</p> }
-);
+// Jodit is an excellent WYSIWYG editor that uses inline styles and semantic HTML,
+// which is exactly what we want for email templates with strong copy-paste support.
+const JoditEditor = dynamic(() => import('jodit-react'), {
+    ssr: false,
+    loading: () => <div className="p-8 text-slate-400 text-center border rounded-xl animate-pulse">Loading Email Editor...</div>
+});
 
 interface RichTextEditorProps {
     value: string;
     onChange: (value: string) => void;
     placeholder?: string;
     height?: string;
+    minHeight?: number;
 }
 
-export default function RichTextEditor({ value, onChange, placeholder, height = '200px' }: RichTextEditorProps) {
-    const quillRef = React.useRef<any>(null);
+export default function RichTextEditor({ value, onChange, placeholder, height = '450px', minHeight = 400 }: RichTextEditorProps) {
+    const editorRef = useRef<any>(null);
 
-    const imageHandler = React.useCallback(() => {
-        const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
-
-        input.onchange = async () => {
-            const file = input.files ? input.files[0] : null;
-            if (!file) return;
-
-            // Upload the file
-            const formData = new FormData();
-            formData.append('image', file);
-
-            try {
-                const res = await fetch('/api/admin/upload', {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                const data = await res.json();
-
-                if (data.url) {
-                    const quill = quillRef.current?.getEditor();
-                    if (quill) {
-                        const range = quill.getSelection(true);
-                        quill.insertEmbed(range.index, 'image', data.url);
-                        quill.setSelection(range.index + 1);
-                    }
-                } else {
-                    alert('Image upload failed: ' + (data.error || 'Unknown error'));
+    // We build the config via useMemo to avoid re-initializing Jodit on re-renders
+    const config = useMemo(() => ({
+        readonly: false,
+        placeholder: placeholder || 'Type your email here (or paste from Gmail)...',
+        height: height,
+        minHeight: minHeight,
+        toolbarSticky: false,
+        // Crucial for email formatting: Prevents the editor from stripping complex styles/tables.
+        askBeforePasteHTML: false,
+        askBeforePasteFromWord: false,
+        defaultActionOnPaste: 'insert_as_html',
+        // Crucial for email spacing: Use 'div' or 'br' instead of massive 'p' margins
+        enter: 'div',
+        useSplitMode: true,
+        // Full toolbar for Gmail parity:
+        buttons: [
+            'font', 'fontsize', 'brush', 'paragraph', '|',
+            'bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', '|',
+            'align', 'ul', 'ol', 'outdent', 'indent', '|',
+            'undo', 'redo', '|',
+            'hr', 'eraser', 'copyformat', '|',
+            'table', 'link', 'image', 'video', '|',
+            'symbol', 'fullsize', 'source'
+        ],
+        uploader: {
+            // Send files securely through our own Next.js /api backend
+            insertImageAsBase64URI: false,
+            url: '/api/admin/upload',
+            format: 'json',
+            method: 'POST',
+            filesVariableName: 'image',
+            isSuccess: function (resp: any) {
+                return !resp.error;
+            },
+            process: function (resp: any) {
+                return {
+                    files: resp.url ? [resp.url] : [],
+                    path: resp.url,
+                    baseurl: resp.url,
+                    error: resp.error ? 1 : 0,
+                    msg: resp.error || ''
+                };
+            },
+            defaultHandlerSuccess: function (data: any, resp: any) {
+                const url = resp.url || (data.files && data.files[0]);
+                if (url) {
+                    // @ts-expect-error Jodit types are incomplete
+                    this.s.insertImage(url, null, 400); // insert at width=400 by default
                 }
-            } catch (error) {
-                console.error('Error uploading image:', error);
-                alert('Upload failed.');
+            },
+            defaultHandlerError: function (err: any) {
+                console.error('Jodit image upload error:', err);
+                alert('Image upload failed.');
             }
-        };
-    }, []);
-
-    const modules = useMemo(() => ({
-        toolbar: {
-            container: [
-                [{ 'header': [1, 2, false] }],
-                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-                ['link', 'image'],
-                ['clean']
-            ],
-            handlers: {
-                image: imageHandler
-            }
+        },
+        style: {
+            fontFamily: 'Arial, sans-serif',
+            fontSize: '14px',
+            color: '#222',
+            background: '#fff'
         }
-    }), [imageHandler]);
-
-    const formats = [
-        'header',
-        'bold', 'italic', 'underline', 'strike', 'blockquote',
-        'list', 'bullet', 'indent',
-        'link', 'image'
-    ];
+    }) as any, [placeholder, height, minHeight]);
 
     return (
-        <div className="bg-white rounded-lg overflow-hidden">
-            <ReactQuill
-                ref={quillRef}
-                theme="snow"
+        <div className="bg-white dark:bg-zinc-900/60 rounded-xl shadow-sm border border-slate-200 dark:border-zinc-800 overflow-hidden text-slate-800 dark:text-zinc-200">
+            <JoditEditor
+                ref={editorRef}
                 value={value}
-                onChange={onChange}
-                modules={modules}
-                formats={formats}
-                placeholder={placeholder}
-                style={{ height, marginBottom: '42px' }} // ample space for toolbar
+                config={config}
+                // Update parent state asynchronously to prevent cursor jumping!
+                onChange={(newContent) => {
+                    onChange(newContent);
+                }}
             />
         </div>
     );

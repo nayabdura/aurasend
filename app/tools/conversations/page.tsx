@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function ConversationsToolPage() {
     return (
-        <div className="min-h-screen bg-white font-sans">
+        <div className="min-h-screen bg-white dark:bg-zinc-900/60 font-sans">
             <MarketingNav active="/tools/conversations" />
             <main className="pt-20">
                 {/* Hero */}
@@ -38,7 +38,7 @@ export default function ConversationsToolPage() {
                             </div>
                             {/* Inbox Mockup */}
                             <div className="flex-1 w-full max-w-lg">
-                                <div className="bg-white/5 backdrop-blur border border-white/10 rounded-3xl overflow-hidden">
+                                <div className="bg-white dark:bg-zinc-900 backdrop-blur border border-white/10 rounded-3xl overflow-hidden">
                                     {/* Top bar */}
                                     <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
                                         <h3 className="text-white font-bold flex items-center gap-2"><Inbox size={18} className="text-emerald-400" /> Conversations</h3>
@@ -52,14 +52,14 @@ export default function ConversationsToolPage() {
                                             { name: 'Emma Davis', co: 'Growify', msg: 'Not the right time for us. Maybe Q3.', time: '1h ago', unread: false, star: false },
                                             { name: 'James Wilson', co: 'SalesHub', msg: 'Looks interesting. Let\'s chat this week.', time: '2h ago', unread: false, star: true },
                                         ].map((c) => (
-                                            <div key={c.name} className={`flex items-start gap-3 px-5 py-4 hover:bg-white/5 transition-colors cursor-pointer ${c.unread ? 'bg-white/5' : ''}`}>
+                                            <div key={c.name} className={`flex items-start gap-3 px-5 py-4 hover:bg-white dark:bg-zinc-900 transition-colors cursor-pointer ${c.unread ? 'bg-white dark:bg-zinc-900' : ''}`}>
                                                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
                                                     {c.name.charAt(0)}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center justify-between">
                                                         <span className={`text-sm font-bold ${c.unread ? 'text-white' : 'text-slate-300'}`}>{c.name}</span>
-                                                        <span className="text-xs text-slate-500 shrink-0">{c.time}</span>
+                                                        <span className="text-xs text-slate-500 dark:text-zinc-400 shrink-0">{c.time}</span>
                                                     </div>
                                                     <p className="text-xs text-slate-400 truncate mt-0.5">{c.co} · {c.msg}</p>
                                                 </div>
@@ -75,11 +75,11 @@ export default function ConversationsToolPage() {
                 </section>
 
                 {/* Features */}
-                <section className="py-24 bg-slate-50">
+                <section className="py-24 bg-slate-50 dark:bg-zinc-900/50">
                     <div className="max-w-7xl mx-auto px-6">
                         <div className="text-center mb-16">
-                            <h2 className="text-4xl font-black text-slate-900 mb-4">Never miss a hot lead in your inbox again</h2>
-                            <p className="text-xl text-slate-500 max-w-2xl mx-auto">All replies across all accounts, organized the way a sales team actually operates.</p>
+                            <h2 className="text-4xl font-black text-slate-900 dark:text-zinc-50 mb-4">Never miss a hot lead in your inbox again</h2>
+                            <p className="text-xl text-slate-500 dark:text-zinc-400 max-w-2xl mx-auto">All replies across all accounts, organized the way a sales team actually operates.</p>
                         </div>
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[
@@ -90,12 +90,12 @@ export default function ConversationsToolPage() {
                                 { icon: Bell, title: 'Real-Time Notifications', desc: 'Get notified the second a lead replies so you can strike while the iron is hot. Browser and email notifications supported.', color: 'text-red-600', bg: 'bg-red-50' },
                                 { icon: Search, title: 'Full-Text Search', desc: 'Search across the entire conversation history by lead name, company, email content, or any keyword. Find anything in seconds.', color: 'text-indigo-600', bg: 'bg-indigo-50' },
                             ].map((f, i) => (
-                                <div key={i} className="bg-white rounded-2xl p-6 border border-slate-200 hover:shadow-md transition-shadow">
+                                <div key={i} className="bg-white dark:bg-zinc-900/60 rounded-2xl p-6 border border-slate-200 dark:border-zinc-800 hover:shadow-md transition-shadow">
                                     <div className={`w-12 h-12 ${f.bg} ${f.color} rounded-xl flex items-center justify-center mb-4`}>
                                         <f.icon size={24} />
                                     </div>
-                                    <h3 className="font-bold text-slate-900 mb-2">{f.title}</h3>
-                                    <p className="text-sm text-slate-500 leading-relaxed">{f.desc}</p>
+                                    <h3 className="font-bold text-slate-900 dark:text-zinc-50 mb-2">{f.title}</h3>
+                                    <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">{f.desc}</p>
                                 </div>
                             ))}
                         </div>
@@ -107,7 +107,7 @@ export default function ConversationsToolPage() {
                     <div className="max-w-4xl mx-auto px-6 text-center">
                         <h2 className="text-4xl font-black text-white mb-4">Centralize every reply in one inbox.</h2>
                         <p className="text-xl text-emerald-100 mb-8">Start managing your conversations for free today.</p>
-                        <Link href="/login" className="inline-flex items-center gap-2 h-14 px-8 bg-white text-emerald-700 font-bold rounded-full text-base shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
+                        <Link href="/login" className="inline-flex items-center gap-2 h-14 px-8 bg-white dark:bg-zinc-900/60 text-emerald-700 font-bold rounded-full text-base shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
                             Open My Inbox <ArrowRight size={18} />
                         </Link>
                     </div>

@@ -10,7 +10,7 @@ export async function GET() {
         let query = `
             SELECT c.*, 
             (SELECT COUNT(*) FROM leads l WHERE l.campaign_id = c.id) as lead_count,
-            (SELECT COUNT(*) FROM leads l WHERE l.campaign_id = c.id AND l.status != 'pending' AND l.status != 'invalid') as sent_count,
+            (SELECT COUNT(*) FROM leads l WHERE l.campaign_id = c.id AND l.status NOT IN ('pending', 'processing_queue', 'invalid')) as sent_count,
             (SELECT COUNT(*) FROM leads l WHERE l.campaign_id = c.id AND l.opened = 1) as opened_count,
             (SELECT COUNT(*) FROM leads l WHERE l.campaign_id = c.id AND l.replied = 1) as replied_count
             FROM campaigns c
@@ -28,13 +28,20 @@ export async function GET() {
         const campaigns = db.prepare(query).all(...params);
         return NextResponse.json(campaigns);
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        console.error('GET Campaigns Error:', e);
+        return NextResponse.json({ error: 'Failed to fetch campaigns.' }, { status: 500 });
     }
 }
 
 export async function POST(req: Request) {
     try {
-        const userId = await getUserId(); // Strict ID
+        let userId: number;
+        try {
+            userId = await getUserId();
+        } catch (authErr: any) {
+            if (authErr?.digest?.startsWith('NEXT_REDIRECT')) throw authErr;
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
         const { name, template_id, template_id_b, account_ids, send_start, send_end,
             followup1_delay_hours, followup2_delay_hours,
             followup1_template_id, followup2_template_id, followup_enabled } = await req.json();
@@ -62,7 +69,7 @@ export async function POST(req: Request) {
             // In strict mode, we'd verify ownership.
 
             const insert = db.prepare("INSERT INTO campaign_accounts (campaign_id, gmail_account_id) VALUES (?, ?)");
-            const insertMany = db.transaction((ids) => {
+            const insertMany = db.transaction((ids: any[]) => {
                 for (const accId of ids) insert.run(campaignId, accId);
             });
             insertMany(account_ids);
@@ -70,6 +77,8 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ success: true, id: campaignId });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        if (e?.digest?.startsWith('NEXT_REDIRECT') || e?.digest?.startsWith('NEXT_NOT_FOUND')) throw e;
+        console.error('POST Campaign Error:', e);
+        return NextResponse.json({ error: 'Failed to create campaign.' }, { status: 500 });
     }
 }

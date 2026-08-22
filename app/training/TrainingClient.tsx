@@ -147,13 +147,13 @@ export default function TrainingClient() {
         <div className="space-y-6 max-w-5xl mx-auto">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-extrabold text-gray-900 flex items-center gap-3 mb-1">
+                <h1 className="text-3xl font-extrabold text-slate-900 dark:text-zinc-50 flex items-center gap-3 mb-1">
                     <span className="p-2.5 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-lg">
                         <Brain size={24} />
                     </span>
                     AI Training Center
                 </h1>
-                <p className="text-gray-500 text-sm">Train personalized intro lines, optimize email copy, and check spam scores.</p>
+                <p className="text-slate-500 dark:text-zinc-50 text-sm">Train personalized intro lines, optimize email copy, and check spam scores.</p>
             </div>
 
             {/* Toast */}
@@ -168,27 +168,27 @@ export default function TrainingClient() {
             <div className="grid grid-cols-3 gap-4">
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
                     <p className="text-2xl font-extrabold text-blue-700">{clientBlocks.length}</p>
-                    <p className="text-xs text-gray-500 font-medium">Client Intros</p>
+                    <p className="text-xs text-slate-500 dark:text-zinc-50 font-medium">Client Intros</p>
                 </div>
                 <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
                     <p className="text-2xl font-extrabold text-purple-700">{agencyBlocks.length}</p>
-                    <p className="text-xs text-gray-500 font-medium">Agency Intros</p>
+                    <p className="text-xs text-slate-500 dark:text-zinc-50 font-medium">Agency Intros</p>
                 </div>
                 <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
                     <p className="text-2xl font-extrabold text-green-700">{blocks.length}</p>
-                    <p className="text-xs text-gray-500 font-medium">Total Lines</p>
+                    <p className="text-xs text-slate-500 dark:text-zinc-50 font-medium">Total Lines</p>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+            <div className="flex gap-1 bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 p-1 rounded-xl w-fit">
                 {[
                     { id: 'blocks', label: '📚 Training Blocks' },
                     { id: 'ai_prompts', label: '🤖 AI Suggestions' },
                     { id: 'spam_check', label: '🛡️ Email Optimizer' },
                 ].map(t => (
                     <button key={t.id} onClick={() => setActiveTab(t.id as any)}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === t.id ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === t.id ? 'bg-white dark:bg-zinc-900/60 text-yellow-700 shadow-sm' : 'text-slate-500 dark:text-zinc-50 hover:text-slate-700 dark:text-zinc-50'}`}>
                         {t.label}
                     </button>
                 ))}
@@ -198,24 +198,24 @@ export default function TrainingClient() {
             {activeTab === 'blocks' && (
                 <div className="space-y-6">
                     {/* Add Block */}
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                    <div className="bg-white dark:bg-zinc-900/60 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-zinc-800 dark:border-zinc-800">
                         <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                             <Plus size={20} className="text-blue-600" /> Add Intro Line
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-gray-600 mb-1">Lead Type</label>
+                                <label className="block text-xs font-bold text-slate-600 dark:text-zinc-50 mb-1">Lead Type</label>
                                 <select value={newBlock.type} onChange={e => setNewBlock({ ...newBlock, type: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none text-sm bg-white">
+                                    className="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none text-sm bg-white dark:bg-zinc-900/60">
                                     <option value="client_intro">👤 For Clients</option>
                                     <option value="agency_intro">🏢 For Agencies</option>
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-gray-600 mb-1">Intro Line</label>
+                                <label className="block text-xs font-bold text-slate-600 dark:text-zinc-50 mb-1">Intro Line</label>
                                 <textarea value={newBlock.content} onChange={e => setNewBlock({ ...newBlock, content: e.target.value })}
                                     placeholder="e.g., I noticed you're working on some interesting projects in the {{industry}} space..."
-                                    className="w-full h-24 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none resize-none text-sm" />
+                                    className="w-full h-24 px-4 py-3 border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none resize-none text-sm" />
                             </div>
                             <button onClick={addBlock} disabled={loading}
                                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 transition-all font-semibold text-sm shadow-md disabled:opacity-50">
@@ -234,12 +234,12 @@ export default function TrainingClient() {
             {activeTab === 'ai_prompts' && (
                 <div className="space-y-6">
                     <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-5">
-                        <h3 className="font-bold text-gray-900 flex items-center gap-2 mb-1"><Sparkles size={18} className="text-yellow-500" /> AI-Powered Intro Suggestions</h3>
-                        <p className="text-sm text-gray-600">Click any suggestion to copy it to your new intro line, then edit and save it.</p>
+                        <h3 className="font-bold text-slate-900 dark:text-zinc-50 flex items-center gap-2 mb-1"><Sparkles size={18} className="text-yellow-500" /> AI-Powered Intro Suggestions</h3>
+                        <p className="text-sm text-slate-600 dark:text-zinc-50">Click any suggestion to copy it to your new intro line, then edit and save it.</p>
                     </div>
 
                     {(['client_intro', 'agency_intro'] as const).map(type => (
-                        <div key={type} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                        <div key={type} className="bg-white dark:bg-zinc-900/60 rounded-2xl border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 shadow-sm overflow-hidden">
                             <div className={`px-6 py-4 ${type === 'client_intro' ? 'bg-blue-50 border-b border-blue-100' : 'bg-purple-50 border-b border-purple-100'}`}>
                                 <h3 className={`font-bold flex items-center gap-2 ${type === 'client_intro' ? 'text-blue-900' : 'text-purple-900'}`}>
                                     {type === 'client_intro' ? <Users size={18} /> : <Briefcase size={18} />}
@@ -248,15 +248,15 @@ export default function TrainingClient() {
                             </div>
                             <div className="divide-y divide-gray-100">
                                 {AI_SUGGESTIONS[type].map((text, i) => (
-                                    <div key={i} className="px-6 py-4 hover:bg-gray-50 group">
-                                        <p className="text-sm text-gray-700 mb-3 leading-relaxed">{text}</p>
+                                    <div key={i} className="px-6 py-4 hover:bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 group">
+                                        <p className="text-sm text-slate-700 dark:text-zinc-50 mb-3 leading-relaxed">{text}</p>
                                         <div className="flex gap-2">
                                             <button onClick={() => { setNewBlock({ type, content: text }); setActiveTab('blocks'); }}
                                                 className={`text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-colors ${type === 'client_intro' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}>
                                                 <ArrowRight size={12} /> Use This
                                             </button>
                                             <button onClick={() => copyToClipboard(text)}
-                                                className="text-xs px-3 py-1.5 rounded-lg font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center gap-1">
+                                                className="text-xs px-3 py-1.5 rounded-lg font-semibold bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 text-slate-600 dark:text-zinc-50 hover:bg-slate-200 dark:bg-zinc-800 flex items-center gap-1">
                                                 <Copy size={12} /> Copy
                                             </button>
                                         </div>
@@ -272,14 +272,14 @@ export default function TrainingClient() {
             {activeTab === 'spam_check' && (
                 <div className="space-y-5">
                     {/* Spam Score Checker */}
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
+                    <div className="bg-white dark:bg-zinc-900/60 rounded-2xl border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 shadow-sm p-6 space-y-4">
                         <h3 className="text-lg font-bold flex items-center gap-2">
                             <TrendingUp size={20} className="text-green-600" /> Spam Score Checker
                         </h3>
-                        <p className="text-sm text-gray-500">Paste your email content to check for spam triggers before sending.</p>
+                        <p className="text-sm text-slate-500 dark:text-zinc-50">Paste your email content to check for spam triggers before sending.</p>
                         <textarea value={spamText} onChange={e => setSpamText(e.target.value)} rows={6}
                             placeholder="Paste your full email body here..."
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-400 outline-none resize-none text-sm" />
+                            className="w-full px-4 py-3 border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-green-400 outline-none resize-none text-sm" />
                         <button onClick={checkSpam} disabled={spamChecking || !spamText.trim()}
                             className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-semibold text-sm shadow-md hover:from-green-600 hover:to-emerald-600 disabled:opacity-50">
                             {spamChecking ? <RefreshCw size={16} className="animate-spin" /> : <Zap size={16} />}
@@ -289,14 +289,14 @@ export default function TrainingClient() {
                         {spamResult && (
                             <div className={`p-5 rounded-xl border ${spamResult.score > 7 ? 'bg-red-50 border-red-200' : spamResult.score > 4 ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200'}`}>
                                 <div className="flex justify-between mb-3">
-                                    <p className="font-bold text-gray-900">Spam Score: {spamResult.score}/10</p>
+                                    <p className="font-bold text-slate-900 dark:text-zinc-50">Spam Score: {spamResult.score}/10</p>
                                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${spamResult.score > 7 ? 'bg-red-200 text-red-800' : spamResult.score > 4 ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800'}`}>
                                         {spamResult.score > 7 ? 'HIGH RISK' : spamResult.score > 4 ? 'MODERATE' : 'GOOD'}
                                     </span>
                                 </div>
                                 {spamResult.triggers?.length > 0 && (
                                     <div>
-                                        <p className="text-sm font-semibold text-gray-700 mb-2">⚠️ Spam Triggers Found:</p>
+                                        <p className="text-sm font-semibold text-slate-700 dark:text-zinc-50 mb-2">⚠️ Spam Triggers Found:</p>
                                         <div className="flex flex-wrap gap-2">
                                             {spamResult.triggers.map((t: string, i: number) => (
                                                 <span key={i} className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded-full font-medium">{t}</span>
@@ -309,14 +309,14 @@ export default function TrainingClient() {
                     </div>
 
                     {/* Email Optimizer */}
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">
+                    <div className="bg-white dark:bg-zinc-900/60 rounded-2xl border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 shadow-sm p-6 space-y-4">
                         <h3 className="text-lg font-bold flex items-center gap-2">
                             <Sparkles size={20} className="text-purple-600" /> AI Email Optimizer
                         </h3>
-                        <p className="text-sm text-gray-500">Paste your email to get AI-powered optimization suggestions for higher reply rates.</p>
+                        <p className="text-sm text-slate-500 dark:text-zinc-50">Paste your email to get AI-powered optimization suggestions for higher reply rates.</p>
                         <textarea value={optimizeText} onChange={e => setOptimizeText(e.target.value)} rows={6}
                             placeholder="Paste your full email (subject + body)..."
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-400 outline-none resize-none text-sm" />
+                            className="w-full px-4 py-3 border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-purple-400 outline-none resize-none text-sm" />
                         <button onClick={optimizeEmail} disabled={optimizing || !optimizeText.trim()}
                             className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold text-sm shadow-md hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50">
                             {optimizing ? <RefreshCw size={16} className="animate-spin" /> : <Sparkles size={16} />}
@@ -325,7 +325,7 @@ export default function TrainingClient() {
 
                         {optimizeResult && (
                             <div className="bg-purple-50 border border-purple-200 rounded-xl p-5">
-                                <pre className="text-sm text-gray-800 whitespace-pre-wrap font-sans leading-relaxed">{optimizeResult}</pre>
+                                <pre className="text-sm text-slate-800 dark:text-zinc-50 whitespace-pre-wrap font-sans leading-relaxed">{optimizeResult}</pre>
                             </div>
                         )}
                     </div>

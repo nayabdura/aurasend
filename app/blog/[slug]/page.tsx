@@ -38,7 +38,7 @@ export default function BlogPostPage({ params }: Props) {
     if (!post) notFound();
 
     return (
-        <div className="min-h-screen bg-white font-sans">
+        <div className="min-h-screen bg-white dark:bg-zinc-900/60 font-sans">
             <MarketingNav active="/blog" />
 
             <main className="pt-32 pb-24">
@@ -71,29 +71,29 @@ export default function BlogPostPage({ params }: Props) {
                         <time className="text-indigo-600 font-bold text-sm uppercase tracking-widest block mb-4">
                             {new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                         </time>
-                        <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-6">{post.title}</h1>
+                        <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-zinc-50 tracking-tight leading-tight mb-6">{post.title}</h1>
                         {post.excerpt && (
-                            <p className="text-xl text-slate-500 leading-relaxed max-w-2xl mx-auto">{post.excerpt}</p>
+                            <p className="text-xl text-slate-500 dark:text-zinc-400 leading-relaxed max-w-2xl mx-auto">{post.excerpt}</p>
                         )}
                         <div className="flex items-center justify-center gap-3 mt-8">
                             <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">
                                 {(post.author || 'M')[0].toUpperCase()}
                             </div>
                             <div className="text-left">
-                                <p className="font-semibold text-slate-900 text-sm">{post.author || 'MailPilot Team'}</p>
+                                <p className="font-semibold text-slate-900 dark:text-zinc-50 text-sm">{post.author || 'MailPilot Team'}</p>
                                 <p className="text-slate-400 text-xs">MailPilot</p>
                             </div>
                         </div>
                     </div>
 
                     <div
-                        className="prose prose-slate prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-indigo-600 hover:prose-a:underline prose-img:rounded-2xl prose-img:border prose-img:border-slate-200 prose-img:shadow-sm"
+                        className="prose prose-slate prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-indigo-600 hover:prose-a:underline prose-img:rounded-2xl prose-img:border prose-img:border-slate-200 dark:border-zinc-800 prose-img:shadow-sm"
                         dangerouslySetInnerHTML={{ __html: post.content }}
                     />
                 </article>
 
-                <div className="max-w-3xl mx-auto px-6 mt-16 pt-12 border-t border-slate-100 flex justify-center">
-                    <Link href="/blog" className="inline-flex items-center gap-2 h-12 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-all text-sm">
+                <div className="max-w-3xl mx-auto px-6 mt-16 pt-12 border-t border-slate-100 dark:border-zinc-800/80 flex justify-center">
+                    <Link href="/blog" className="inline-flex items-center gap-2 h-12 px-6 bg-slate-100 dark:bg-zinc-800/50 hover:bg-slate-200 text-slate-700 dark:text-zinc-300 rounded-xl font-bold transition-all text-sm">
                         ← Back to Blog
                     </Link>
                 </div>

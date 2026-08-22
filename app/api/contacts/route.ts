@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireAuth, getEffectiveUserId } from '@/lib/auth';
+import { requireAuth, getEffectiveUserId, getUserId } from '@/lib/auth';
 import db from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -51,7 +51,7 @@ export async function GET(req: Request) {
 
         return NextResponse.json({ contacts, total });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
 
@@ -59,7 +59,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         await requireAuth();
-        const userId = await getEffectiveUserId();
+        const userId = await getUserId();
         const body = await req.json();
         const { email, first_name, last_name, company, current_role, campaign_id } = body;
 
@@ -72,6 +72,6 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ id: result.lastInsertRowid, success: true });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }

@@ -14,7 +14,7 @@ export async function POST(req: Request) {
         db.prepare("INSERT INTO training_blocks (user_id, type, content) VALUES (?, ?, ?)").run(userId, type, content);
         return NextResponse.json({ success: true });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
 
@@ -34,7 +34,7 @@ export async function GET() {
         const blocks = db.prepare(query).all(...params);
         return NextResponse.json(blocks);
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
 
@@ -56,6 +56,6 @@ export async function DELETE(req: Request) {
         if (result.changes === 0) return NextResponse.json({ error: 'Not found' }, { status: 404 });
         return NextResponse.json({ success: true });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }

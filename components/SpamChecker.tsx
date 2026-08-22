@@ -67,7 +67,7 @@ export default function SpamChecker({ subject, body }: { subject: string; body: 
     return (
         <div className="mt-6 p-8 bg-gradient-to-br from-purple-50 via-pink-50 to-purple-100 rounded-2xl border-2 border-purple-300 shadow-xl">
             <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-3">
+                <h3 className="text-xl font-bold text-slate-800 dark:text-zinc-50 flex items-center gap-3">
                     {getIcon()} Advanced Spam & Deliverability Analyzer
                 </h3>
                 <span className="text-xs bg-purple-200 text-purple-800 px-3 py-1 rounded-full font-semibold">
@@ -119,21 +119,21 @@ export default function SpamChecker({ subject, body }: { subject: string; body: 
                                                 />
                                             </svg>
                                             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                                <span className="text-3xl font-bold text-gray-800">{100 - result.score}</span>
-                                                <span className="text-xs text-gray-500">Safety</span>
+                                                <span className="text-3xl font-bold text-slate-800 dark:text-zinc-50">{100 - result.score}</span>
+                                                <span className="text-xs text-slate-500 dark:text-zinc-50">Safety</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-300">
+                                <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-300 dark:border-zinc-700">
                                     <div className="text-center">
-                                        <p className="text-2xl font-bold text-gray-800">{result.score}</p>
-                                        <p className="text-xs text-gray-600">Spam Score</p>
+                                        <p className="text-2xl font-bold text-slate-800 dark:text-zinc-50">{result.score}</p>
+                                        <p className="text-xs text-slate-600 dark:text-zinc-50">Spam Score</p>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-2xl font-bold text-gray-800">{result.flags.length}</p>
-                                        <p className="text-xs text-gray-600">Issues Found</p>
+                                        <p className="text-2xl font-bold text-slate-800 dark:text-zinc-50">{result.flags.length}</p>
+                                        <p className="text-xs text-slate-600 dark:text-zinc-50">Issues Found</p>
                                     </div>
                                 </div>
                             </div>
@@ -142,8 +142,8 @@ export default function SpamChecker({ subject, body }: { subject: string; body: 
 
                     {/* Flags List */}
                     {result.flags.length > 0 ? (
-                        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-                            <h4 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <div className="bg-white dark:bg-zinc-900/60 p-6 rounded-xl shadow-md border border-slate-200 dark:border-zinc-800 dark:border-zinc-800">
+                            <h4 className="font-semibold text-slate-800 dark:text-zinc-50 mb-4 flex items-center gap-2">
                                 <AlertTriangle size={18} className="text-orange-500" /> Detailed Issues ({result.flags.length})
                             </h4>
                             <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -174,7 +174,7 @@ export default function SpamChecker({ subject, body }: { subject: string; body: 
             )}
 
             {!result && (
-                <div className="text-center py-8 text-gray-500 bg-white rounded-xl shadow-inner">
+                <div className="text-center py-8 text-slate-500 dark:text-zinc-50 bg-white dark:bg-zinc-900/60 rounded-xl shadow-inner">
                     <Shield size={48} className="mx-auto mb-3 text-purple-400" />
                     <p className="font-medium">Click "Run Analysis" to check your email for:</p>
                     <ul className="text-sm mt-3 space-y-1 text-left max-w-md mx-auto">

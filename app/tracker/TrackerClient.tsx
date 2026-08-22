@@ -97,14 +97,14 @@ function NotifToast({ notif, onDismiss }: { notif: Notif; onDismiss: () => void 
             initial={{ opacity: 0, x: 80, scale: 0.95 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 80, scale: 0.9 }}
-            className="flex items-start gap-3 bg-white border border-emerald-200 shadow-xl rounded-2xl p-4 w-80 cursor-pointer"
+            className="flex items-start gap-3 bg-white dark:bg-zinc-900/60 border border-emerald-200 shadow-xl rounded-2xl p-4 w-80 cursor-pointer"
             onClick={onDismiss}
         >
             <div className="p-2 bg-emerald-50 rounded-xl shrink-0">
                 <Eye size={18} className="text-emerald-600" />
             </div>
             <div className="min-w-0">
-                <p className="text-sm font-bold text-slate-900">Email Opened! 👀</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-zinc-50">Email Opened! 👀</p>
                 <p className="text-sm text-emerald-700 font-semibold truncate">{notif.name || notif.email}</p>
                 <p className="text-xs text-slate-400 truncate">{notif.email}</p>
                 <p className="text-xs text-slate-400 mt-0.5">via {notif.account || 'unknown'} · just now</p>
@@ -192,7 +192,7 @@ export default function TrackerClient() {
                     <div className="w-16 h-16 rounded-2xl bg-indigo-100 flex items-center justify-center mx-auto mb-4">
                         <Eye size={32} className="text-indigo-500 animate-pulse" />
                     </div>
-                    <p className="text-slate-600 font-medium">Loading tracker data...</p>
+                    <p className="text-slate-600 dark:text-zinc-400 font-medium">Loading tracker data...</p>
                 </div>
             </div>
         );
@@ -238,7 +238,7 @@ export default function TrackerClient() {
 
             <div className="space-y-6">
                 {/* Header */}
-                <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+                <div className="bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-3xl p-8 shadow-sm">
                     <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6">
                         <div>
                             <div className="flex items-center gap-3 mb-2">
@@ -246,8 +246,8 @@ export default function TrackerClient() {
                                     <Eye size={24} />
                                 </div>
                                 <div>
-                                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Email Tracker</h1>
-                                    <p className="text-slate-500 text-sm">Real-time pixel tracking across all outbound accounts</p>
+                                    <h1 className="text-3xl font-black text-slate-900 dark:text-zinc-50 tracking-tight">Email Tracker</h1>
+                                    <p className="text-slate-500 dark:text-zinc-400 text-sm">Real-time pixel tracking across all outbound accounts</p>
                                 </div>
                             </div>
                         </div>
@@ -261,9 +261,9 @@ export default function TrackerClient() {
                                     {newCount} new open{newCount > 1 ? 's' : ''} since load
                                 </motion.div>
                             )}
-                            <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm">
+                            <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 rounded-2xl text-sm">
                                 <PulseDot active={polling} />
-                                <span className="font-medium text-slate-600">
+                                <span className="font-medium text-slate-600 dark:text-zinc-400">
                                     {polling ? 'Live · 15s' : 'Paused'}
                                 </span>
                                 {lastPoll && (
@@ -281,7 +281,7 @@ export default function TrackerClient() {
                             </button>
                             <button
                                 onClick={() => { setNewCount(0); fetchData(); }}
-                                className="p-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors"
+                                className="p-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:bg-zinc-800/50 transition-colors"
                                 title="Refresh now"
                             >
                                 <RefreshCw size={18} />
@@ -302,7 +302,7 @@ export default function TrackerClient() {
                                     {s.icon}
                                     <span className="text-xs font-bold uppercase tracking-wider">{s.label}</span>
                                 </div>
-                                <p className="text-3xl font-black text-slate-900">{s.value}</p>
+                                <p className="text-3xl font-black text-slate-900 dark:text-zinc-50">{s.value}</p>
                             </div>
                         ))}
                     </div>
@@ -311,20 +311,20 @@ export default function TrackerClient() {
                 <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
                     {/* Per-Account stats panel */}
                     <div className="xl:col-span-1">
-                        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-                            <div className="px-6 py-5 border-b border-slate-100 flex items-center gap-2">
+                        <div className="bg-white dark:bg-zinc-900/60 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+                            <div className="px-6 py-5 border-b border-slate-100 dark:border-zinc-800/80 flex items-center gap-2">
                                 <BarChart3 size={16} className="text-indigo-500" />
-                                <h2 className="font-bold text-slate-900 text-sm">Per-Account Stats</h2>
+                                <h2 className="font-bold text-slate-900 dark:text-zinc-50 text-sm">Per-Account Stats</h2>
                             </div>
                             <div className="divide-y divide-slate-50">
                                 {accountStats.length === 0 ? (
                                     <div className="p-6 text-center text-slate-400 text-sm">No accounts found</div>
                                 ) : accountStats.map(acc => (
-                                    <div key={acc.id} className={`p-4 cursor-pointer hover:bg-slate-50 transition-colors ${filterAccount === acc.email ? 'bg-indigo-50' : ''}`}
+                                    <div key={acc.id} className={`p-4 cursor-pointer hover:bg-slate-50 dark:bg-zinc-900/50 transition-colors ${filterAccount === acc.email ? 'bg-indigo-50' : ''}`}
                                         onClick={() => setFilterAccount(filterAccount === acc.email ? 'all' : acc.email)}>
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="min-w-0">
-                                                <p className="font-semibold text-slate-900 text-xs truncate">{acc.email}</p>
+                                                <p className="font-semibold text-slate-900 dark:text-zinc-50 text-xs truncate">{acc.email}</p>
                                                 {acc.name && <p className="text-[10px] text-slate-400">{acc.name}</p>}
                                             </div>
                                             {filterAccount === acc.email && (
@@ -340,7 +340,7 @@ export default function TrackerClient() {
                                             </div>
                                         </div>
                                         {acc.opens > 0 && (
-                                            <div className="mt-2 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                            <div className="mt-2 h-1.5 bg-slate-100 dark:bg-zinc-800/50 rounded-full overflow-hidden">
                                                 <div
                                                     className="h-full bg-emerald-400 rounded-full"
                                                     style={{ width: `${Math.min((acc.opens / Math.max(totals.total_opened, 1)) * 100, 100)}%` }}
@@ -350,7 +350,7 @@ export default function TrackerClient() {
                                     </div>
                                 ))}
                                 {filterAccount !== 'all' && (
-                                    <button onClick={() => setFilterAccount('all')} className="w-full py-3 text-xs text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors font-semibold">
+                                    <button onClick={() => setFilterAccount('all')} className="w-full py-3 text-xs text-slate-400 hover:text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:bg-zinc-900/50 transition-colors font-semibold">
                                         Clear filter ✕
                                     </button>
                                 )}
@@ -360,24 +360,24 @@ export default function TrackerClient() {
 
                     {/* Main open events table */}
                     <div className="xl:col-span-3">
-                        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div className="bg-white dark:bg-zinc-900/60 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
                             {/* Filters */}
-                            <div className="px-6 py-4 border-b border-slate-100 flex flex-wrap items-center gap-3">
-                                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 flex-1 min-w-48">
+                            <div className="px-6 py-4 border-b border-slate-100 dark:border-zinc-800/80 flex flex-wrap items-center gap-3">
+                                <div className="flex items-center gap-2 bg-slate-50 dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 flex-1 min-w-48">
                                     <Search size={14} className="text-slate-400 shrink-0" />
                                     <input
                                         value={search}
                                         onChange={e => setSearch(e.target.value)}
                                         placeholder="Search by name, email, company..."
-                                        className="bg-transparent text-sm text-slate-800 outline-none flex-1 placeholder:text-slate-400"
+                                        className="bg-transparent text-sm text-slate-800 dark:text-zinc-200 outline-none flex-1 placeholder:text-slate-400"
                                     />
                                 </div>
-                                <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl p-1">
+                                <div className="flex items-center gap-1 bg-slate-50 dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 rounded-xl p-1">
                                     {[['all', 'All Time'], ['hour', 'Last Hour'], ['today', 'Today']].map(([v, l]) => (
                                         <button
                                             key={v}
                                             onClick={() => setFilterRecency(v)}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${filterRecency === v ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${filterRecency === v ? 'bg-white dark:bg-zinc-900/60 text-indigo-600 shadow-sm' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:text-zinc-300'}`}
                                         >
                                             {l}
                                         </button>
@@ -390,7 +390,7 @@ export default function TrackerClient() {
                             {filtered.length === 0 ? (
                                 <div className="text-center py-24">
                                     <Eye size={48} className="text-slate-200 mx-auto mb-4" />
-                                    <h3 className="text-lg font-bold text-slate-700 mb-2">No opens tracked yet</h3>
+                                    <h3 className="text-lg font-bold text-slate-700 dark:text-zinc-300 mb-2">No opens tracked yet</h3>
                                     <p className="text-slate-400 text-sm max-w-sm mx-auto">
                                         Every time a recipient opens your email, it will appear here instantly.
                                         Tracking pixels are automatically embedded in all outbound emails.
@@ -408,17 +408,17 @@ export default function TrackerClient() {
                                                 initial={idx < 5 ? { opacity: 0, y: 5 } : false}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 transition={{ delay: idx < 5 ? idx * 0.04 : 0 }}
-                                                className={`flex items-center gap-4 px-6 py-4 hover:bg-slate-50 transition-colors ${isNew ? 'border-l-4 border-emerald-400' : ''}`}
+                                                className={`flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:bg-zinc-900/50 transition-colors ${isNew ? 'border-l-4 border-emerald-400' : ''}`}
                                             >
                                                 {/* Avatar */}
-                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${isNew ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${isNew ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 dark:bg-zinc-800/50 text-slate-500 dark:text-zinc-400'}`}>
                                                     {(o.lead_name || o.lead_email).charAt(0).toUpperCase()}
                                                 </div>
 
                                                 {/* Lead info */}
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2 mb-0.5">
-                                                        <span className="font-semibold text-slate-900 text-sm truncate">
+                                                        <span className="font-semibold text-slate-900 dark:text-zinc-50 text-sm truncate">
                                                             {o.lead_name || o.lead_email}
                                                         </span>
                                                         {isNew && (
@@ -436,7 +436,7 @@ export default function TrackerClient() {
                                                         <span className="truncate">{o.lead_email}</span>
                                                         {o.company && <>
                                                             <span className="text-slate-200">·</span>
-                                                            <span className="truncate text-slate-500">{o.company}</span>
+                                                            <span className="truncate text-slate-500 dark:text-zinc-400">{o.company}</span>
                                                         </>}
                                                     </div>
                                                 </div>
@@ -453,7 +453,7 @@ export default function TrackerClient() {
 
                                                 {/* Time */}
                                                 <div className="shrink-0 text-right min-w-[80px]">
-                                                    <div className={`text-sm font-bold ${isNew ? 'text-emerald-600' : 'text-slate-600'}`}>
+                                                    <div className={`text-sm font-bold ${isNew ? 'text-emerald-600' : 'text-slate-600 dark:text-zinc-400'}`}>
                                                         {timeAgo(o.opened_at)}
                                                     </div>
                                                     <div className="text-[10px] text-slate-400">

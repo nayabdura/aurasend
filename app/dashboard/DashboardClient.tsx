@@ -35,7 +35,7 @@ export default function DashboardClient({ initialActivities }: { initialActiviti
     }, []);
 
     if (activities.length === 0) {
-        return <p className="text-gray-500 text-sm italic">No recent activity found.</p>;
+        return <p className="text-slate-500 dark:text-zinc-50 text-sm italic">No recent activity found.</p>;
     }
 
     return (
@@ -56,13 +56,13 @@ export default function DashboardClient({ initialActivities }: { initialActiviti
                 const Icon = isReply ? TrendingUp : isError ? AlertTriangle : isWarmup ? Play : Send;
 
                 return (
-                    <div key={log.id} className="flex items-start gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div key={log.id} className="flex items-start gap-4 p-3 hover:bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 rounded-xl transition-colors animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className={`p-2 rounded-lg ${bgColor}`}>
                             <Icon size={16} />
                         </div>
                         <div>
-                            <p className="text-sm font-semibold text-gray-900 capitalize">{displayType}</p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-sm font-semibold text-slate-900 dark:text-zinc-50 capitalize">{displayType}</p>
+                            <p className="text-xs text-slate-500 dark:text-zinc-50">
                                 {log.lead_email ? `To: ${log.lead_email}` : ''}
                                 {log.gmail_email && ` (via ${log.gmail_email})`}
                             </p>

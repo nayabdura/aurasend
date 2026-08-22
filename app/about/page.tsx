@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
     return (
-        <div className="min-h-screen bg-slate-50 font-sans">
+        <div className="min-h-screen bg-slate-50 dark:bg-zinc-900/50 font-sans">
             <MarketingNav active="/about" />
 
             <main className="pt-32 pb-24 relative overflow-hidden">
@@ -20,21 +20,21 @@ export default function AboutPage() {
                 <div className="max-w-7xl mx-auto px-6 relative z-10">
 
                     {/* Hero Section */}
-                    <div className="grid lg:grid-cols-2 gap-16 items-center pb-24 border-b border-slate-200">
+                    <div className="grid lg:grid-cols-2 gap-16 items-center pb-24 border-b border-slate-200 dark:border-zinc-800">
                         <div>
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-50 border border-rose-100 text-rose-700 text-sm font-bold tracking-wide shadow-sm mb-6">
                                 <Sparkles size={16} /> Our Story
                             </div>
-                            <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tight mb-8 leading-tight">
+                            <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-zinc-50 tracking-tight mb-8 leading-tight">
                                 We built the tool <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-amber-500">
                                     we always wanted.
                                 </span>
                             </h1>
-                            <p className="text-xl text-slate-500 leading-relaxed mb-6 font-medium">
+                            <p className="text-xl text-slate-500 dark:text-zinc-400 leading-relaxed mb-6 font-medium">
                                 AuraSend started from a simple frustration: the best cold email tools cost thousands per month, lock features behind paywalls, and are bloated with things you'll never use.
                             </p>
-                            <p className="text-lg text-slate-500 leading-relaxed mb-10">
+                            <p className="text-lg text-slate-500 dark:text-zinc-400 leading-relaxed mb-10">
                                 We built this for modern B2B teams that need a complete, clean, and affordable outreach system. One platform for everything — inbox management, warmup, campaigns, analytics, and deliverability.
                             </p>
                             <Link href="/login" className="inline-flex items-center justify-center gap-2 h-14 px-8 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-white rounded-xl font-bold transition-all shadow-xl shadow-rose-500/25 w-full sm:w-auto hover:-translate-y-1">
@@ -50,13 +50,13 @@ export default function AboutPage() {
                                 { num: '99.5%', label: 'Delivery Rate', icon: <Sparkles size={24} />, color: 'emerald' },
                                 { num: '4.9★', label: 'User Rating', icon: <Heart size={24} />, color: 'pink' },
                             ].map(s => (
-                                <div key={s.label} className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 hover:-translate-y-2 transition-transform duration-300 relative overflow-hidden group">
+                                <div key={s.label} className="bg-white dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800/80 rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 hover:-translate-y-2 transition-transform duration-300 relative overflow-hidden group">
                                     <div className={`absolute -right-8 -top-8 w-24 h-24 bg-${s.color}-500/10 rounded-full blur-xl group-hover:bg-${s.color}-500/20 transition-all duration-300`} />
                                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 bg-${s.color}-50 text-${s.color}-500 border border-${s.color}-100 group-hover:scale-110 transition-transform duration-300`}>
                                         {s.icon}
                                     </div>
-                                    <div className="text-4xl font-black text-slate-900 mb-2">{s.num}</div>
-                                    <div className="text-sm text-slate-500 font-bold uppercase tracking-wider">{s.label}</div>
+                                    <div className="text-4xl font-black text-slate-900 dark:text-zinc-50 mb-2">{s.num}</div>
+                                    <div className="text-sm text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-wider">{s.label}</div>
                                 </div>
                             ))}
                         </div>
@@ -68,11 +68,11 @@ export default function AboutPage() {
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900 text-white text-sm font-bold tracking-wide shadow-sm mb-6">
                                 Our Mission
                             </div>
-                            <h2 className="text-5xl font-black text-slate-900 tracking-tight mb-8">
+                            <h2 className="text-5xl font-black text-slate-900 dark:text-zinc-50 tracking-tight mb-8">
                                 Outreach infrastructure <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-600 to-slate-400">for everyone</span>
                             </h2>
-                            <p className="text-xl text-slate-500 leading-relaxed font-medium">
+                            <p className="text-xl text-slate-500 dark:text-zinc-400 leading-relaxed font-medium">
                                 To give every sales team, consultant, and founder access to the infrastructure that only large enterprise companies previously had. Clean software, transparent pricing, fair limits — and everything working exactly the way it should.
                             </p>
                         </div>
@@ -98,12 +98,12 @@ export default function AboutPage() {
                                     color: 'rose'
                                 },
                             ].map(v => (
-                                <div key={v.title} className="bg-white rounded-[2rem] p-10 border border-slate-100 shadow-xl shadow-slate-200/50 hover:-translate-y-2 transition-transform duration-300 group">
+                                <div key={v.title} className="bg-white dark:bg-zinc-900/60 rounded-[2rem] p-10 border border-slate-100 dark:border-zinc-800/80 shadow-xl shadow-slate-200/50 hover:-translate-y-2 transition-transform duration-300 group">
                                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-8 bg-${v.color}-50 text-${v.color}-500 border border-${v.color}-100 group-hover:bg-${v.color}-500 group-hover:text-white transition-colors duration-300`}>
                                         {v.icon}
                                     </div>
-                                    <h3 className="text-2xl font-black text-slate-900 mb-4">{v.title}</h3>
-                                    <p className="text-slate-500 leading-relaxed text-lg font-medium">{v.desc}</p>
+                                    <h3 className="text-2xl font-black text-slate-900 dark:text-zinc-50 mb-4">{v.title}</h3>
+                                    <p className="text-slate-500 dark:text-zinc-400 leading-relaxed text-lg font-medium">{v.desc}</p>
                                 </div>
                             ))}
                         </div>

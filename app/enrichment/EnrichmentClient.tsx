@@ -171,7 +171,7 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
         switch (status) {
             case 'MX_VALID': return <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1"><ShieldCheck size={10} /> Verified MX</span>;
             case 'PATTERN_ONLY': return <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Pattern-Match</span>;
-            default: return <span className="bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Unverified</span>;
+            default: return <span className="bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 text-slate-500 dark:text-zinc-50 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Unverified</span>;
         }
     };
 
@@ -184,12 +184,12 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header & Stats */}
-            <motion.div initial="hidden" animate="visible" custom={0} variants={fadeUp} className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+            <motion.div initial="hidden" animate="visible" custom={0} variants={fadeUp} className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white dark:bg-zinc-900/60 p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
+                    <h1 className="text-3xl font-extrabold text-slate-900 dark:text-zinc-50 tracking-tight flex items-center gap-3">
                         <Globe className="text-blue-600" size={32} /> Deep Enrichment Engine
                     </h1>
-                    <p className="text-gray-500 text-lg mt-1">Discover verified contacts and extract data in real-time</p>
+                    <p className="text-slate-500 dark:text-zinc-50 text-lg mt-1">Discover verified contacts and extract data in real-time</p>
                 </div>
             </motion.div>
 
@@ -201,7 +201,7 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
             </motion.div>
 
             {/* Input Form */}
-            <motion.div initial="hidden" animate="visible" custom={2} variants={fadeUp} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all">
+            <motion.div initial="hidden" animate="visible" custom={2} variants={fadeUp} className="bg-white dark:bg-zinc-900/60 p-8 rounded-3xl border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-bold">AuraSend Enrichment Engine V2</h2>
                     {isScraping && (
@@ -212,13 +212,13 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
                 </div>
 
                 <div className="flex gap-2 mb-6 border-b pb-4">
-                    <button onClick={() => setInputType('linkedin')} className={`px-4 py-2 rounded-t font-medium border-b-2 ${inputType === 'linkedin' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:bg-gray-50'}`}>
+                    <button onClick={() => setInputType('linkedin')} className={`px-4 py-2 rounded-t font-medium border-b-2 ${inputType === 'linkedin' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 dark:text-zinc-50 hover:bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30'}`}>
                         LinkedIn Profile
                     </button>
-                    <button onClick={() => setInputType('domain')} className={`px-4 py-2 rounded-t font-medium border-b-2 ${inputType === 'domain' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:bg-gray-50'}`}>
+                    <button onClick={() => setInputType('domain')} className={`px-4 py-2 rounded-t font-medium border-b-2 ${inputType === 'domain' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 dark:text-zinc-50 hover:bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30'}`}>
                         Company Domain / Site
                     </button>
-                    <button onClick={() => setInputType('csv')} className={`px-4 py-2 rounded-t font-medium border-b-2 ${inputType === 'csv' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:bg-gray-50'}`}>
+                    <button onClick={() => setInputType('csv')} className={`px-4 py-2 rounded-t font-medium border-b-2 ${inputType === 'csv' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 dark:text-zinc-50 hover:bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30'}`}>
                         Bulk CSV
                     </button>
                 </div>
@@ -230,7 +230,7 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
                                 type="file"
                                 accept=".csv"
                                 onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
-                                className="block w-full text-sm text-gray-500
+                                className="block w-full text-sm text-slate-500 dark:text-zinc-50
                                   file:mr-4 file:py-2 file:px-4
                                   file:rounded file:border-0
                                   file:text-sm file:font-semibold
@@ -261,13 +261,13 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
 
                 {isScraping && (
                     <div className="mt-6 flex flex-col gap-4">
-                        <div className="w-full bg-gray-200 rounded-full h-3">
+                        <div className="w-full bg-slate-200 dark:bg-zinc-800 rounded-full h-3">
                             <div className="bg-gradient-to-r from-blue-500 to-emerald-500 h-3 rounded-full transition-all duration-300" style={{ width: `${(progress.current / progress.total) * 100}%` }}></div>
                         </div>
 
                         {/* Process Console */}
                         <div className="bg-gray-900 rounded-lg p-4 font-mono text-[11px] text-emerald-400 h-32 overflow-y-auto border-2 border-gray-800 shadow-inner">
-                            <div className="flex items-center gap-2 mb-2 border-b border-gray-800 pb-1 text-gray-500 uppercase tracking-widest text-[9px] font-bold">
+                            <div className="flex items-center gap-2 mb-2 border-b border-gray-800 pb-1 text-slate-500 dark:text-zinc-50 uppercase tracking-widest text-[9px] font-bold">
                                 <Zap size={10} /> Live Process Console
                             </div>
                             {logs.map((log, i) => (
@@ -279,10 +279,10 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
             </motion.div>
 
             {/* Contacts Table Database */}
-            <motion.div initial="hidden" animate="visible" custom={3} variants={fadeUp} className="bg-white rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all overflow-hidden flex flex-col">
-                <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <h2 className="font-bold text-gray-800 flex items-center gap-2">
-                        <List size={18} className="text-gray-500" /> Enriched Leads Cache ({filteredContacts.length})
+            <motion.div initial="hidden" animate="visible" custom={3} variants={fadeUp} className="bg-white dark:bg-zinc-900/60 rounded-3xl border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all overflow-hidden flex flex-col">
+                <div className="p-6 border-b border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30/50 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <h2 className="font-bold text-slate-800 dark:text-zinc-50 flex items-center gap-2">
+                        <List size={18} className="text-slate-500 dark:text-zinc-50" /> Enriched Leads Cache ({filteredContacts.length})
                     </h2>
 
                     <div className="flex gap-3 w-full sm:w-auto">
@@ -296,7 +296,7 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
                                 className="pl-9 pr-4 py-2 w-full border rounded outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                             />
                         </div>
-                        <a href="/api/contacts/export" className="flex items-center text-sm font-medium bg-white border px-3 py-2 rounded text-gray-600 hover:bg-gray-50 transition-colors">
+                        <a href="/api/contacts/export" className="flex items-center text-sm font-medium bg-white dark:bg-zinc-900/60 border px-3 py-2 rounded text-slate-600 dark:text-zinc-50 hover:bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 transition-colors">
                             <Download size={16} className="mr-2" /> Export
                         </a>
                     </div>
@@ -304,7 +304,7 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm whitespace-nowrap">
-                        <thead className="bg-white text-gray-500 border-b">
+                        <thead className="bg-white dark:bg-zinc-900/60 text-slate-500 dark:text-zinc-50 border-b">
                             <tr>
                                 <th className="p-4 font-semibold w-10"></th>
                                 <th className="p-4 font-semibold">Contact</th>
@@ -318,11 +318,11 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
                             {filteredContacts.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="p-12 text-center">
-                                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-4">
+                                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 mb-4">
                                             <Search className="text-gray-400" size={24} />
                                         </div>
-                                        <h3 className="text-lg font-bold text-gray-900 mb-1">No leads found</h3>
-                                        <p className="text-gray-500">Run the Deep Scraper to discovery real-time data.</p>
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-zinc-50 mb-1">No leads found</h3>
+                                        <p className="text-slate-500 dark:text-zinc-50">Run the Deep Scraper to discovery real-time data.</p>
                                     </td>
                                 </tr>
                             ) : filteredContacts.map((contact) => (
@@ -335,11 +335,11 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 font-bold">
+                                                <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 flex items-center justify-center text-slate-500 dark:text-zinc-50 font-bold">
                                                     {contact.name?.split(' ').map((n: any) => n[0]).join('') || '?'}
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-gray-900 flex items-center gap-2">
+                                                    <p className="font-bold text-slate-900 dark:text-zinc-50 flex items-center gap-2">
                                                         {contact.name}
                                                         {contact.linkedin_url && (
                                                             <a href={contact.linkedin_url} target="_blank" className="text-blue-500 hover:text-blue-700">
@@ -347,7 +347,7 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
                                                             </a>
                                                         )}
                                                     </p>
-                                                    <p className="text-xs text-gray-500">{contact.current_role} @ <span className="font-medium">{contact.company}</span></p>
+                                                    <p className="text-xs text-slate-500 dark:text-zinc-50">{contact.current_role} @ <span className="font-medium">{contact.company}</span></p>
                                                 </div>
                                             </div>
                                         </td>
@@ -355,7 +355,7 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex items-center gap-2">
                                                     <Mail size={14} className="text-gray-400" />
-                                                    <span className="font-medium text-gray-700">{contact.email || '-'}</span>
+                                                    <span className="font-medium text-slate-700 dark:text-zinc-50">{contact.email || '-'}</span>
                                                     {getStatusBadge(contact.validation_status)}
                                                 </div>
                                                 {contact.email_pattern && (
@@ -366,21 +366,21 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
                                             </div>
                                         </td>
                                         <td className="p-4">
-                                            <div className="flex items-center gap-2 bg-gray-50 border px-2 py-1 rounded inline-flex">
+                                            <div className="flex items-center gap-2 bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 border px-2 py-1 rounded inline-flex">
                                                 {getSourceIcon(contact.source_type)}
-                                                <span className="text-[10px] font-bold text-gray-600 uppercase tracking-tighter">{contact.source_type?.replace('_', ' ')}</span>
+                                                <span className="text-[10px] font-bold text-slate-600 dark:text-zinc-50 uppercase tracking-tighter">{contact.source_type?.replace('_', ' ')}</span>
                                             </div>
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-12 bg-gray-200 rounded-full h-1.5">
+                                                <div className="w-12 bg-slate-200 dark:bg-zinc-800 rounded-full h-1.5">
                                                     <div className={`h-1.5 rounded-full ${contact.confidence_score > 80 ? 'bg-green-500' : contact.confidence_score > 50 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${contact.confidence_score}%` }}></div>
                                                 </div>
-                                                <span className="text-xs font-bold text-gray-600">{contact.confidence_score}%</span>
+                                                <span className="text-xs font-bold text-slate-600 dark:text-zinc-50">{contact.confidence_score}%</span>
                                             </div>
                                         </td>
                                         <td className="p-4 text-right space-x-2">
-                                            <button onClick={() => startScraping(contact.linkedin_url || contact.company_domain)} title="Re-run Enrichment" className="p-2 text-gray-400 hover:text-blue-600 hover:bg-white rounded transition-colors hidden group-hover:inline-block">
+                                            <button onClick={() => startScraping(contact.linkedin_url || contact.company_domain)} title="Re-run Enrichment" className="p-2 text-gray-400 hover:text-blue-600 hover:bg-white dark:bg-zinc-900/60 rounded transition-colors hidden group-hover:inline-block">
                                                 <RefreshCw size={16} />
                                             </button>
                                             <button onClick={() => handleAssignToLeads(contact.id)} title="Add to Leads" className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded transition-colors inline-block">
@@ -404,7 +404,7 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
                                                         </h4>
                                                         <div className="space-y-1">
                                                             {JSON.parse(contact.enrichment_steps || '[]').map((step: string, i: number) => (
-                                                                <div key={i} className="flex items-center gap-2 text-xs text-gray-600">
+                                                                <div key={i} className="flex items-center gap-2 text-xs text-slate-600 dark:text-zinc-50">
                                                                     <div className="w-4 h-4 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-[10px] font-bold">✓</div>
                                                                     {step.replace(/_/g, ' ')}
                                                                 </div>
@@ -418,12 +418,12 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
                                                         <div className="text-xs space-y-2">
                                                             <div>
                                                                 <span className="text-gray-400">Official Domain:</span>
-                                                                <div className="font-bold text-gray-800">{contact.company_domain || 'Unknown'}</div>
+                                                                <div className="font-bold text-slate-800 dark:text-zinc-50">{contact.company_domain || 'Unknown'}</div>
                                                             </div>
                                                             {contact.phone && (
                                                                 <div>
                                                                     <span className="text-gray-400">Extracted Phone:</span>
-                                                                    <div className="font-bold text-gray-800 flex items-center gap-1"><Phone size={10} /> {contact.phone}</div>
+                                                                    <div className="font-bold text-slate-800 dark:text-zinc-50 flex items-center gap-1"><Phone size={10} /> {contact.phone}</div>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -432,8 +432,8 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
                                                         <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
                                                             <Info size={14} /> Metadata
                                                         </h4>
-                                                        <div className="p-3 bg-white border border-blue-100 rounded-lg max-h-32 overflow-y-auto">
-                                                            <pre className="text-[10px] text-gray-500 font-mono whitespace-pre-wrap">
+                                                        <div className="p-3 bg-white dark:bg-zinc-900/60 border border-blue-100 rounded-lg max-h-32 overflow-y-auto">
+                                                            <pre className="text-[10px] text-slate-500 dark:text-zinc-50 font-mono whitespace-pre-wrap">
                                                                 {JSON.stringify(JSON.parse(contact.metadata || '{}'), null, 2)}
                                                             </pre>
                                                         </div>
@@ -457,12 +457,12 @@ export default function EnrichmentClient({ initialContacts }: { initialContacts:
 
 function StatCard({ icon, title, value }: any) {
     return (
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-between hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all">
+        <div className="bg-white dark:bg-zinc-900/60 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-between hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all">
             <div>
-                <div className="text-gray-500 text-sm font-bold uppercase tracking-wider mb-2">{title}</div>
-                <div className="text-4xl font-black text-gray-900 tracking-tight">{value}</div>
+                <div className="text-slate-500 dark:text-zinc-50 text-sm font-bold uppercase tracking-wider mb-2">{title}</div>
+                <div className="text-4xl font-black text-slate-900 dark:text-zinc-50 tracking-tight">{value}</div>
             </div>
-            <div className="p-4 bg-gray-50/80 border border-gray-100 rounded-2xl">{icon}</div>
+            <div className="p-4 bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30/80 border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 rounded-2xl">{icon}</div>
         </div>
     );
 }

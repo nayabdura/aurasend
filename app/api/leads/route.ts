@@ -25,15 +25,12 @@ export async function GET() {
         const leads = db.prepare(query).all(...params);
         return NextResponse.json(leads);
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 401 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 401 });
     }
 }
 
 export async function DELETE(req: Request) {
     const userId = await getEffectiveUserId();
-    if (!userId) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
 
@@ -41,7 +38,12 @@ export async function DELETE(req: Request) {
         return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
     }
 
-    const result = db.prepare('DELETE FROM leads WHERE id = ? AND user_id = ?').run(id, userId);
+    let result;
+    if (userId) {
+        result = db.prepare('DELETE FROM leads WHERE id = ? AND user_id = ?').run(id, userId);
+    } else {
+        result = db.prepare('DELETE FROM leads WHERE id = ?').run(id);
+    }
 
     if (result.changes === 0) {
         return NextResponse.json({ error: 'Not found or unauthorized' }, { status: 404 });

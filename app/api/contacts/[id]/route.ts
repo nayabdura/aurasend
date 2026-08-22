@@ -9,8 +9,8 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
         await requireAuth();
         const userId = await getEffectiveUserId();
 
-        const result = db.prepare('DELETE FROM contacts WHERE id = ? AND user_id = ?').run(params.id, userId);
-        db.prepare('DELETE FROM enriched_contacts WHERE id = ? AND user_id = ?').run(params.id, userId);
+        const result = db.prepare('DELETE FROM contacts WHERE id = ? AND (? IS NULL OR user_id = ?)').run(params.id, userId, userId);
+        db.prepare('DELETE FROM enriched_contacts WHERE id = ? AND (? IS NULL OR user_id = ?)').run(params.id, userId, userId);
 
         if (result.changes === 0) {
             return NextResponse.json({ error: 'Contact not found' }, { status: 404 });
@@ -18,7 +18,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
         return NextResponse.json({ success: true });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
 
@@ -31,8 +31,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         const result = db.prepare(`
             UPDATE enriched_contacts 
             SET email = ?, phone = ?, validation_status = ? 
-            WHERE id = ? AND user_id = ?
-        `).run(email, phone, validation_status, params.id, userId);
+            WHERE id = ? AND (? IS NULL OR user_id = ?)
+        `).run(email, phone, validation_status, params.id, userId, userId);
 
         if (result.changes === 0) {
             return NextResponse.json({ error: 'Contact not found' }, { status: 404 });
@@ -40,6 +40,6 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
         return NextResponse.json({ success: true });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }

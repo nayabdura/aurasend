@@ -22,7 +22,7 @@ export async function GET(req: Request, { params }: { params: { accountId: strin
 
         return NextResponse.json(contacts);
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
 
@@ -69,7 +69,7 @@ export async function POST(req: Request, { params }: { params: { accountId: stri
 
         return NextResponse.json({ success: true, inserted, skipped });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
 
@@ -97,6 +97,6 @@ export async function DELETE(req: Request, { params }: { params: { accountId: st
 
         return NextResponse.json({ success: true });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }

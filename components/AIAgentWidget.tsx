@@ -65,7 +65,7 @@ export default function AIAgentWidget() {
             <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 transition-all animate-in slide-in-from-bottom-5">
                 <button
                     onClick={() => setMinimized(false)}
-                    className="p-3 bg-white shadow-xl rounded-full text-indigo-600 border border-gray-100 hover:bg-indigo-50 transition-colors flex items-center gap-2"
+                    className="p-3 bg-white dark:bg-zinc-900/60 shadow-xl rounded-full text-indigo-600 border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 hover:bg-indigo-50 transition-colors flex items-center gap-2"
                 >
                     <Bot size={20} />
                     <span className="font-bold text-sm pr-2">AI Agent active</span>
@@ -75,11 +75,11 @@ export default function AIAgentWidget() {
     }
 
     return (
-        <div className="fixed bottom-6 right-6 w-96 h-[32rem] bg-white rounded-3xl shadow-2xl border border-gray-100 z-50 flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in zoom-in-95 duration-200">
+        <div className="fixed bottom-6 right-6 w-96 h-[32rem] bg-white dark:bg-zinc-900/60 rounded-3xl shadow-2xl border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 z-50 flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in zoom-in-95 duration-200">
             {/* Header */}
             <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 shrink-0 flex items-center justify-between text-white">
                 <div className="flex items-center gap-3">
-                    <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
+                    <div className="bg-white dark:bg-zinc-900 p-2 rounded-xl backdrop-blur-sm">
                         <Bot size={24} />
                     </div>
                     <div>
@@ -90,17 +90,17 @@ export default function AIAgentWidget() {
                     </div>
                 </div>
                 <div className="flex items-center gap-1">
-                    <button onClick={() => setMinimized(true)} className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"><Minimize2 size={16} /></button>
-                    <button onClick={() => setOpen(false)} className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"><X size={18} /></button>
+                    <button onClick={() => setMinimized(true)} className="p-1.5 hover:bg-white dark:bg-zinc-900 rounded-lg transition-colors"><Minimize2 size={16} /></button>
+                    <button onClick={() => setOpen(false)} className="p-1.5 hover:bg-white dark:bg-zinc-900 rounded-lg transition-colors"><X size={18} /></button>
                 </div>
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 overflow-y-auto p-4 bg-gray-50/50 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30/50 space-y-4">
                 {messages.map((m, i) => (
                     <div key={i} className={`flex flex-col ${m.role === 'ai' ? 'items-start' : 'items-end'}`}>
                         <div className={`shadow-sm px-4 py-3 max-w-[85%] text-sm rounded-2xl ${m.role === 'ai'
-                                ? 'bg-white border border-gray-100 text-gray-800 rounded-tl-sm'
+                                ? 'bg-white dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 text-slate-800 dark:text-zinc-50 rounded-tl-sm'
                                 : 'bg-indigo-600 text-white rounded-tr-sm'
                             }`}>
                             {m.text}
@@ -110,7 +110,7 @@ export default function AIAgentWidget() {
                 ))}
                 {loading && (
                     <div className="flex items-start">
-                        <div className="bg-white border border-gray-100 px-4 py-3 rounded-2xl rounded-tl-sm flex items-center gap-2">
+                        <div className="bg-white dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 px-4 py-3 rounded-2xl rounded-tl-sm flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
                             <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
                             <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"></div>
@@ -121,7 +121,7 @@ export default function AIAgentWidget() {
             </div>
 
             {/* Input Area */}
-            <div className="p-3 bg-white border-t border-gray-100 shrink-0">
+            <div className="p-3 bg-white dark:bg-zinc-900/60 border-t border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 shrink-0">
                 <form
                     onSubmit={(e) => { e.preventDefault(); handleSend(); }}
                     className="relative flex items-center"
@@ -131,7 +131,7 @@ export default function AIAgentWidget() {
                         value={input}
                         onChange={e => setInput(e.target.value)}
                         placeholder="Ask the AI agent..."
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all placeholder:text-gray-400"
+                        className="w-full bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 rounded-xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all placeholder:text-gray-400"
                     />
                     <button
                         type="submit"
@@ -143,7 +143,7 @@ export default function AIAgentWidget() {
                 </form>
                 <div className="mt-2 text-center flex items-center justify-center gap-1 opacity-60">
                     <Sparkles size={10} className="text-purple-600" />
-                    <span className="text-[10px] text-gray-500 font-medium">AI handles campaigns, templates, and analytics</span>
+                    <span className="text-[10px] text-slate-500 dark:text-zinc-50 font-medium">AI handles campaigns, templates, and analytics</span>
                 </div>
             </div>
         </div>

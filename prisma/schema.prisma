@@ -1,0 +1,595 @@
+// Prisma Schema for AuraSend (ColdMail.os) — Production PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  MASTER
+  ADMIN
+  USER
+}
+
+enum PlanStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+enum SubStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+  UNPAID
+  EXPIRED
+}
+
+enum AiJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum MsgStatus {
+  PENDING
+  GENERATED
+  EDITED
+  FAILED
+}
+
+model User {
+  id                 Int         @id @default(autoincrement())
+  email              String      @unique
+  passwordHash       String      @map("password_hash")
+  name               String?
+  role               Role        @default(USER)
+  workspaceId        Int?        @map("workspace_id")
+  plan               String      @default("free")
+  planStatus         PlanStatus  @default(ACTIVE) @map("plan_status")
+  stripeCustomerId   String?     @map("stripe_customer_id")
+  stripeSubscriptionId String?   @map("stripe_subscription_id")
+  twoFactorEnabled   Boolean     @default(false) @map("two_factor_enabled")
+  isVerified         Boolean     @default(false) @map("is_verified")
+  verifyCode         String?     @map("verify_code")
+  lastLoginIp        String?     @map("last_login_ip")
+  lastLogin          DateTime?   @map("last_login")
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @updatedAt @map("updated_at")
+
+  workspace          Workspace?   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  gmailAccounts      GmailAccount[]
+  leads              Lead[]
+  contacts           Contact[]
+  templates          Template[]
+  campaigns          Campaign[]
+  emailLogs          EmailLog[]
+  subscriptions      Subscription[]
+  payments           Payment[]
+  usageRecords       UsageRecord[]
+  entitlements       Entitlement[]
+  aiJobs             AiJob[]
+  deliverabilityStats DeliverabilityStat[]
+  auditLogs          AdminAuditLog[]
+  userSettings       UserSetting[]
+
+  @@map("users")
+}
+
+model Workspace {
+  id                   Int       @id @default(autoincrement())
+  name                 String
+  customTrackingDomain String?   @map("custom_tracking_domain")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  users         User[]
+  domains       Domain[]
+  gmailAccounts GmailAccount[]
+  leads         Lead[]
+  templates     Template[]
+  campaigns     Campaign[]
+  emailLogs     EmailLog[]
+
+  @@map("workspaces")
+}
+
+model Plan {
+  id           Int          @id @default(autoincrement())
+  name         String
+  slug         String       @unique // 'free', 'starter', 'pro', 'business'
+  description  String?
+  monthlyPrice Int          @default(0) @map("monthly_price") // in cents or currency units
+  yearlyPrice  Int          @default(0) @map("yearly_price")
+  isActive     Boolean      @default(true) @map("is_active")
+  sortOrder    Int          @default(0) @map("sort_order")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  limits        PlanLimit[]
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model PlanLimit {
+  id         Int      @id @default(autoincrement())
+  planId     Int      @map("plan_id")
+  featureKey String   @map("feature_key") // e.g. 'ai_generations', 'emails_per_month', 'contacts', 'connected_inboxes', 'campaigns'
+  limitValue Int      @default(-1) @map("limit_value") // -1 = unlimited
+  isEnabled  Boolean  @default(true) @map("is_enabled")
+
+  plan       Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, featureKey])
+  @@map("plan_limits")
+}
+
+model Entitlement {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  featureKey   String   @map("feature_key")
+  grantedLimit Int      @default(0) @map("granted_limit")
+  source       String   @default("plan") // 'plan', 'override', 'addon'
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, featureKey])
+  @@map("entitlements")
+}
+
+model Subscription {
+  id                   Int       @id @default(autoincrement())
+  userId               Int       @map("user_id")
+  planId               Int       @map("plan_id")
+  status               SubStatus @default(ACTIVE)
+  currentPeriodStart   DateTime? @map("current_period_start")
+  currentPeriodEnd     DateTime? @map("current_period_end")
+  cancelAtPeriodEnd    Boolean   @default(false) @map("cancel_at_period_end")
+  stripeCustomerId     String?   @map("stripe_customer_id")
+  stripeSubscriptionId String?   @unique @map("stripe_subscription_id")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan                 Plan      @relation(fields: [planId], references: [id], onDelete: Restrict)
+  items                SubscriptionItem[]
+  payments             Payment[]
+
+  @@map("subscriptions")
+}
+
+model SubscriptionItem {
+  id             Int          @id @default(autoincrement())
+  subscriptionId Int          @map("subscription_id")
+  stripeItemId   String       @unique @map("stripe_item_id")
+  priceId        String       @map("price_id")
+  quantity       Int          @default(1)
+
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("subscription_items")
+}
+
+model Payment {
+  id                    Int           @id @default(autoincrement())
+  userId                Int           @map("user_id")
+  subscriptionId        Int?          @map("subscription_id")
+  amount                Int // in cents
+  currency              String        @default("usd")
+  status                String        @default("succeeded") // 'succeeded', 'failed', 'pending', 'refunded'
+  paymentMethod         String?       @map("payment_method")
+  stripeInvoiceId       String?       @map("stripe_invoice_id")
+  stripePaymentIntentId String?       @map("stripe_payment_intent_id")
+  createdAt             DateTime      @default(now()) @map("created_at")
+
+  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription          Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@map("payments")
+}
+
+model PaymentEvent {
+  id              Int      @id @default(autoincrement())
+  providerEventId String   @unique @map("provider_event_id")
+  eventType       String   @map("event_type")
+  provider        String   @default("stripe")
+  payload         String   // JSON string
+  processed       Boolean  @default(false)
+  processedAt     DateTime? @map("processed_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("payment_events")
+}
+
+model UsageRecord {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  featureKey  String   @map("feature_key")
+  count       Int      @default(0)
+  periodStart DateTime @map("period_start")
+  periodEnd   DateTime @map("period_end")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, featureKey, periodStart])
+  @@map("usage_records")
+}
+
+model Domain {
+  id              Int       @id @default(autoincrement())
+  workspaceId     Int       @map("workspace_id")
+  domainName      String    @map("domain_name")
+  spfStatus       String?   @map("spf_status")
+  dkimStatus      String?   @map("dkim_status")
+  dmarcStatus     String?   @map("dmarc_status")
+  mxStatus        String?   @map("mx_status")
+  healthScore     Int       @default(100) @map("health_score")
+  dailySendLimit  Int       @default(500) @map("daily_send_limit")
+  isSafeMode      Boolean   @default(false) @map("is_safe_mode")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  gmailAccounts   GmailAccount[]
+
+  @@unique([workspaceId, domainName])
+  @@map("domains")
+}
+
+model GmailAccount {
+  id                    Int      @id @default(autoincrement())
+  userId                Int      @map("user_id")
+  workspaceId           Int?     @map("workspace_id")
+  domainId              Int?     @map("domain_id")
+  email                 String
+  name                  String?
+  authMethod            String   @default("oauth") @map("auth_method")
+
+  clientId              String?  @map("client_id")
+  clientSecret          String?  @map("client_secret")
+  accessTokenEncrypted  String?  @map("access_token_encrypted")
+  refreshTokenEncrypted String?  @map("refresh_token_encrypted")
+  expiryDate            BigInt?  @map("expiry_date")
+
+  appPasswordEncrypted  String?  @map("app_password_encrypted")
+  smtpHost              String   @default("smtp.gmail.com") @map("smtp_host")
+  smtpPort              Int      @default(587) @map("smtp_port")
+  imapHost              String   @default("imap.gmail.com") @map("imap_host")
+  imapPort              Int      @default(993) @map("imap_port")
+
+  dailyLimit            Int      @default(20) @map("daily_limit")
+  sentToday             Int      @default(0) @map("sent_today")
+  lastDailyResetAt      BigInt   @default(0) @map("last_daily_reset_at")
+  lastSentDate          String?  @map("last_sent_date")
+  status                String   @default("active")
+  isConnected           Boolean  @default(false) @map("is_connected")
+
+  warmupEnabled         Boolean  @default(false) @map("warmup_enabled")
+  warmupDay             Int      @default(1) @map("warmup_day")
+  warmupDailyLimit      Int      @default(10) @map("warmup_daily_limit")
+  warmupSentToday       Int      @default(0) @map("warmup_sent_today")
+  warmupLastDate        String?  @map("warmup_last_date")
+  warmupHealthScore     Int      @default(0) @map("warmup_health_score")
+
+  signature             String?
+  timezone              String   @default("America/New_York")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace             Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  domain                Domain?  @relation(fields: [domainId], references: [id], onDelete: SetNull)
+  emailLogs             EmailLog[]
+  deliverabilityStats   DeliverabilityStat[]
+
+  @@unique([userId, email])
+  @@map("gmail_accounts")
+}
+
+model Lead {
+  id               Int       @id @default(autoincrement())
+  userId           Int       @map("user_id")
+  workspaceId      Int?      @map("workspace_id")
+  campaignId       Int?      @map("campaign_id")
+  name             String?
+  firstName        String?   @map("first_name")
+  lastName         String?   @map("last_name")
+  email            String
+  website          String?
+  company          String?
+  intro            String?
+  source           String?
+  status           String    @default("pending")
+  leadType         String    @default("client") @map("lead_type")
+  temperature      String    @default("Cold")
+  companyDomain    String?   @map("company_domain")
+  currentRole      String?   @map("current_role")
+  niche            String?
+  previousWork     String?   @map("previous_work")
+  
+  opened           Boolean   @default(false)
+  replied          Boolean   @default(false)
+  threadId         String?   @map("thread_id")
+  lastSentAt       BigInt?   @map("last_sent_at")
+  openedAt         BigInt?   @map("opened_at")
+  repliedAt        BigInt?   @map("replied_at")
+  followUpCount    Int       @default(0) @map("follow_up_count")
+  followupType     String?   @map("followup_type")
+
+  emailScore       Int       @default(0) @map("email_score")
+  emailStatus      String?   @map("email_status")
+  validationStatus String?   @map("validation_status")
+  isRoleAccount    Boolean   @default(false) @map("is_role_account")
+  isCatchAll       Boolean   @default(false) @map("is_catch_all")
+  isDisposable     Boolean   @default(false) @map("is_disposable")
+  isFullInbox      Boolean   @default(false) @map("is_full_inbox")
+  mxRecords        String?   @map("mx_records")
+  verificationDate String?   @map("verification_date")
+  isValid          Boolean   @default(true) @map("is_valid")
+
+  sentAt           BigInt?   @map("sent_at")
+  followup1SentAt  BigInt?   @map("followup1_sent_at")
+  followup2SentAt  BigInt?   @map("followup2_sent_at")
+  nextFollowupAt   BigInt?   @map("next_followup_at")
+
+  isSuppressed     Boolean   @default(false) @map("is_suppressed")
+  suppressedReason String?   @map("suppressed_reason")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace        Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  campaign         Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  emailLogs        EmailLog[]
+  personalizedMessages PersonalizedMessage[]
+
+  @@unique([userId, email])
+  @@index([campaignId, status])
+  @@index([userId, status])
+  @@map("leads")
+}
+
+model Contact {
+  id             Int       @id @default(autoincrement())
+  userId         Int       @map("user_id")
+  email          String
+  firstName      String?   @map("first_name")
+  lastName       String?   @map("last_name")
+  company        String?
+  currentRole    String?   @map("current_role")
+  campaignId     Int?      @map("campaign_id")
+  campaignStatus String    @default("pending") @map("campaign_status")
+  lastContactDate String?  @map("last_contact_date")
+  replyStatus    String    @default("none") @map("reply_status")
+  bounceStatus   Boolean   @default(false) @map("bounce_status")
+  emailValid     Boolean   @default(true) @map("email_valid")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, email])
+  @@map("contacts")
+}
+
+model Template {
+  id          Int       @id @default(autoincrement())
+  userId      Int       @map("user_id")
+  workspaceId Int?      @map("workspace_id")
+  name        String
+  subject     String
+  body        String
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  campaigns   Campaign[]
+
+  @@map("templates")
+}
+
+model Campaign {
+  id                  Int       @id @default(autoincrement())
+  userId              Int       @map("user_id")
+  workspaceId         Int?      @map("workspace_id")
+  name                String
+  templateId          Int?      @map("template_id")
+  templateIdB         Int?      @map("template_id_b")
+  status              String    @default("paused") // 'paused', 'running', 'completed'
+  sendWindowStart     String    @default("09:00") @map("send_window_start")
+  sendWindowEnd       String    @default("18:00") @map("send_window_end")
+  timezone            String    @default("America/New_York")
+  delayBetweenEmails  Int       @default(30) @map("delay_between_emails")
+  followup1DelayHours Int       @default(48) @map("followup1_delay_hours")
+  followup2DelayHours Int       @default(96) @map("followup2_delay_hours")
+  followup1TemplateId Int?      @map("followup1_template_id")
+  followup2TemplateId Int?      @map("followup2_template_id")
+  followupEnabled     Boolean   @default(true) @map("followup_enabled")
+  lockUntil           DateTime? @map("lock_until")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace           Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  template            Template? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  sequences           Sequence[]
+  leads               Lead[]
+  aiJobs              AiJob[]
+  personalizedMessages PersonalizedMessage[]
+
+  @@map("campaigns")
+}
+
+model Sequence {
+  id            Int      @id @default(autoincrement())
+  campaignId    Int      @map("campaign_id")
+  stepNumber    Int      @map("step_number")
+  delayDays     Int      @default(0) @map("delay_days")
+  subjectSpintax String   @map("subject_spintax")
+  bodySpintax   String   @map("body_spintax")
+  isAbTest      Boolean  @default(false) @map("is_ab_test")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  campaign      Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("sequences")
+}
+
+model PersonalizedMessage {
+  id                   Int       @id @default(autoincrement())
+  leadId               Int       @map("lead_id")
+  campaignId           Int?      @map("campaign_id")
+  subject              String
+  body                 String
+  personalizationPoints String?  @map("personalization_points") // JSON string
+  status               MsgStatus @default(GENERATED)
+  createdAt            DateTime  @default(now()) @map("created_at")
+
+  lead                 Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  campaign             Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@map("personalized_messages")
+}
+
+model AiJob {
+  id             Int         @id @default(autoincrement())
+  userId         Int         @map("user_id")
+  campaignId     Int?        @map("campaign_id")
+  status         AiJobStatus @default(PENDING)
+  totalItems     Int         @default(0) @map("total_items")
+  processedItems Int         @default(0) @map("processed_items")
+  failedItems    Int         @default(0) @map("failed_items")
+  errorLog       String?     @map("error_log")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaign       Campaign?   @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@map("ai_jobs")
+}
+
+model EmailLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  workspaceId Int?     @map("workspace_id")
+  leadId      Int?     @map("lead_id")
+  gmailId     Int?     @map("gmail_id")
+  type        String // 'sent', 'opened', 'replied', 'bounced'
+  timestamp   BigInt   @default(0)
+  messageId   String?  @map("message_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead        Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  gmailAccount GmailAccount? @relation(fields: [gmailId], references: [id], onDelete: SetNull)
+
+  @@index([userId, timestamp])
+  @@map("email_logs")
+}
+
+model GlobalSuppression {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  domain     String?
+  reason     String   @default("unsubscribed")
+  userId     Int?     @map("user_id")
+  campaignId Int?     @map("campaign_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("global_suppression")
+}
+
+model DeliverabilityStat {
+  id             Int          @id @default(autoincrement())
+  gmailAccountId Int          @map("gmail_account_id")
+  userId         Int          @map("user_id")
+  date           String
+  sent           Int          @default(0)
+  opened         Int          @default(0)
+  replied        Int          @default(0)
+  bounced        Int          @default(0)
+  spamComplaints Int          @default(0) @map("spam_complaints")
+  spamRiskScore  Int          @default(0) @map("spam_risk_score")
+  inboxPlacement String       @default("unknown") @map("inbox_placement")
+
+  gmailAccount   GmailAccount @relation(fields: [gmailAccountId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([gmailAccountId, date])
+  @@map("deliverability_stats")
+}
+
+model BlogPost {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  content     String
+  excerpt     String?
+  author      String   @default("Admin")
+  imageUrl    String?  @map("image_url")
+  isPublished Boolean  @default(false) @map("is_published")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("blog_posts")
+}
+
+model AdminAuditLog {
+  id        Int      @id @default(autoincrement())
+  adminId   Int      @map("admin_id")
+  action    String
+  target    String?
+  ip        String?
+  details   String? // JSON blob
+  createdAt DateTime @default(now()) @map("created_at")
+
+  admin     User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@map("admin_audit_logs")
+}
+
+model SystemLog {
+  id        Int      @id @default(autoincrement())
+  level     String   @default("info")
+  message   String
+  details   String?
+  timestamp DateTime @default(now())
+
+  @@map("system_logs")
+}
+
+model SystemSetting {
+  key       String   @id
+  value     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}
+
+model UserSetting {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  key       String
+  value     String?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@map("user_settings")
+}

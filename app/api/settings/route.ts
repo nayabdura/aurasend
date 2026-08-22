@@ -32,7 +32,7 @@ export async function POST(req: Request) {
         const update = db.prepare('INSERT OR REPLACE INTO user_settings (user_id, key, value) VALUES (?, ?, ?)');
 
         // Transaction
-        const updateMany = db.transaction((settings) => {
+        const updateMany = db.transaction((settings: any) => {
             for (const [key, value] of Object.entries(settings)) {
                 update.run(userId, key, String(value));
             }

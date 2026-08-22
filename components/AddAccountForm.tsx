@@ -80,7 +80,7 @@ export default function AddAccountForm() {
     }
 
     return (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden mb-6">
+        <div className="bg-white dark:bg-zinc-900/60 rounded-2xl shadow-lg border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 overflow-hidden mb-6">
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
@@ -108,12 +108,12 @@ export default function AddAccountForm() {
                 <form onSubmit={handleSubmit} className="space-y-5">
                     {/* Email (always shown) */}
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Gmail Address</label>
+                        <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-50 mb-2">Gmail Address</label>
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            className="w-full px-4 py-3 border border-slate-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                             placeholder="yourname@gmail.com"
                             required
                         />
@@ -121,7 +121,7 @@ export default function AddAccountForm() {
 
                     {/* Nickname */}
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-50 mb-2">
                             Account Nickname
                             <span className="ml-2 text-xs font-normal text-gray-400">(optional — helps you identify this account)</span>
                         </label>
@@ -129,21 +129,21 @@ export default function AddAccountForm() {
                             type="text"
                             value={accountNickname}
                             onChange={(e) => setAccountNickname(e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            className="w-full px-4 py-3 border border-slate-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                             placeholder="e.g. Sales Outreach, Personal, Company Main..."
                         />
                     </div>
 
                     {/* Auth Method Tabs */}
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-3">Authentication Method</label>
+                        <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-50 mb-3">Authentication Method</label>
                         <div className="grid grid-cols-3 gap-2">
                             <button
                                 type="button"
                                 onClick={() => setAuthMethod('oauth')}
                                 className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 font-medium text-xs transition-all ${authMethod === 'oauth'
                                     ? 'border-blue-500 bg-blue-50 text-blue-700'
-                                    : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                                    : 'border-slate-200 dark:border-zinc-800 dark:border-zinc-800 text-slate-500 dark:text-zinc-50 hover:border-slate-300 dark:border-zinc-700'
                                     }`}
                             >
                                 {/* Google Icon */}
@@ -162,7 +162,7 @@ export default function AddAccountForm() {
                                 onClick={() => setAuthMethod('app_password')}
                                 className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 font-medium text-xs transition-all ${authMethod === 'app_password'
                                     ? 'border-purple-500 bg-purple-50 text-purple-700'
-                                    : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                                    : 'border-slate-200 dark:border-zinc-800 dark:border-zinc-800 text-slate-500 dark:text-zinc-50 hover:border-slate-300 dark:border-zinc-700'
                                     }`}
                             >
                                 <Key size={20} className={authMethod === 'app_password' ? 'text-purple-600' : 'text-gray-400'} />
@@ -174,11 +174,11 @@ export default function AddAccountForm() {
                                 type="button"
                                 onClick={() => setAuthMethod('smtp')}
                                 className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 font-medium text-xs transition-all ${authMethod === 'smtp'
-                                    ? 'border-gray-600 bg-gray-50 text-gray-700'
-                                    : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                                    ? 'border-gray-600 bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 text-slate-700 dark:text-zinc-50'
+                                    : 'border-slate-200 dark:border-zinc-800 dark:border-zinc-800 text-slate-500 dark:text-zinc-50 hover:border-slate-300 dark:border-zinc-700'
                                     }`}
                             >
-                                <Lock size={20} className={authMethod === 'smtp' ? 'text-gray-600' : 'text-gray-400'} />
+                                <Lock size={20} className={authMethod === 'smtp' ? 'text-slate-600 dark:text-zinc-50' : 'text-gray-400'} />
                                 <span>SMTP</span>
                                 <span className="text-[10px] text-gray-400">Custom Server</span>
                             </button>
@@ -203,7 +203,7 @@ export default function AddAccountForm() {
                             <button
                                 type="button"
                                 onClick={() => setShowAdvanced(!showAdvanced)}
-                                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 font-medium transition-colors"
+                                className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-50 hover:text-slate-700 dark:text-zinc-50 font-medium transition-colors"
                             >
                                 {showAdvanced ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                                 {showAdvanced ? 'Hide' : 'Use custom OAuth credentials instead'}
@@ -218,22 +218,22 @@ export default function AddAccountForm() {
                                         </p>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-600 mb-1.5">Custom Client ID</label>
+                                        <label className="block text-xs font-semibold text-slate-600 dark:text-zinc-50 mb-1.5">Custom Client ID</label>
                                         <input
                                             type="text"
                                             value={clientId}
                                             onChange={(e) => { setClientId(e.target.value); setUseDefaultOAuth(!e.target.value); }}
-                                            className="w-full px-3 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono"
+                                            className="w-full px-3 py-2.5 border border-slate-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono"
                                             placeholder="xxxx.apps.googleusercontent.com"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-600 mb-1.5">Custom Client Secret</label>
+                                        <label className="block text-xs font-semibold text-slate-600 dark:text-zinc-50 mb-1.5">Custom Client Secret</label>
                                         <input
                                             type="password"
                                             value={clientSecret}
                                             onChange={(e) => { setClientSecret(e.target.value); setUseDefaultOAuth(!e.target.value); }}
-                                            className="w-full px-3 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono"
+                                            className="w-full px-3 py-2.5 border border-slate-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono"
                                             placeholder="GOCSPX-..."
                                         />
                                     </div>
@@ -254,15 +254,15 @@ export default function AddAccountForm() {
                                 </p>
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-50 mb-2">
                                     App Password
-                                    <span className="ml-2 text-xs font-normal text-gray-500">(16 characters)</span>
+                                    <span className="ml-2 text-xs font-normal text-slate-500 dark:text-zinc-50">(16 characters)</span>
                                 </label>
                                 <input
                                     type="password"
                                     value={appPassword}
                                     onChange={(e) => setAppPassword(e.target.value)}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition-all font-mono tracking-wider"
+                                    className="w-full px-4 py-3 border border-slate-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition-all font-mono tracking-wider"
                                     placeholder="xxxx xxxx xxxx xxxx"
                                     required
                                 />
@@ -279,33 +279,33 @@ export default function AddAccountForm() {
                     {authMethod === 'smtp' && (
                         <div className="space-y-3">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-50 mb-2">Password</label>
                                 <input
                                     type="password"
                                     value={appPassword}
                                     onChange={(e) => setAppPassword(e.target.value)}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    className="w-full px-4 py-3 border border-slate-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                                     placeholder="Gmail password or app password"
                                     required
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">SMTP Host</label>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-50 mb-2">SMTP Host</label>
                                     <input
                                         type="text"
                                         value={smtpHost}
                                         onChange={(e) => setSmtpHost(e.target.value)}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                        className="w-full px-4 py-3 border border-slate-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                         placeholder="smtp.gmail.com"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">SMTP Port</label>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-50 mb-2">SMTP Port</label>
                                     <select
                                         value={smtpPort}
                                         onChange={(e) => setSmtpPort(e.target.value)}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                                        className="w-full px-4 py-3 border border-slate-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-zinc-900/60"
                                     >
                                         <option value="587">587 (STARTTLS)</option>
                                         <option value="465">465 (SSL)</option>
@@ -318,7 +318,7 @@ export default function AddAccountForm() {
 
                     {/* Daily Limit */}
                     <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-50 mb-2">
                             Daily Send Limit
                             <span className="ml-2 text-xs font-normal text-gray-400">(20–50 recommended for new accounts)</span>
                         </label>
@@ -326,7 +326,7 @@ export default function AddAccountForm() {
                             type="number"
                             value={dailyLimit}
                             onChange={(e) => setDailyLimit(e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="w-full px-4 py-3 border border-slate-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                             placeholder="20"
                             min="1"
                             max="500"
@@ -338,7 +338,7 @@ export default function AddAccountForm() {
                         <button
                             type="submit"
                             disabled={loading || !email}
-                            className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white hover:bg-gray-50 border-2 border-gray-300 hover:border-gray-400 text-gray-700 rounded-xl font-semibold transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white dark:bg-zinc-900/60 hover:bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 border-2 border-slate-300 dark:border-zinc-700 hover:border-gray-400 text-slate-700 dark:text-zinc-50 rounded-xl font-semibold transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? (
                                 <Loader2 size={20} className="animate-spin text-blue-600" />

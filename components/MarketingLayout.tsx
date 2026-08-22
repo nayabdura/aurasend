@@ -72,44 +72,44 @@ export function MarketingNav({ active }: { active?: string }) {
 
     return (
         <>
-            <nav className="fixed top-0 w-full z-50 bg-white border-b border-slate-200/80 shadow-sm">
+            <nav className="fixed top-0 w-full z-50 bg-white dark:bg-zinc-900/60 border-b border-slate-200 dark:border-zinc-800/80 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 lg:px-6 h-16 flex items-center justify-between gap-4">
 
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2.5 shrink-0">
                         <AuraSendLogo size={36} />
-                        <span className="text-xl font-black text-slate-900 tracking-tight hidden sm:block">AuraSend</span>
+                        <span className="text-xl font-black text-slate-900 dark:text-zinc-50 tracking-tight hidden sm:block">AuraSend</span>
                     </Link>
 
                     {/* Desktop Nav */}
-                    <div className="hidden xl:flex items-center gap-0.5 text-sm font-semibold text-slate-600 flex-1 justify-center">
+                    <div className="hidden xl:flex items-center gap-0.5 text-sm font-semibold text-slate-600 dark:text-zinc-400 flex-1 justify-center">
                         {/* Tools Mega Menu */}
                         <div
                             className="relative"
                             onMouseEnter={() => setToolsOpen(true)}
                             onMouseLeave={() => setToolsOpen(false)}
                         >
-                            <button className={`flex items-center gap-1.5 px-4 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors ${toolsOpen ? 'bg-slate-100 text-slate-900' : ''}`}>
+                            <button className={`flex items-center gap-1.5 px-4 py-2 rounded-lg hover:bg-slate-100 dark:bg-zinc-800/50 hover:text-slate-900 dark:text-zinc-50 transition-colors ${toolsOpen ? 'bg-slate-100 dark:bg-zinc-800/50 text-slate-900 dark:text-zinc-50' : ''}`}>
                                 Tools
                                 <ChevronDown size={14} className={`transition-transform duration-200 ${toolsOpen ? 'rotate-180' : ''}`} />
                             </button>
 
                             {/* Mega menu */}
-                            <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[560px] bg-white border border-slate-200 rounded-2xl shadow-2xl shadow-slate-200/80 p-4 transition-all duration-150 ${toolsOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
+                            <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[560px] bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-2xl shadow-slate-200/80 p-4 transition-all duration-150 ${toolsOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2 mb-3">Platform Tools</p>
                                 <div className="grid grid-cols-2 gap-1">
                                     {TOOLS.map((tool) => (
                                         <Link
                                             key={tool.href}
                                             href={tool.href}
-                                            className="flex items-start gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
+                                            className="flex items-start gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:bg-zinc-900/50 transition-colors group"
                                         >
-                                            <div className={`w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 mt-0.5 ${tool.color} group-hover:bg-white group-hover:shadow-sm transition-all`}>
+                                            <div className={`w-8 h-8 rounded-lg bg-slate-100 dark:bg-zinc-800/50 flex items-center justify-center shrink-0 mt-0.5 ${tool.color} group-hover:bg-white dark:bg-zinc-900/60 group-hover:shadow-sm transition-all`}>
                                                 <tool.icon size={16} />
                                             </div>
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex items-center gap-1.5">
-                                                    <span className="text-sm font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">{tool.label}</span>
+                                                    <span className="text-sm font-semibold text-slate-800 dark:text-zinc-200 group-hover:text-indigo-600 transition-colors">{tool.label}</span>
                                                     {tool.tag && <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold leading-none">{tool.tag}</span>}
                                                 </div>
                                                 <span className="text-xs text-slate-400 font-normal leading-tight">{tool.desc}</span>
@@ -117,7 +117,7 @@ export function MarketingNav({ active }: { active?: string }) {
                                         </Link>
                                     ))}
                                 </div>
-                                <div className="border-t border-slate-100 mt-3 pt-3 px-2 flex items-center justify-between">
+                                <div className="border-t border-slate-100 dark:border-zinc-800/80 mt-3 pt-3 px-2 flex items-center justify-between">
                                     <Link href="/tools" className="flex items-center gap-1.5 text-sm font-bold text-indigo-600 hover:text-indigo-700 group">
                                         View all tools <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                                     </Link>
@@ -130,7 +130,7 @@ export function MarketingNav({ active }: { active?: string }) {
                             <Link
                                 key={l.href}
                                 href={l.href}
-                                className={`px-4 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors whitespace-nowrap ${active === l.href ? 'text-indigo-600 bg-indigo-50' : ''}`}
+                                className={`px-4 py-2 rounded-lg hover:bg-slate-100 dark:bg-zinc-800/50 hover:text-slate-900 dark:text-zinc-50 transition-colors whitespace-nowrap ${active === l.href ? 'text-indigo-600 bg-indigo-50' : ''}`}
                             >
                                 {l.label}
                             </Link>
@@ -139,7 +139,7 @@ export function MarketingNav({ active }: { active?: string }) {
 
                     {/* Right side */}
                     <div className="flex items-center gap-2 shrink-0">
-                        <Link href="/login" className="hidden sm:block text-sm font-semibold text-slate-600 hover:text-slate-900 px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors">
+                        <Link href="/login" className="hidden sm:block text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:text-zinc-50 px-4 py-2 rounded-lg hover:bg-slate-100 dark:bg-zinc-800/50 transition-colors">
                             Log in
                         </Link>
                         <Link href="/login" className="h-9 px-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-sm font-bold flex items-center gap-1.5 transition-all shadow-md shadow-indigo-500/30">
@@ -147,7 +147,7 @@ export function MarketingNav({ active }: { active?: string }) {
                         </Link>
                         <button
                             onClick={() => setMobileOpen(!mobileOpen)}
-                            className="xl:hidden w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors text-slate-600"
+                            className="xl:hidden w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 dark:bg-zinc-800/50 transition-colors text-slate-600 dark:text-zinc-400"
                         >
                             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
                         </button>
@@ -156,35 +156,35 @@ export function MarketingNav({ active }: { active?: string }) {
 
                 {/* Mobile Menu */}
                 {mobileOpen && (
-                    <div className="xl:hidden bg-white border-t border-slate-200 px-4 py-4 space-y-1 max-h-[80vh] overflow-y-auto">
+                    <div className="xl:hidden bg-white dark:bg-zinc-900/60 border-t border-slate-200 dark:border-zinc-800 px-4 py-4 space-y-1 max-h-[80vh] overflow-y-auto">
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest px-3 py-2">Tools</p>
                         {TOOLS.map((tool) => (
                             <Link
                                 key={tool.href}
                                 href={tool.href}
                                 onClick={() => setMobileOpen(false)}
-                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors"
+                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:bg-zinc-900/50 transition-colors"
                             >
                                 <tool.icon size={18} className={tool.color} />
                                 <div>
-                                    <span className="text-sm font-semibold text-slate-700 block">{tool.label}</span>
+                                    <span className="text-sm font-semibold text-slate-700 dark:text-zinc-300 block">{tool.label}</span>
                                     <span className="text-xs text-slate-400">{tool.desc}</span>
                                 </div>
                             </Link>
                         ))}
-                        <div className="border-t border-slate-100 my-2 pt-2" />
+                        <div className="border-t border-slate-100 dark:border-zinc-800/80 my-2 pt-2" />
                         {NAV_LINKS.map((l) => (
                             <Link
                                 key={l.href}
                                 href={l.href}
                                 onClick={() => setMobileOpen(false)}
-                                className="block px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                                className="block px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:bg-zinc-900/50 transition-colors"
                             >
                                 {l.label}
                             </Link>
                         ))}
                         <div className="pt-3 pb-1 grid grid-cols-2 gap-2">
-                            <Link href="/login" onClick={() => setMobileOpen(false)} className="h-11 border border-slate-200 text-slate-700 font-bold rounded-xl flex items-center justify-center text-sm">
+                            <Link href="/login" onClick={() => setMobileOpen(false)} className="h-11 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 font-bold rounded-xl flex items-center justify-center text-sm">
                                 Log in
                             </Link>
                             <Link href="/login" onClick={() => setMobileOpen(false)} className="h-11 bg-indigo-600 text-white font-bold rounded-xl flex items-center justify-center text-sm">
@@ -232,7 +232,7 @@ export function MarketingFooter() {
                                 <a
                                     key={hover}
                                     href={href}
-                                    className={`w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 transition-all duration-200 ${hover}`}
+                                    className={`w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 dark:text-zinc-400 transition-all duration-200 ${hover}`}
                                 >
                                     <Icon size={16} />
                                 </a>
@@ -252,7 +252,7 @@ export function MarketingFooter() {
                                 ['All Tools', '/tools'],
                             ].map(([l, h]) => (
                                 <li key={l}>
-                                    <Link href={h} className="text-sm text-slate-500 hover:text-slate-200 transition-colors font-medium">{l}</Link>
+                                    <Link href={h} className="text-sm text-slate-500 dark:text-zinc-400 hover:text-slate-200 transition-colors font-medium">{l}</Link>
                                 </li>
                             ))}
                         </ul>
@@ -270,7 +270,7 @@ export function MarketingFooter() {
                                 ['Integrations', '/integrations'],
                             ].map(([l, h]) => (
                                 <li key={l}>
-                                    <Link href={h} className="text-sm text-slate-500 hover:text-slate-200 transition-colors font-medium">{l}</Link>
+                                    <Link href={h} className="text-sm text-slate-500 dark:text-zinc-400 hover:text-slate-200 transition-colors font-medium">{l}</Link>
                                 </li>
                             ))}
                         </ul>
@@ -287,7 +287,7 @@ export function MarketingFooter() {
                                 ['GDPR', '#'],
                             ].map(([l, h]) => (
                                 <li key={l}>
-                                    <Link href={h} className="text-sm text-slate-500 hover:text-slate-200 transition-colors font-medium">{l}</Link>
+                                    <Link href={h} className="text-sm text-slate-500 dark:text-zinc-400 hover:text-slate-200 transition-colors font-medium">{l}</Link>
                                 </li>
                             ))}
                         </ul>
@@ -296,10 +296,10 @@ export function MarketingFooter() {
 
                 {/* Bottom bar */}
                 <div className="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <p className="text-sm text-slate-600">© {new Date().getFullYear()} AuraSend. All rights reserved.</p>
+                    <p className="text-sm text-slate-600 dark:text-zinc-400">© {new Date().getFullYear()} AuraSend. All rights reserved.</p>
                     <div className="flex items-center gap-2">
                         <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-sm text-slate-600">All systems operational</span>
+                        <span className="text-sm text-slate-600 dark:text-zinc-400">All systems operational</span>
                     </div>
                 </div>
             </div>

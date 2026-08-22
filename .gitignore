@@ -26,7 +26,20 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.env
 .env*.local
+.env.local
+.env.production
+.env.development
+
+# SQLite Databases & Backups (SECURITY CRITICAL — Never commit production credentials/DBs)
+cold-email.db
+cold-email.db.*
+*.sqlite
+*.sqlite3
+*.db
+*.db.bak
+aurasend-production-build.zip
 
 # vercel
 .vercel

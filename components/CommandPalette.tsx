@@ -138,25 +138,25 @@ export default function CommandPalette() {
 
     return (
         <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4 bg-black/40 backdrop-blur-sm transition-all duration-300">
-            <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-full max-w-xl bg-white dark:bg-zinc-900/60 rounded-2xl shadow-2xl border border-slate-100 dark:border-zinc-800/80 dark:border-zinc-800/80 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 <div className="relative flex items-center p-4 border-b">
                     <Search className="absolute left-6 text-gray-400" size={20} />
                     <input
                         ref={inputRef}
-                        className="w-full pl-12 pr-4 py-2 text-lg text-gray-900 placeholder:text-gray-400 outline-none"
+                        className="w-full pl-12 pr-4 py-2 text-lg text-slate-900 dark:text-zinc-50 placeholder:text-gray-400 outline-none"
                         placeholder="Search leads, campaigns, or pages... (Type 'k' if menu is closed)"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onKeyDown={handleKeyDown}
                     />
-                    <div className="flex items-center gap-2 px-2 py-1 bg-gray-100 rounded text-[10px] font-bold text-gray-400 border border-gray-200">
+                    <div className="flex items-center gap-2 px-2 py-1 bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 rounded text-[10px] font-bold text-gray-400 border border-slate-200 dark:border-zinc-800 dark:border-zinc-800">
                         ESC
                     </div>
                 </div>
 
                 <div className="max-h-[60vh] overflow-y-auto p-2 overscroll-contain">
                     {results.length === 0 ? (
-                        <div className="p-8 text-center text-gray-500 italic">
+                        <div className="p-8 text-center text-slate-500 dark:text-zinc-50 italic">
                             No results found for "{query}"
                         </div>
                     ) : (
@@ -166,18 +166,18 @@ export default function CommandPalette() {
                                     key={`${result.type}-${result.id}`}
                                     onClick={() => handleSelect(result)}
                                     onMouseEnter={() => setSelectedIndex(index)}
-                                    className={`w-full flex items-center justify-between p-3 rounded-xl transition-all text-left group ${index === selectedIndex ? 'bg-blue-600 text-white' : 'hover:bg-gray-50 text-gray-700'
+                                    className={`w-full flex items-center justify-between p-3 rounded-xl transition-all text-left group ${index === selectedIndex ? 'bg-blue-600 text-white' : 'hover:bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 text-slate-700 dark:text-zinc-50'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-lg ${index === selectedIndex ? 'bg-white/20' : 'bg-gray-100 group-hover:bg-white'
+                                        <div className={`p-2 rounded-lg ${index === selectedIndex ? 'bg-white dark:bg-zinc-900' : 'bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 group-hover:bg-white dark:bg-zinc-900/60'
                                             }`}>
                                             {result.icon}
                                         </div>
                                         <div>
                                             <div className="font-bold flex items-center gap-2">
                                                 {result.title}
-                                                <span className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded ${index === selectedIndex ? 'bg-white/30' : 'bg-gray-100 text-gray-400'
+                                                <span className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded ${index === selectedIndex ? 'bg-white dark:bg-zinc-900' : 'bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 text-gray-400'
                                                     }`}>
                                                     {result.type}
                                                 </span>
@@ -199,10 +199,10 @@ export default function CommandPalette() {
                     )}
                 </div>
 
-                <div className="p-3 border-t bg-gray-50 flex items-center justify-between text-[11px] text-gray-400 font-medium">
+                <div className="p-3 border-t bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30 flex items-center justify-between text-[11px] text-gray-400 font-medium">
                     <div className="flex gap-4">
-                        <span className="flex items-center gap-1"><span className="p-0.5 bg-white border rounded text-black px-1 shadow-sm">Enter</span> to select</span>
-                        <span className="flex items-center gap-1"><span className="p-0.5 bg-white border rounded text-black px-1 shadow-sm flex items-center"><ArrowRight size={8} className="rotate-90" /></span> move</span>
+                        <span className="flex items-center gap-1"><span className="p-0.5 bg-white dark:bg-zinc-900/60 border rounded text-black px-1 shadow-sm">Enter</span> to select</span>
+                        <span className="flex items-center gap-1"><span className="p-0.5 bg-white dark:bg-zinc-900/60 border rounded text-black px-1 shadow-sm flex items-center"><ArrowRight size={8} className="rotate-90" /></span> move</span>
                     </div>
                     <div className="flex items-center gap-1">
                         <Command size={12} /> + K to toggle

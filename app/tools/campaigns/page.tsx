@@ -6,7 +6,7 @@ import { Zap, CheckCircle, ArrowRight, GitBranch, Clock, BarChart2, Target, Edit
 
 export default function CampaignsToolPage() {
     return (
-        <div className="min-h-screen bg-white font-sans">
+        <div className="min-h-screen bg-white dark:bg-zinc-900/60 font-sans">
             <MarketingNav active="/tools/campaigns" />
             <main className="pt-20">
                 {/* Hero */}
@@ -37,7 +37,7 @@ export default function CampaignsToolPage() {
                             </div>
                             {/* Campaign builder mockup */}
                             <div className="flex-1 w-full max-w-lg">
-                                <div className="bg-white/5 backdrop-blur border border-white/10 rounded-3xl p-6 space-y-3">
+                                <div className="bg-white dark:bg-zinc-900 backdrop-blur border border-white/10 rounded-3xl p-6 space-y-3">
                                     <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-4">Campaign: SaaS Outreach Q1</p>
                                     {[
                                         { step: 1, label: 'Initial Email', delay: 'Day 0', rate: '68% opened', color: 'indigo' },
@@ -45,7 +45,7 @@ export default function CampaignsToolPage() {
                                         { step: 3, label: 'Follow-up #2', delay: '+7 days', rate: '28% opened', color: 'purple' },
                                         { step: 4, label: 'Final Reply', delay: '+14 days', rate: 'In progress', color: 'pink' },
                                     ].map((s) => (
-                                        <div key={s.step} className="flex items-center gap-4 bg-white/5 rounded-xl px-4 py-3 border border-white/10">
+                                        <div key={s.step} className="flex items-center gap-4 bg-white dark:bg-zinc-900 rounded-xl px-4 py-3 border border-white/10">
                                             <div className={`w-8 h-8 rounded-full bg-${s.color}-600 text-white flex items-center justify-center text-sm font-black shrink-0`}>{s.step}</div>
                                             <div className="flex-1">
                                                 <p className="text-white font-semibold text-sm">{s.label}</p>
@@ -61,12 +61,12 @@ export default function CampaignsToolPage() {
                 </section>
 
                 {/* How it works */}
-                <section className="py-24 bg-white">
+                <section className="py-24 bg-white dark:bg-zinc-900/60">
                     <div className="max-w-7xl mx-auto px-6">
                         <div className="grid lg:grid-cols-2 gap-16 items-center">
                             <div>
-                                <h2 className="text-4xl font-black text-slate-900 mb-6">A campaign builder built for B2B sales teams</h2>
-                                <p className="text-lg text-slate-500 mb-10 leading-relaxed">
+                                <h2 className="text-4xl font-black text-slate-900 dark:text-zinc-50 mb-6">A campaign builder built for B2B sales teams</h2>
+                                <p className="text-lg text-slate-500 dark:text-zinc-400 mb-10 leading-relaxed">
                                     From your first email to your fourth follow-up, AuraSend gives you full control over your outreach sequence. Design intelligent flows, personalize at scale, and know exactly when each prospect is in your funnel.
                                 </p>
                                 <ul className="space-y-5">
@@ -81,7 +81,7 @@ export default function CampaignsToolPage() {
                                     ].map((f, i) => (
                                         <li key={i} className="flex items-start gap-3">
                                             <CheckCircle className="text-indigo-500 shrink-0 mt-0.5" size={20} />
-                                            <span className="text-slate-700 font-medium">{f}</span>
+                                            <span className="text-slate-700 dark:text-zinc-300 font-medium">{f}</span>
                                         </li>
                                     ))}
                                 </ul>
@@ -93,10 +93,10 @@ export default function CampaignsToolPage() {
                                     { icon: Clock, title: 'Smart Send Windows', desc: 'Schedule sends during business hours in the recipient\'s local timezone.' },
                                     { icon: RefreshCw, title: 'Inbox Rotation', desc: 'Distribute sending load across multiple accounts to stay within safe limits.' },
                                 ].map((f, i) => (
-                                    <div key={i} className="bg-slate-50 rounded-2xl p-5 border border-slate-200">
+                                    <div key={i} className="bg-slate-50 dark:bg-zinc-900/50 rounded-2xl p-5 border border-slate-200 dark:border-zinc-800">
                                         <f.icon className="text-indigo-600 mb-3" size={24} />
-                                        <h4 className="font-bold text-slate-900 mb-1">{f.title}</h4>
-                                        <p className="text-sm text-slate-500">{f.desc}</p>
+                                        <h4 className="font-bold text-slate-900 dark:text-zinc-50 mb-1">{f.title}</h4>
+                                        <p className="text-sm text-slate-500 dark:text-zinc-400">{f.desc}</p>
                                     </div>
                                 ))}
                             </div>
@@ -109,7 +109,7 @@ export default function CampaignsToolPage() {
                     <div className="max-w-4xl mx-auto px-6 text-center">
                         <h2 className="text-4xl font-black text-white mb-4">Launch your first campaign in minutes.</h2>
                         <p className="text-xl text-indigo-100 mb-8">Fully automated outreach that scales without the extra headcount.</p>
-                        <Link href="/login" className="inline-flex items-center gap-2 h-14 px-8 bg-white text-indigo-700 font-bold rounded-full text-base shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
+                        <Link href="/login" className="inline-flex items-center gap-2 h-14 px-8 bg-white dark:bg-zinc-900/60 text-indigo-700 font-bold rounded-full text-base shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
                             Start Campaigning Free <ArrowRight size={18} />
                         </Link>
                     </div>

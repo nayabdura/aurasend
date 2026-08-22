@@ -56,7 +56,7 @@ export default function PricingPage() {
     const [annual, setAnnual] = useState(false);
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans">
+        <div className="min-h-screen bg-slate-50 dark:bg-zinc-900/50 font-sans">
             <MarketingNav active="/pricing" />
 
             <main className="pt-32 pb-24 relative overflow-hidden">
@@ -70,25 +70,25 @@ export default function PricingPage() {
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm font-bold tracking-wide shadow-sm mb-6">
                             <Sparkles size={16} /> Transparent Pricing
                         </div>
-                        <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tight mb-6">
+                        <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-zinc-50 tracking-tight mb-6">
                             Scale without <br className="hidden md:block" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-pink-500">
                                 per-inbox fees.
                             </span>
                         </h1>
-                        <p className="text-xl text-slate-500 max-w-2xl mx-auto font-medium">
+                        <p className="text-xl text-slate-500 dark:text-zinc-400 max-w-2xl mx-auto font-medium">
                             Choose the plan that fits your growth. Upgrade, downgrade, or cancel anytime.
                         </p>
 
                         <div className="flex items-center justify-center gap-4 mt-10">
-                            <span className={`text-sm font-bold transition-colors ${!annual ? 'text-slate-900' : 'text-slate-400'}`}>Monthly</span>
+                            <span className={`text-sm font-bold transition-colors ${!annual ? 'text-slate-900 dark:text-zinc-50' : 'text-slate-400'}`}>Monthly</span>
                             <button
                                 onClick={() => setAnnual(!annual)}
                                 className="w-16 h-8 bg-indigo-100 rounded-full relative p-1 transition-colors hover:bg-indigo-200"
                             >
                                 <div className={`w-6 h-6 bg-indigo-600 rounded-full shadow-md transition-transform duration-300 ${annual ? 'translate-x-8' : ''}`} />
                             </button>
-                            <span className={`text-sm font-bold flex items-center gap-2 transition-colors ${annual ? 'text-slate-900' : 'text-slate-400'}`}>
+                            <span className={`text-sm font-bold flex items-center gap-2 transition-colors ${annual ? 'text-slate-900 dark:text-zinc-50' : 'text-slate-400'}`}>
                                 Annually <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-md">Save 20%</span>
                             </span>
                         </div>
@@ -99,7 +99,7 @@ export default function PricingPage() {
                         {PLANS.map(plan => (
                             <div key={plan.id} className={`rounded-3xl p-10 relative overflow-hidden transition-all duration-300 hover:-translate-y-2 ${plan.featured
                                 ? 'bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-2xl shadow-indigo-500/20 ring-4 ring-indigo-500/30'
-                                : 'bg-white border border-slate-200 shadow-xl shadow-slate-200/50 hover:border-indigo-200'
+                                : 'bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 shadow-xl shadow-slate-200/50 hover:border-indigo-200'
                                 }`}>
                                 {plan.featured && (
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none" />
@@ -111,14 +111,14 @@ export default function PricingPage() {
                                             Most Popular
                                         </div>
                                     )}
-                                    <h2 className={`text-3xl font-black mb-4 ${plan.featured ? 'text-white' : 'text-slate-900'}`}>{plan.name}</h2>
-                                    <p className={`text-base font-medium leading-relaxed h-12 mb-6 ${plan.featured ? 'text-slate-300' : 'text-slate-500'}`}>{plan.description}</p>
+                                    <h2 className={`text-3xl font-black mb-4 ${plan.featured ? 'text-white' : 'text-slate-900 dark:text-zinc-50'}`}>{plan.name}</h2>
+                                    <p className={`text-base font-medium leading-relaxed h-12 mb-6 ${plan.featured ? 'text-slate-300' : 'text-slate-500 dark:text-zinc-400'}`}>{plan.description}</p>
 
                                     <div className="flex items-baseline gap-1 mb-8">
-                                        <span className={`text-6xl font-black tracking-tight ${plan.featured ? 'text-white' : 'text-slate-900'}`}>
+                                        <span className={`text-6xl font-black tracking-tight ${plan.featured ? 'text-white' : 'text-slate-900 dark:text-zinc-50'}`}>
                                             {annual && plan.id === 'starter' ? 'PKR 1,600' : annual && plan.id === 'unlimited' ? 'PKR 8,000' : plan.price}
                                         </span>
-                                        <span className={`font-semibold ${plan.featured ? 'text-slate-400' : 'text-slate-500'}`}>{plan.period}</span>
+                                        <span className={`font-semibold ${plan.featured ? 'text-slate-400' : 'text-slate-500 dark:text-zinc-400'}`}>{plan.period}</span>
                                     </div>
 
                                     <Link
@@ -143,13 +143,13 @@ export default function PricingPage() {
                                                         <CheckCircle2 size={16} className={(plan.featured && !f.included) ? '' : ''} />
                                                     </div>
                                                 ) : (
-                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${plan.featured ? 'bg-slate-800 text-slate-600' : 'bg-slate-100 text-slate-400'}`}>
+                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${plan.featured ? 'bg-slate-800 text-slate-600 dark:text-zinc-400' : 'bg-slate-100 dark:bg-zinc-800/50 text-slate-400'}`}>
                                                         <XCircle size={16} />
                                                     </div>
                                                 )}
                                                 <span className={`text-base font-semibold ${f.included
-                                                    ? (plan.featured ? 'text-slate-100' : 'text-slate-700')
-                                                    : (plan.featured ? 'text-slate-600' : 'text-slate-400')
+                                                    ? (plan.featured ? 'text-slate-100' : 'text-slate-700 dark:text-zinc-300')
+                                                    : (plan.featured ? 'text-slate-600 dark:text-zinc-400' : 'text-slate-400')
                                                     }`}>
                                                     {f.label}
                                                 </span>
@@ -162,10 +162,10 @@ export default function PricingPage() {
                     </div>
 
                     {/* FAQ */}
-                    <div className="max-w-4xl mx-auto bg-white rounded-3xl p-10 border border-slate-200 shadow-xl shadow-slate-200/50">
+                    <div className="max-w-4xl mx-auto bg-white dark:bg-zinc-900/60 rounded-3xl p-10 border border-slate-200 dark:border-zinc-800 shadow-xl shadow-slate-200/50">
                         <div className="text-center mb-12">
-                            <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Frequently Asked Questions</h2>
-                            <p className="text-lg text-slate-500">Everything you need to know before getting started.</p>
+                            <h2 className="text-4xl font-black text-slate-900 dark:text-zinc-50 tracking-tight mb-4">Frequently Asked Questions</h2>
+                            <p className="text-lg text-slate-500 dark:text-zinc-400">Everything you need to know before getting started.</p>
                         </div>
                         <div className="grid md:grid-cols-2 gap-8">
                             {[
@@ -176,12 +176,12 @@ export default function PricingPage() {
                                 { q: 'Are there per-inbox or per-seat fees?', a: 'Never. Both plans include as many inboxes and seats as described. No hidden usage fees.' },
                                 { q: 'How does the warmup work?', a: 'We automatically interact with your emails in a private pool of over 50,000 real accounts, moving them out of spam and marking them as important to boost sender reputation.' },
                             ].map(({ q, a }) => (
-                                <div key={q} className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                <div key={q} className="bg-slate-50 dark:bg-zinc-900/50 p-6 rounded-2xl border border-slate-100 dark:border-zinc-800/80">
                                     <div className="flex gap-3 mb-3">
                                         <HelpCircle size={24} className="text-indigo-500 shrink-0" />
-                                        <h3 className="text-lg font-bold text-slate-900">{q}</h3>
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-zinc-50">{q}</h3>
                                     </div>
-                                    <p className="text-slate-500 leading-relaxed font-medium pl-9">{a}</p>
+                                    <p className="text-slate-500 dark:text-zinc-400 leading-relaxed font-medium pl-9">{a}</p>
                                 </div>
                             ))}
                         </div>

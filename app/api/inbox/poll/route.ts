@@ -11,6 +11,6 @@ export async function POST() {
         const result = await pollAllInboxes(user.id);
         return NextResponse.json({ ...result, success: true });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }

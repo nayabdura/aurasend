@@ -105,7 +105,7 @@ export async function POST(req: Request) {
     } catch (e: any) {
         console.error('Add password account error:', e);
         return NextResponse.json(
-            { error: e.message || 'Failed to add account' },
+            { error: 'An internal server error occurred.' },
             { status: 500 }
         );
     }

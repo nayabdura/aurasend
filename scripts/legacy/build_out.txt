@@ -1,0 +1,524 @@
+﻿
+> cold-email-platform@0.1.0 build
+> next build
+
+  Γû▓ Next.js 14.2.35
+  - Environments: .env.local
+  - Experiments (use with caution):
+    ┬╖ instrumentationHook
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully
+   Linting and checking validity of types ...
+
+./app/analytics/AnalyticsClient.tsx
+5:46  Warning: 'CheckCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/account-leads/[accountId]/route.ts
+3:25  Warning: 'isWithinLimit' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/admin/blog/route.ts
+68:27  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/ai/patterns/route.ts
+10:15  Warning: 'user' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/auth/logout/route.ts
+10:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/auth/me/route.ts
+13:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/auth/signup/route.ts
+2:24  Warning: 'createToken' is defined but never used.  @typescript-eslint/no-unused-vars
+3:10  Warning: 'cookies' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/blacklist/sync-bounced/route.ts
+27:22  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/campaign/control/route.ts
+2:10  Warning: 'getTokens' is defined but never used.  @typescript-eslint/no-unused-vars
+2:21  Warning: 'refreshAccessToken' is defined but never used.  @typescript-eslint/no-unused-vars
+10:15  Warning: 'settings' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+34:27  Warning: 'req' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/campaigns/[id]/send/route.ts
+25:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/contacts/export/route.ts
+8:27  Warning: 'req' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/events/stream/route.ts
+37:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/gmail/oauth/callback/route.ts
+34:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/gmail/warmup/tick/route.ts
+5:28  Warning: 'req' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/leads/verify/route.ts
+21:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/plan/usage/route.ts
+28:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/send/manual/route.ts
+18:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/settings/route.ts
+22:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/suppression/route.ts
+3:29  Warning: 'isEmailSuppressed' is defined but never used.  @typescript-eslint/no-unused-vars
+6:27  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/track/open/[id]/route.ts
+24:105  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/warmup/window/route.ts
+2:10  Warning: 'getUserId' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/autopilot/AutopilotClient.tsx
+6:34  Warning: 'AlertTriangle' is defined but never used.  @typescript-eslint/no-unused-vars
+8:16  Warning: 'Mail' is defined but never used.  @typescript-eslint/no-unused-vars
+38:12  Warning: 'saving' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+62:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+115:11  Warning: 'riskColor' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/blog/page.tsx
+24:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/blog/[slug]/page.tsx
+17:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+36:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/campaigns/CampaignsClient.tsx
+6:5  Warning: 'Upload' is defined but never used.  @typescript-eslint/no-unused-vars
+6:45  Warning: 'TrendingUp' is defined but never used.  @typescript-eslint/no-unused-vars
+7:12  Warning: 'BarChart2' is defined but never used.  @typescript-eslint/no-unused-vars
+8:5  Warning: 'ChevronDown' is defined but never used.  @typescript-eslint/no-unused-vars
+8:18  Warning: 'ChevronUp' is defined but never used.  @typescript-eslint/no-unused-vars
+242:12  Warning: 'refreshing' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+281:20  Warning: 'refreshCampaign' is defined but never used.  @typescript-eslint/no-unused-vars
+392:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/contact/page.tsx
+4:8  Warning: 'Link' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/contacts/ContactsClient.tsx
+6:26  Warning: 'Filter' is defined but never used.  @typescript-eslint/no-unused-vars
+6:34  Warning: 'Upload' is defined but never used.  @typescript-eslint/no-unused-vars
+6:42  Warning: 'Download' is defined but never used.  @typescript-eslint/no-unused-vars
+7:53  Warning: 'ChevronDown' is defined but never used.  @typescript-eslint/no-unused-vars
+31:12  Warning: 'selected' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+31:22  Warning: 'setSelected' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+36:8  Warning: React Hook useEffect has a missing dependency: 'loadContacts'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+65:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+81:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+119:29  Warning: 'i' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/conversations/ConversationsClient.tsx
+4:18  Warning: 'AnimatePresence' is defined but never used.  @typescript-eslint/no-unused-vars
+6:37  Warning: 'Eye' is defined but never used.  @typescript-eslint/no-unused-vars
+7:28  Warning: 'Filter' is defined but never used.  @typescript-eslint/no-unused-vars
+24:38  Warning: React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+47:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/dashboard/DashboardClient.tsx
+4:28  Warning: 'Mail' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/dashboard/page.tsx
+4:45  Warning: 'Magnet' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/deliverability/DeliverabilityClient.tsx
+6:5  Warning: 'Shield' is defined but never used.  @typescript-eslint/no-unused-vars
+7:10  Warning: 'BarChart3' is defined but never used.  @typescript-eslint/no-unused-vars
+7:42  Warning: 'Info' is defined but never used.  @typescript-eslint/no-unused-vars
+7:48  Warning: 'Star' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/domains/page.tsx
+3:43  Warning: 'CheckCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/email-verifier/page.tsx
+6:57  Warning: 'Zap' is defined but never used.  @typescript-eslint/no-unused-vars
+6:62  Warning: 'Target' is defined but never used.  @typescript-eslint/no-unused-vars
+40:15  Warning: 'dateKey' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/enrichment/EnrichmentClient.tsx
+4:18  Warning: 'AnimatePresence' is defined but never used.  @typescript-eslint/no-unused-vars
+6:13  Warning: 'Loader2' is defined but never used.  @typescript-eslint/no-unused-vars
+7:5  Warning: 'Play' is defined but never used.  @typescript-eslint/no-unused-vars
+25:12  Warning: 'message' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+128:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+139:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+158:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/features/page.tsx
+4:24  Warning: 'Globe2' is defined but never used.  @typescript-eslint/no-unused-vars
+4:48  Warning: 'GitBranch' is defined but never used.  @typescript-eslint/no-unused-vars
+4:88  Warning: 'Database' is defined but never used.  @typescript-eslint/no-unused-vars
+4:98  Warning: 'Bell' is defined but never used.  @typescript-eslint/no-unused-vars
+4:104  Warning: 'Lock' is defined but never used.  @typescript-eslint/no-unused-vars
+4:110  Warning: 'Code' is defined but never used.  @typescript-eslint/no-unused-vars
+4:116  Warning: 'Activity' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/followups/FollowUpsClient.tsx
+4:35  Warning: 'Reorder' is defined but never used.  @typescript-eslint/no-unused-vars
+6:30  Warning: 'GripVertical' is defined but never used.  @typescript-eslint/no-unused-vars
+7:15  Warning: 'ChevronRight' is defined but never used.  @typescript-eslint/no-unused-vars
+7:29  Warning: 'CheckSquare' is defined but never used.  @typescript-eslint/no-unused-vars
+8:5  Warning: 'ArrowDown' is defined but never used.  @typescript-eslint/no-unused-vars
+62:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+114:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+137:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/gmail/SenderHubClient.tsx
+5:10  Warning: 'motion' is defined but never used.  @typescript-eslint/no-unused-vars
+12:60  Warning: 'userRole' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/leads/LeadsClient.tsx
+4:25  Warning: 'Filter' is defined but never used.  @typescript-eslint/no-unused-vars
+4:51  Warning: 'Shield' is defined but never used.  @typescript-eslint/no-unused-vars
+4:70  Warning: 'ListFilter' is defined but never used.  @typescript-eslint/no-unused-vars
+21:8  Warning: React Hook useEffect has a missing dependency: 'filterLeads'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./app/login/page.tsx
+5:74  Warning: 'Zap' is defined but never used.  @typescript-eslint/no-unused-vars
+20:11  Warning: 'router' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/page.tsx
+2:27  Warning: 'Target' is defined but never used.  @typescript-eslint/no-unused-vars
+2:35  Warning: 'Search' is defined but never used.  @typescript-eslint/no-unused-vars
+2:57  Warning: 'Globe2' is defined but never used.  @typescript-eslint/no-unused-vars
+2:65  Warning: 'Mail' is defined but never used.  @typescript-eslint/no-unused-vars
+2:79  Warning: 'Users' is defined but never used.  @typescript-eslint/no-unused-vars
+2:86  Warning: 'Inbox' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/settings/SettingsClient.tsx
+81:34  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/sitemap.ts
+25:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/spam-checker/page.tsx
+6:23  Warning: 'AlertTriangle' is defined but never used.  @typescript-eslint/no-unused-vars
+6:38  Warning: 'ShieldCheck' is defined but never used.  @typescript-eslint/no-unused-vars
+6:72  Warning: 'CheckCircle2' is defined but never used.  @typescript-eslint/no-unused-vars
+40:15  Warning: 'dateKey' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/suppression/page.tsx
+3:28  Warning: 'CheckCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/templates/TemplatesClient.tsx
+51:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/test/TestingCenterClient.tsx
+5:5  Warning: 'TestTube' is defined but never used.  @typescript-eslint/no-unused-vars
+92:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+254:22  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+419:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+507:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+567:10  Warning: 'CheckItem' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/tools/analytics/page.tsx
+4:68  Warning: 'CheckCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/tools/campaigns/page.tsx
+5:58  Warning: 'BarChart2' is defined but never used.  @typescript-eslint/no-unused-vars
+5:69  Warning: 'Target' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/tools/conversations/page.tsx
+4:17  Warning: 'CheckCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/tools/email-warmup/page.tsx
+5:60  Warning: 'Star' is defined but never used.  @typescript-eslint/no-unused-vars
+5:66  Warning: 'Globe2' is defined but never used.  @typescript-eslint/no-unused-vars
+5:80  Warning: 'BarChart2' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/tools/page.tsx
+4:61  Warning: 'BarChart2' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/tracker/TrackerClient.tsx
+6:10  Warning: 'Mail' is defined but never used.  @typescript-eslint/no-unused-vars
+6:27  Warning: 'Zap' is defined but never used.  @typescript-eslint/no-unused-vars
+7:5  Warning: 'Clock' is defined but never used.  @typescript-eslint/no-unused-vars
+7:35  Warning: 'ChevronRight' is defined but never used.  @typescript-eslint/no-unused-vars
+8:5  Warning: 'Activity' is defined but never used.  @typescript-eslint/no-unused-vars
+8:21  Warning: 'User' is defined but never used.  @typescript-eslint/no-unused-vars
+8:35  Warning: 'Filter' is defined but never used.  @typescript-eslint/no-unused-vars
+403:47  Warning: 'tMs' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/training/TrainingClient.tsx
+5:5  Warning: 'Lightbulb' is defined but never used.  @typescript-eslint/no-unused-vars
+5:50  Warning: 'Trash2' is defined but never used.  @typescript-eslint/no-unused-vars
+7:22  Warning: 'FileText' is defined but never used.  @typescript-eslint/no-unused-vars
+7:32  Warning: 'Eye' is defined but never used.  @typescript-eslint/no-unused-vars
+83:14  Warning: 'useAISuggestion' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/use-cases/page.tsx
+4:32  Warning: 'GraduationCap' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/warmup/WarmupClient.tsx
+6:5  Warning: 'TrendingUp' is defined but never used.  @typescript-eslint/no-unused-vars
+7:16  Warning: 'Eye' is defined but never used.  @typescript-eslint/no-unused-vars
+7:21  Warning: 'Copy' is defined but never used.  @typescript-eslint/no-unused-vars
+8:43  Warning: 'ArrowRight' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/AddAccountForm.tsx
+4:16  Warning: 'Mail' is defined but never used.  @typescript-eslint/no-unused-vars
+75:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/AIAgentWidget.tsx
+4:34  Warning: 'Loader2' is defined but never used.  @typescript-eslint/no-unused-vars
+4:54  Warning: 'Maximize2' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/CommandPalette.tsx
+13:5  Warning: 'Shield' is defined but never used.  @typescript-eslint/no-unused-vars
+16:5  Warning: 'X' is defined but never used.  @typescript-eslint/no-unused-vars
+50:211  Warning: 'r' is defined but never used.  @typescript-eslint/no-unused-vars
+51:206  Warning: 'r' is defined but never used.  @typescript-eslint/no-unused-vars
+107:22  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+114:8  Warning: React Hook useEffect has missing dependencies: 'actions' and 'pages'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/DashboardLayout.tsx
+7:39  Warning: 'FileText' is defined but never used.  @typescript-eslint/no-unused-vars
+9:62  Warning: 'Magnet' is defined but never used.  @typescript-eslint/no-unused-vars
+10:20  Warning: 'ShieldIcon' is defined but never used.  @typescript-eslint/no-unused-vars
+10:47  Warning: 'GitBranch' is defined but never used.  @typescript-eslint/no-unused-vars
+61:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+72:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+132:33  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/HelpAssistant.tsx
+4:22  Warning: 'ChevronUp' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/MarketingLayout.tsx
+8:50  Warning: 'Mail' is defined but never used.  @typescript-eslint/no-unused-vars
+9:12  Warning: 'Settings' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/QuickActionsClient.tsx
+27:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+51:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/RichTextEditor.tsx
+3:34  Warning: 'useState' is defined but never used.  @typescript-eslint/no-unused-vars
+3:44  Warning: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/Sidebar.tsx
+2:88  Warning: 'Shield' is defined but never used.  @typescript-eslint/no-unused-vars
+2:96  Warning: 'TestTube' is defined but never used.  @typescript-eslint/no-unused-vars
+2:106  Warning: 'Lightbulb' is defined but never used.  @typescript-eslint/no-unused-vars
+2:117  Warning: 'BookOpen' is defined but never used.  @typescript-eslint/no-unused-vars
+2:127  Warning: 'FileText' is defined but never used.  @typescript-eslint/no-unused-vars
+2:137  Warning: 'Magnet' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./lib/auth.ts
+41:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+60:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./lib/autopilot.ts
+235:22  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+315:22  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./lib/db.ts
+539:103  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+540:110  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+541:95  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+542:117  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+543:107  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+544:92  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+545:108  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+546:110  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+547:106  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+548:104  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+549:113  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+550:99  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+551:115  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+561:12  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+562:115  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+564:94  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+565:95  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+566:84  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+567:94  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+568:94  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+569:93  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+570:88  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+571:100  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+572:86  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+573:87  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+574:87  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+575:98  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+576:86  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+577:102  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+578:99  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+579:100  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+580:100  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+581:84  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+582:91  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+585:89  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+586:105  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+587:87  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+590:98  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+591:85  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+594:93  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+595:102  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+597:98  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+598:95  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+600:89  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+601:80  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+602:91  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+604:93  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+605:93  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+622:104  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+623:99  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+624:98  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+625:86  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+626:105  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+627:98  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+628:89  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+629:107  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+630:94  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+631:111  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+632:109  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+633:113  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+634:113  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+635:102  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+636:102  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+637:107  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+638:104  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+639:98  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+640:84  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+651:12  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+653:105  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+654:112  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+655:110  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+656:111  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+657:112  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+658:93  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+659:98  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+661:116  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+662:114  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+663:117  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+664:115  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+665:117  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+666:107  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+667:118  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+668:87  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+670:111  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+671:109  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+672:113  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+673:112  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+675:113  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+676:113  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+677:102  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+678:102  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+679:107  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+681:88  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+683:100  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+684:88  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+685:86  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+688:99  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+689:97  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+690:100  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+691:102  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+692:94  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+726:12  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+747:12  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+760:12  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+776:12  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+779:93  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+780:102  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+783:100  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+784:91  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+794:12  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+807:12  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./lib/enrichmentEngine.ts
+93:22  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+152:15  Warning: 'username' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+282:26  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+284:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+308:26  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+335:30  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+348:26  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+354:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+423:18  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./lib/gmail.ts
+184:89  Warning: 'threadId' is defined but never used.  @typescript-eslint/no-unused-vars
+257:36  Warning: 'ignoreStatus' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+485:16  Warning: 'sendNewEmail' is defined but never used.  @typescript-eslint/no-unused-vars
+539:152  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+550:131  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+592:149  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+673:147  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+728:186  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./lib/gmail_v2.ts
+115:13  Warning: 'introLine' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./lib/imapMonitor.ts
+29:11  Warning: 'ImapMessage' is defined but never used.  @typescript-eslint/no-unused-vars
+56:17  Warning: 'simpleParser' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+71:44  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+76:57  Warning: 'box' is defined but never used.  @typescript-eslint/no-unused-vars
+164:54  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+207:58  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+209:50  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+225:38  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+309:30  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+321:149  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+323:26  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./lib/queue.ts
+33:5  Warning: 'campaignId' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./lib/verification.ts
+38:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+59:29  Warning: 'err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./lib/warmupEngine.ts
+208:154  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+node.exe : Failed to compile.
+At C:\Program Files\nodejs\npm.ps1:29 char:3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: 
+    (Failed to compile.:String) [], Remote  
+  Exception
+    + FullyQualifiedErrorId : NativeCommand 
+   Error
+ 
+
+./app/api/auth/profile/route.ts:4:20
+Type error: Could not find a declaration 
+file for module 'bcrypt'. 
+'C:/Users/nayab/OneDrive/Desktop/Anti Gravit
+y/cold-email-platform/node_modules/bcrypt/bc
+rypt.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/bcrypt` if 
+it exists or add a new declaration (.d.ts) 
+file containing `declare module 'bcrypt';`
+
+[0m [90m 2 |[39m [36mimport[39m { 
+requireAuth } [36mfrom[39m 
+[32m'@/lib/auth'[39m[33m;[39m[0m
+[0m [90m 3 |[39m [36mimport[39m db 
+[36mfrom[39m 
+[32m'@/lib/db'[39m[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 4 |[39m 
+[36mimport[39m bcrypt [36mfrom[39m 
+[32m'bcrypt'[39m[33m;[39m[0m
+[0m [90m   |[39m                    
+[31m[1m^[22m[39m[0m
+[0m [90m 5 |[39m[0m
+[0m [90m 6 |[39m [36mexport[39m 
+[36masync[39m [36mfunction[39m 
+[33mPUT[39m(req[33m:[39m 
+[33mRequest[39m) {[0m
+[0m [90m 7 |[39m     [36mtry[39m {[0m
+Next.js build worker exited with code: 1 
+and signal: null

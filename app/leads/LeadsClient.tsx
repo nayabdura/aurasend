@@ -1,68 +1,68 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Users, Search, Filter, Download, Trash2, Shield, Mail, Eye, ListFilter } from 'lucide-react';
+import { useState, useMemo, useCallback } from 'react';
+import useSWR from 'swr';
+import { Users, Search, Download, Trash2, Eye, Mail } from 'lucide-react';
 import BlacklistClient from '../blacklist/BlacklistClient';
+import { useDebouncedValue } from '@/lib/hooks';
+
+// ── Types ──────────────────────────────────────────────────────────────────────────
+interface Lead {
+    id: number;
+    name: string | null;
+    email: string;
+    company: string | null;
+    website: string | null;
+    status: string;
+    opened: number;
+    replied: number;
+}
+
+const fetcher = (url: string) => fetch(url).then(r => r.json());
 
 export default function LeadsPage() {
     const [activeTab, setActiveTab] = useState<'contacts' | 'blacklist'>('contacts');
-    const [leads, setLeads] = useState<any[]>([]);
-    const [filteredLeads, setFilteredLeads] = useState<any[]>([]);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadLeads();
-    }, []);
+    // Ph16: Debounce search to avoid re-filtering on every keystroke
+    const debouncedSearch = useDebouncedValue(search, 200);
 
-    useEffect(() => {
-        filterLeads();
-    }, [search, statusFilter, leads]);
+    const { data: leads = [], isLoading: loading, mutate: reloadLeads } = useSWR<Lead[]>('/api/leads', fetcher, {
+        revalidateOnFocus: false,
+        dedupingInterval: 10_000,
+    });
 
-    async function loadLeads() {
-        const res = await fetch('/api/leads');
-        const data = await res.json();
-        setLeads(data);
-        setLoading(false);
-    }
-
-    function filterLeads() {
-        let filtered = leads;
-
-        if (search) {
-            filtered = filtered.filter(l =>
-                l.email?.toLowerCase().includes(search.toLowerCase()) ||
-                l.name?.toLowerCase().includes(search.toLowerCase()) ||
-                l.company?.toLowerCase().includes(search.toLowerCase())
+    // Derived filtered list — only re-computes when debounced search or filter changes
+    const filteredLeads = useMemo(() => {
+        let filtered: Lead[] = leads;
+        if (debouncedSearch) {
+            const q = debouncedSearch.toLowerCase();
+            filtered = filtered.filter((l) =>
+                l.email?.toLowerCase().includes(q) ||
+                l.name?.toLowerCase().includes(q) ||
+                l.company?.toLowerCase().includes(q)
             );
         }
-
         if (statusFilter !== 'all') {
-            filtered = filtered.filter(l => l.status === statusFilter);
+            filtered = filtered.filter((l) => l.status === statusFilter);
         }
+        return filtered;
+    }, [leads, debouncedSearch, statusFilter]);
 
-        setFilteredLeads(filtered);
-    }
-
-    async function deleteLead(id: number) {
+    const deleteLead = useCallback(async (id: number) => {
         if (!confirm('Delete this lead?')) return;
         await fetch(`/api/leads/${id}`, { method: 'DELETE' });
-        loadLeads();
-    }
+        reloadLeads();
+    }, [reloadLeads]);
 
-    async function exportLeads() {
+    const exportLeads = useCallback(() => {
         const csv = [
             ['Name', 'Email', 'Company', 'Website', 'Status', 'Opened', 'Replied'].join(','),
-            ...filteredLeads.map(l => [
-                l.name || '',
-                l.email || '',
-                l.company || '',
-                l.website || '',
-                l.status || '',
-                l.opened ? 'Yes' : 'No',
-                l.replied ? 'Yes' : 'No'
-            ].join(','))
+            ...filteredLeads.map(l =>
+                [l.name || '', l.email || '', l.company || '', l.website || '',
+                 l.status || '', l.opened ? 'Yes' : 'No', l.replied ? 'Yes' : 'No']
+                .join(','))
         ].join('\n');
 
         const blob = new Blob([csv], { type: 'text/csv' });
@@ -71,7 +71,8 @@ export default function LeadsPage() {
         a.href = url;
         a.download = `leads-export-${Date.now()}.csv`;
         a.click();
-    }
+        window.URL.revokeObjectURL(url); // Ph16: free memory after download
+    }, [filteredLeads]);
 
     if (loading) return <div className="p-8 text-center text-zinc-500">Loading audience...</div>;
 

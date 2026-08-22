@@ -26,25 +26,25 @@ export default function HelpAssistant() {
     return (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
             {isOpen && (
-                <div className="bg-white w-80 shadow-2xl rounded-2xl border border-gray-200 overflow-hidden mb-4 animate-in slide-in-from-bottom-5">
+                <div className="bg-white dark:bg-zinc-900/60 w-80 shadow-2xl rounded-2xl border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 overflow-hidden mb-4 animate-in slide-in-from-bottom-5">
                     <div className="bg-blue-600 p-4 text-white flex justify-between items-center">
                         <h3 className="font-bold flex items-center gap-2"><HelpCircle size={18} /> Helper Bot</h3>
                         <button onClick={() => setIsOpen(false)}><ChevronDown size={18} /></button>
                     </div>
 
-                    <div className="h-64 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                    <div className="h-64 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-zinc-900/50 dark:bg-zinc-900/30">
                         {messages.map((m, i) => (
                             <div key={i} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[80%] p-3 rounded-lg text-sm whitespace-pre-wrap ${m.from === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border text-gray-800 rounded-bl-none shadow-sm'}`}>
+                                <div className={`max-w-[80%] p-3 rounded-lg text-sm whitespace-pre-wrap ${m.from === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white dark:bg-zinc-900/60 border text-slate-800 dark:text-zinc-50 rounded-bl-none shadow-sm'}`}>
                                     {m.text}
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    <div className="p-2 bg-gray-100 border-t grid gap-2">
+                    <div className="p-2 bg-slate-100 dark:bg-zinc-800/50 dark:bg-zinc-800/50 border-t grid gap-2">
                         {options.map((opt, i) => (
-                            <button key={i} onClick={() => ask(opt)} className="text-left text-xs bg-white hover:bg-blue-50 p-2 rounded border border-gray-200 transition-colors text-blue-700 font-medium">
+                            <button key={i} onClick={() => ask(opt)} className="text-left text-xs bg-white dark:bg-zinc-900/60 hover:bg-blue-50 p-2 rounded border border-slate-200 dark:border-zinc-800 dark:border-zinc-800 transition-colors text-blue-700 font-medium">
                                 {opt.label}
                             </button>
                         ))}

@@ -31,6 +31,6 @@ export async function POST() {
 
         return NextResponse.json({ success: true, added });
     } catch (e: any) {
-        return NextResponse.json({ error: e.message || 'Unauthorized' }, { status: 401 });
+        return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 401 });
     }
 }
