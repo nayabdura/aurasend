@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import db from '@/lib/db';
+import prisma from '@/lib/prisma';
 import { createToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
@@ -24,12 +25,10 @@ export async function GET(req: Request) {
     const storedState = cookieStore.get('oauth_state')?.value;
 
     if (!state || !storedState || state !== storedState) {
-        // Clear the invalid state cookie
         cookieStore.delete('oauth_state');
         return NextResponse.redirect(new URL('/login?error=invalid_csrf_state', req.url));
     }
 
-    // Clear the valid state cookie after successful verification
     cookieStore.delete('oauth_state');
 
     const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -41,7 +40,7 @@ export async function GET(req: Request) {
 
     try {
         const origin = new URL(req.url).origin;
-        const redirectUri = `${origin}/api/auth/google/callback`;
+        const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${origin}/api/auth/google/callback`;
 
         // Exchange code for tokens
         const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
@@ -71,23 +70,47 @@ export async function GET(req: Request) {
             throw new Error('Could not retrieve email from Google profile');
         }
 
-        // Check if user exists
-        let user = db.prepare('SELECT * FROM users WHERE email = ?').get(profile.email) as any;
-
-        if (!user) {
-            // Create new user from Google profile
-            const result = db.prepare(
-                "INSERT INTO users (email, password_hash, name, role, workspace_id) VALUES (?, ?, ?, 'user', 1)"
-            ).run(
-                profile.email,
-                `google_oauth_${Date.now()}`, // Non-functional placeholder hash
-                profile.name || profile.email.split('@')[0]
-            );
-            user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid) as any;
+        let user: any = null;
+        if (process.env.DATABASE_URL) {
+            let dbUser = await prisma.user.findUnique({ where: { email: profile.email } });
+            if (!dbUser) {
+                dbUser = await prisma.user.create({
+                    data: {
+                        email: profile.email,
+                        passwordHash: `google_oauth_${Date.now()}`,
+                        name: profile.name || profile.email.split('@')[0],
+                        role: 'USER',
+                        workspaceId: 1,
+                        isVerified: true,
+                    },
+                });
+            } else {
+                await prisma.user.update({
+                    where: { id: dbUser.id },
+                    data: { lastLogin: new Date() },
+                });
+            }
+            user = {
+                id: dbUser.id,
+                email: dbUser.email,
+                name: dbUser.name,
+                role: dbUser.role,
+                workspace_id: dbUser.workspaceId || 1,
+            };
+        } else {
+            user = db.prepare('SELECT * FROM users WHERE email = ?').get(profile.email) as any;
+            if (!user) {
+                const result = db.prepare(
+                    "INSERT INTO users (email, password_hash, name, role, workspace_id, is_verified) VALUES (?, ?, ?, 'user', 1, 1)"
+                ).run(
+                    profile.email,
+                    `google_oauth_${Date.now()}`,
+                    profile.name || profile.email.split('@')[0]
+                );
+                user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid) as any;
+            }
+            db.prepare('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?').run(user.id);
         }
-
-        // Update last login
-        db.prepare('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?').run(user.id);
 
         // Create JWT session
         const token = await createToken({
@@ -107,7 +130,7 @@ export async function GET(req: Request) {
         });
 
         // Redirect based on role
-        if (user.role === 'master') {
+        if (String(user.role).toUpperCase() === 'MASTER' || String(user.role).toUpperCase() === 'ADMIN') {
             return NextResponse.redirect(new URL('/admin', req.url));
         }
         return NextResponse.redirect(new URL('/dashboard', req.url));

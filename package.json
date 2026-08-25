@@ -12,6 +12,7 @@
     "type-check": "tsc --noEmit",
     "type-check:watch": "tsc --noEmit --watch",
     "verify:artifact": "npx tsx scripts/verify-production-artifact.ts",
+    "verify:production-db": "npx tsx scripts/verify-production-db.ts",
     "clean": "rimraf .next out",
     "analyze": "cross-env ANALYZE=true next build"
   },

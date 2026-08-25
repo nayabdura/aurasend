@@ -1,6 +1,6 @@
-
 import { NextResponse } from 'next/server';
 import db from '@/lib/db';
+import prisma from '@/lib/prisma';
 import { getAuthUrl } from '@/lib/gmail';
 import { getUserId } from '@/lib/auth';
 
@@ -21,32 +21,55 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Google OAuth Client ID and Secret are missing. Please provide them or set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in the environment variables.' }, { status: 400 });
         }
 
-        // Check if exists for this user
-        const existing = db.prepare(
-            'SELECT * FROM gmail_accounts WHERE user_id = ? AND email = ?'
-        ).get(userId, email);
-
-        if (existing) {
-            // Update credentials
-            db.prepare(`
-                UPDATE gmail_accounts 
-                SET client_id = ?, client_secret = ?, auth_method = 'oauth', daily_limit = ?,
-                    status = 'pending_auth', is_connected = 0,
-                    name = COALESCE(NULLIF(?, ''), name)
-                WHERE user_id = ? AND email = ?
-            `).run(finalClientId, finalClientSecret, dailyLimit || 20, name || '', userId, email);
+        // Upsert Gmail Account
+        if (process.env.DATABASE_URL) {
+            await prisma.gmailAccount.upsert({
+                where: { userId_email: { userId, email } },
+                update: {
+                    clientId: finalClientId,
+                    clientSecret: finalClientSecret,
+                    authMethod: 'oauth',
+                    dailyLimit: dailyLimit || 20,
+                    status: 'pending_auth',
+                    isConnected: false,
+                    name: name || undefined,
+                },
+                create: {
+                    userId,
+                    email,
+                    name: name || email.split('@')[0],
+                    clientId: finalClientId,
+                    clientSecret: finalClientSecret,
+                    authMethod: 'oauth',
+                    dailyLimit: dailyLimit || 20,
+                    status: 'pending_auth',
+                    isConnected: false,
+                    workspaceId: 1,
+                },
+            });
         } else {
-            db.prepare(`
-                INSERT INTO gmail_accounts (
-                    user_id, email, name, client_id, client_secret, 
-                    auth_method, daily_limit, status
-                ) VALUES (?, ?, ?, ?, ?, 'oauth', ?, 'pending_auth')
-            `).run(userId, email, name || '', finalClientId, finalClientSecret, dailyLimit || 20);
+            const existing = db.prepare('SELECT * FROM gmail_accounts WHERE user_id = ? AND email = ?').get(userId, email);
+            if (existing) {
+                db.prepare(`
+                    UPDATE gmail_accounts 
+                    SET client_id = ?, client_secret = ?, auth_method = 'oauth', daily_limit = ?,
+                        status = 'pending_auth', is_connected = 0,
+                        name = COALESCE(NULLIF(?, ''), name)
+                    WHERE user_id = ? AND email = ?
+                `).run(finalClientId, finalClientSecret, dailyLimit || 20, name || '', userId, email);
+            } else {
+                db.prepare(`
+                    INSERT INTO gmail_accounts (
+                        user_id, email, name, client_id, client_secret, 
+                        auth_method, daily_limit, status
+                    ) VALUES (?, ?, ?, ?, ?, 'oauth', ?, 'pending_auth')
+                `).run(userId, email, name || '', finalClientId, finalClientSecret, dailyLimit || 20);
+            }
         }
 
         // Generate Auth URL
         const origin = new URL(req.url).origin;
-        const redirectUri = `${origin}/api/gmail/oauth/callback`;
+        const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${origin}/api/gmail/oauth/callback`;
         const authUrl = await getAuthUrl(finalClientId, redirectUri);
 
         // Generate CSRF token for state

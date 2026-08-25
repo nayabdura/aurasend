@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { loginUser } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import { checkRateLimit } from '@/lib/rateLimit';
+import prisma from '@/lib/prisma';
 
 export async function POST(req: Request) {
     try {
@@ -35,9 +36,21 @@ export async function POST(req: Request) {
 
         if (result.user.is_verified === 0) {
             // Generate and send OTP again
-            const db = require('@/lib/db').default;
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
-            db.prepare('UPDATE users SET verify_code = ? WHERE id = ?').run(otp, result.user.id);
+
+            if (process.env.DATABASE_URL) {
+                try {
+                    await prisma.user.update({
+                        where: { id: result.user.id },
+                        data: { verifyCode: otp },
+                    });
+                } catch (e) {
+                    console.error('Failed to update verifyCode in Postgres:', e);
+                }
+            } else {
+                const db = require('@/lib/db').default;
+                db.prepare('UPDATE users SET verify_code = ? WHERE id = ?').run(otp, result.user.id);
+            }
 
             const nodemailer = require('nodemailer');
             const transporter = nodemailer.createTransport({
@@ -101,6 +114,7 @@ export async function POST(req: Request) {
             user: result.user
         });
     } catch (e: any) {
+        console.error('Login API error:', e);
         return NextResponse.json(
             { error: 'An internal server error occurred.' },
             { status: 500 }

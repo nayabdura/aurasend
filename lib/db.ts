@@ -28,6 +28,12 @@ function normalizeSql(sql: string): string {
   normalized = normalized.replace(/strftime\('%s',\s*'now'\)/gi, 'EXTRACT(EPOCH FROM NOW())::INTEGER');
   normalized = normalized.replace(/INSERT\s+OR\s+REPLACE\s+INTO/gi, 'INSERT INTO');
 
+  // Convert positional ? placeholders to PostgreSQL $1, $2, $3... when running against PostgreSQL
+  if (process.env.DATABASE_URL && normalized.includes('?')) {
+    let paramIdx = 1;
+    normalized = normalized.replace(/\?/g, () => `$${paramIdx++}`);
+  }
+
   return normalized;
 }
 
