@@ -17,7 +17,7 @@ export const prisma =
         },
       }) as any));
 
-if (process.env.NODE_ENV !== 'production' && process.env.DATABASE_URL) {
+if (process.env.DATABASE_URL) {
   globalThis.prismaGlobal = prisma;
 }
 
