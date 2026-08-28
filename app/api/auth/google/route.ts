@@ -10,14 +10,13 @@ export async function GET(req: Request) {
     const clientId = process.env.GOOGLE_CLIENT_ID;
 
     if (!clientId) {
-        // Redirect back to login with helpful error
         return NextResponse.redirect(
             new URL('/login?error=google_not_configured', req.url)
         );
     }
 
     const origin = new URL(req.url).origin;
-    const redirectUri = `${origin}/api/auth/google/callback`;
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${origin}/api/auth/google/callback`;
 
     // Generate CSRF state token
     const state = crypto.randomBytes(32).toString('hex');
