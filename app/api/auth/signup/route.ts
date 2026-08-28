@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { registerUser, createToken } from '@/lib/auth';
-import { cookies } from 'next/headers';
+import { registerUser } from '@/lib/auth';
+import prisma from '@/lib/prisma';
+import db from '@/lib/db';
 
 export async function POST(req: Request) {
     try {
@@ -14,8 +15,12 @@ export async function POST(req: Request) {
         }
 
         // Check if user already exists
-        const db = require('@/lib/db').default;
-        const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+        let existing: any = null;
+        if (process.env.DATABASE_URL) {
+            existing = await prisma.user.findUnique({ where: { email } });
+        } else {
+            existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+        }
 
         if (existing) {
             return NextResponse.json(
@@ -28,7 +33,14 @@ export async function POST(req: Request) {
 
         // Generate OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        db.prepare('UPDATE users SET verify_code = ?, is_verified = 0 WHERE id = ?').run(otp, user.id);
+        if (process.env.DATABASE_URL) {
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { verifyCode: otp, isVerified: false }
+            });
+        } else {
+            db.prepare('UPDATE users SET verify_code = ?, is_verified = 0 WHERE id = ?').run(otp, user.id);
+        }
 
         // Send OTP
         const nodemailer = require('nodemailer');
@@ -80,8 +92,9 @@ export async function POST(req: Request) {
             devOtp: emailFailed ? otp : null
         });
     } catch (e: any) {
+        console.error('Signup error:', e);
         return NextResponse.json(
-            { error: 'An internal server error occurred.' },
+            { error: e?.message || 'An internal server error occurred.' },
             { status: 500 }
         );
     }
