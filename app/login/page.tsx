@@ -106,12 +106,13 @@ export default function LoginPage() {
             }
 
             setTimeout(() => {
-                if (data.user?.role === 'master') {
+                const roleUpper = String(data.user?.role || '').toUpperCase();
+                if (roleUpper === 'MASTER' || roleUpper === 'ADMIN') {
                     window.location.href = '/admin';
                 } else {
                     window.location.href = '/dashboard';
                 }
-            }, 500);
+            }, 300);
 
         } catch (e: any) {
             setError(e.message || 'Network error. Please try again.');
