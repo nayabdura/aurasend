@@ -6,6 +6,13 @@ import prisma from '@/lib/prisma';
 
 export async function POST(req: Request) {
     try {
+        if (!process.env.DATABASE_URL) {
+            return NextResponse.json(
+                { error: 'Database connection string (DATABASE_URL) is missing in environment variables. Please add DATABASE_URL in Vercel Project Settings.' },
+                { status: 500 }
+            );
+        }
+
         const rawIp = req.headers.get('x-forwarded-for') || req.headers.get('remote-addr') || 'unknown';
         const ip = rawIp.split(',')[0].trim();
         // Max 50 login attempts per IP per 10 minutes (generous threshold to prevent lockouts during setup)

@@ -6,17 +6,28 @@ declare global {
   var prismaGlobal: PrismaClient | undefined;
 }
 
+function createMissingDbProxy(): any {
+  const handler: ProxyHandler<any> = {
+    get(_target, _prop) {
+      const dummyFn = () => {
+        throw new Error('Prisma database is not configured. Please set DATABASE_URL in your Vercel Environment Variables.');
+      };
+      return new Proxy(dummyFn, handler);
+    },
+    apply() {
+      throw new Error('Prisma database is not configured. Please set DATABASE_URL in your Vercel Environment Variables.');
+    },
+  };
+  return new Proxy({}, handler);
+}
+
 export const prisma: PrismaClient =
   globalThis.prismaGlobal ??
   (process.env.DATABASE_URL
     ? new PrismaClient({
         log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
       })
-    : (new Proxy({}, {
-        get: () => () => {
-          throw new Error('Prisma database is not configured. Please set DATABASE_URL in your environment variables.');
-        },
-      }) as any));
+    : createMissingDbProxy());
 
 if (process.env.DATABASE_URL) {
   globalThis.prismaGlobal = prisma;
