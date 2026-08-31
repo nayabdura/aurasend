@@ -8,6 +8,7 @@ const nextConfig = {
     serverComponentsExternalPackages: [
       'better-sqlite3',
       'bcrypt',
+      'bcryptjs',
       'nodemailer',
       'imap',
       'mailparser',
