@@ -1,106 +1,27 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import { requireAuth } from '@/lib/auth';
-import db from '@/lib/db';
 import { Mail, Megaphone, Send, TrendingUp, Activity } from 'lucide-react';
 import DashboardClient from './DashboardClient';
 import dynamic from 'next/dynamic';
-import { cacheOrFetch, TTL } from '@/lib/cache';
+import DashboardService from '@/backend/services/DashboardService';
 
 const DashboardChartClient = dynamic(() => import('@/app/dashboard/DashboardChartClient'), { ssr: false });
 
-interface CountRow { count: number; }
-interface AccountHealthRow {
-    email: string;
-    status: string;
-    sent_today: number;
-    daily_limit: number;
-    is_connected: number;
-    warmup_enabled: number;
-}
-interface ActivityRow {
-    id: number;
-    lead_email: string | null;
-    gmail_email: string | null;
-    type: string;
-    timestamp: number;
-}
-interface TrendRow { date: string; sent: number; }
-
 export default async function DashboardPage() {
     const user = await requireAuth();
-    const uid = user.id;
-    const isMaster = user.role === 'master';
-    const cachePrefix = isMaster ? 'dashboard:master' : `dashboard:${uid}`;
-    const ttl = isMaster ? TTL.SHORT : TTL.MEDIUM;
+    const stats = await DashboardService.getDashboardStats(user.id, user.role);
 
-    // ─── Phase 14: All queries cached to reduce DB pressure ─────────────────
-    const [gmailAccounts, campaigns, sentToday, totalSent, repliedLeads,
-        totalLeads, recentActivity, accountHealth, trendData] = await Promise.all([
-
-        cacheOrFetch<CountRow>(
-            `${cachePrefix}:gmail`,
-            () => (isMaster
-                ? db.prepare('SELECT COUNT(*) as count FROM gmail_accounts WHERE is_connected = 1').get()
-                : db.prepare('SELECT COUNT(*) as count FROM gmail_accounts WHERE user_id = ? AND is_connected = 1').get(uid)
-            ) as CountRow, ttl
-        ),
-        cacheOrFetch<CountRow>(
-            `${cachePrefix}:campaigns`,
-            () => (isMaster
-                ? db.prepare('SELECT COUNT(*) as count FROM campaigns').get()
-                : db.prepare('SELECT COUNT(*) as count FROM campaigns WHERE user_id = ?').get(uid)
-            ) as CountRow, ttl
-        ),
-        cacheOrFetch<CountRow>(
-            `${cachePrefix}:sent_today`,
-            () => (isMaster
-                ? db.prepare("SELECT COUNT(*) as count FROM email_logs WHERE DATE(timestamp, 'unixepoch') = DATE('now')").get()
-                : db.prepare("SELECT COUNT(*) as count FROM email_logs WHERE user_id = ? AND DATE(timestamp, 'unixepoch') = DATE('now')").get(uid)
-            ) as CountRow, TTL.SHORT
-        ),
-        cacheOrFetch<CountRow>(
-            `${cachePrefix}:total_sent`,
-            () => (isMaster
-                ? db.prepare('SELECT COUNT(*) as count FROM email_logs').get()
-                : db.prepare('SELECT COUNT(*) as count FROM email_logs WHERE user_id = ?').get(uid)
-            ) as CountRow, ttl
-        ),
-        cacheOrFetch<CountRow>(
-            `${cachePrefix}:replied`,
-            () => (isMaster
-                ? db.prepare('SELECT COUNT(*) as count FROM leads WHERE replied = 1').get()
-                : db.prepare('SELECT COUNT(*) as count FROM leads WHERE user_id = ? AND replied = 1').get(uid)
-            ) as CountRow, ttl
-        ),
-        cacheOrFetch<CountRow>(
-            `${cachePrefix}:total_leads`,
-            () => (isMaster
-                ? db.prepare('SELECT COUNT(*) as count FROM leads').get()
-                : db.prepare('SELECT COUNT(*) as count FROM leads WHERE user_id = ?').get(uid)
-            ) as CountRow, ttl
-        ),
-        cacheOrFetch<ActivityRow[]>(
-            `${cachePrefix}:activity`,
-            () => (isMaster
-                ? db.prepare(`SELECT e.*, l.email as lead_email, g.email as gmail_email FROM email_logs e LEFT JOIN leads l ON e.lead_id = l.id LEFT JOIN gmail_accounts g ON e.gmail_id = g.id ORDER BY e.timestamp DESC LIMIT 5`).all()
-                : db.prepare(`SELECT e.*, l.email as lead_email, g.email as gmail_email FROM email_logs e LEFT JOIN leads l ON e.lead_id = l.id LEFT JOIN gmail_accounts g ON e.gmail_id = g.id WHERE e.user_id = ? ORDER BY e.timestamp DESC LIMIT 5`).all(uid)
-            ) as ActivityRow[], TTL.SHORT
-        ),
-        cacheOrFetch<AccountHealthRow[]>(
-            `${cachePrefix}:health`,
-            () => (isMaster
-                ? db.prepare('SELECT email, status, sent_today, daily_limit, is_connected, warmup_enabled FROM gmail_accounts').all()
-                : db.prepare('SELECT email, status, sent_today, daily_limit, is_connected, warmup_enabled FROM gmail_accounts WHERE user_id = ?').all(uid)
-            ) as AccountHealthRow[], TTL.SHORT
-        ),
-        cacheOrFetch<TrendRow[]>(
-            `${cachePrefix}:trends`,
-            () => (isMaster
-                ? db.prepare(`SELECT DATE(timestamp, 'unixepoch') as date, COUNT(*) as sent FROM email_logs WHERE timestamp >= strftime('%s', 'now', '-7 days') GROUP BY date ORDER BY date ASC`).all()
-                : db.prepare(`SELECT DATE(timestamp, 'unixepoch') as date, COUNT(*) as sent FROM email_logs WHERE user_id = ? AND timestamp >= strftime('%s', 'now', '-7 days') GROUP BY date ORDER BY date ASC`).all(uid)
-            ) as TrendRow[], TTL.MEDIUM
-        ),
-    ]);
+    const {
+        gmailAccounts,
+        campaigns,
+        sentToday,
+        totalSent,
+        repliedLeads,
+        totalLeads,
+        recentActivity,
+        accountHealth,
+        trendData
+    } = stats;
 
     const replyRate = totalSent.count > 0
         ? ((repliedLeads.count / totalSent.count) * 100).toFixed(1)

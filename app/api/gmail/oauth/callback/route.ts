@@ -80,8 +80,9 @@ export async function GET(req: Request) {
     }
 
     try {
-        const origin = new URL(req.url).origin;
-        const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${origin}/api/gmail/oauth/callback`;
+        const { getAppBaseUrl } = require('@/backend/utils/url');
+        const baseUrl = getAppBaseUrl(req);
+        const redirectUri = process.env.GOOGLE_GMAIL_REDIRECT_URI || `${baseUrl}/api/gmail/oauth/callback`;
         const tokens = await getTokens(code, clientId, clientSecret, redirectUri);
 
         const expiryDate = Date.now() + ((tokens.expires_in || 3600) * 1000);

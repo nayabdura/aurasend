@@ -68,8 +68,9 @@ export async function POST(req: Request) {
         }
 
         // Generate Auth URL
-        const origin = new URL(req.url).origin;
-        const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${origin}/api/gmail/oauth/callback`;
+        const { getAppBaseUrl } = require('@/backend/utils/url');
+        const baseUrl = getAppBaseUrl(req);
+        const redirectUri = process.env.GOOGLE_GMAIL_REDIRECT_URI || `${baseUrl}/api/gmail/oauth/callback`;
         const authUrl = await getAuthUrl(finalClientId, redirectUri);
 
         // Generate CSRF token for state

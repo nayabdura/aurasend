@@ -42,6 +42,9 @@ export const metadata: Metadata = {
     creator: '@aurasend',
     images: ['/twitter-image.jpeg']
   },
+  verification: {
+    google: 'google185bf4e765e4af7a',
+  },
 };
 
 export const viewport: Viewport = {

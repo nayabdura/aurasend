@@ -29,13 +29,26 @@ export class UserRepository {
     workspaceId?: number | null;
     isVerified?: boolean;
   }): Promise<User> {
+    let targetWorkspaceId = data.workspaceId || 1;
+    try {
+      const existingWs = await prisma.workspace.findUnique({ where: { id: targetWorkspaceId } });
+      if (!existingWs) {
+        const createdWs = await prisma.workspace.create({
+          data: { name: 'Default Workspace' },
+        });
+        targetWorkspaceId = createdWs.id;
+      }
+    } catch {
+      // Fallback: continue with targetWorkspaceId
+    }
+
     return prisma.user.create({
       data: {
         email: data.email.toLowerCase().trim(),
         passwordHash: data.passwordHash,
         name: data.name || null,
         role: data.role || 'USER',
-        workspaceId: data.workspaceId || 1,
+        workspaceId: targetWorkspaceId,
         isVerified: data.isVerified !== undefined ? data.isVerified : true,
       },
     });

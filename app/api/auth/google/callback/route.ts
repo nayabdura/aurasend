@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getAppBaseUrl } from '@/backend/utils/url';
 import db from '@/lib/db';
 import prisma from '@/lib/prisma';
 import { createToken } from '@/lib/auth';
@@ -39,8 +40,8 @@ export async function GET(req: Request) {
     }
 
     try {
-        const origin = new URL(req.url).origin;
-        const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${origin}/api/auth/google/callback`;
+        const baseUrl = getAppBaseUrl(req);
+        const redirectUri = process.env.GOOGLE_AUTH_REDIRECT_URI || process.env.GOOGLE_REDIRECT_URI || `${baseUrl}/api/auth/google/callback`;
 
         // Exchange code for tokens
         const tokenRes = await fetch('https://oauth2.googleapis.com/token', {

@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { getAppBaseUrl } from '@/backend/utils/url';
 
 /**
  * GET /api/auth/google
- * Initiates Google OAuth flow for APP LOGIN (not Gmail SMTP).
- * Requires GOOGLE_CLIENT_ID to be configured in environment variables.
+ * Initiates Google OAuth flow for APP LOGIN.
+ * Dynamically resolves redirect_uri for production and development.
  */
 export async function GET(req: Request) {
     const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -15,8 +16,8 @@ export async function GET(req: Request) {
         );
     }
 
-    const origin = new URL(req.url).origin;
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${origin}/api/auth/google/callback`;
+    const baseUrl = getAppBaseUrl(req);
+    const redirectUri = process.env.GOOGLE_AUTH_REDIRECT_URI || process.env.GOOGLE_REDIRECT_URI || `${baseUrl}/api/auth/google/callback`;
 
     // Generate CSRF state token
     const state = crypto.randomBytes(32).toString('hex');
