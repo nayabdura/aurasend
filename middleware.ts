@@ -60,8 +60,8 @@ export async function middleware(request: NextRequest) {
         });
     }
 
-    // Always allow static assets (fast regex check)
-    if (/\.(?:png|jpe?g|gif|svg|ico|webp|woff2?|ttf|otf|css|js|map)$/i.test(pathname)) {
+    // Always allow static assets and verification files (fast regex check)
+    if (/\.(?:png|jpe?g|gif|svg|ico|webp|woff2?|ttf|otf|css|js|map|html|txt)$/i.test(pathname) || /^google[a-z0-9]+\.html$/i.test(pathname.replace(/^\//, ''))) {
         return NextResponse.next();
     }
     if (pathname.startsWith('/_next') || pathname.startsWith('/fonts')) {
