@@ -1,9 +1,9 @@
-import { cookies } from 'next/headers';
-import prisma from './prisma';
-import db from './db';
-import bcrypt from 'bcrypt';
+import 'server-only';
 import { redirect } from 'next/navigation';
-import { SignJWT, jwtVerify } from 'jose';
+import AuthService, { SessionData } from '../backend/auth';
+import UserService from '../backend/services/UserService';
+import SecurityService from '../backend/security';
+import UserRepository from '../backend/repositories/UserRepository';
 
 export interface User {
     id: number;
@@ -15,90 +15,29 @@ export interface User {
     is_verified?: number;
 }
 
-export interface SessionData {
-    userId: number;
-    email: string;
-    role: 'MASTER' | 'ADMIN' | 'USER' | 'master' | 'admin' | 'user';
-    workspaceId: number;
-    ip?: string;
-}
-
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_super_secret_key_change_in_production!';
-const encodedSecret = new TextEncoder().encode(JWT_SECRET);
+export type { SessionData };
 
 export async function createToken(data: SessionData): Promise<string> {
-    const token = await new SignJWT({ 
-            userId: data.userId, 
-            email: data.email, 
-            role: data.role, 
-            workspaceId: data.workspaceId, 
-            ip: data.ip 
-        })
-        .setProtectedHeader({ alg: 'HS256' })
-        .setIssuedAt()
-        .setExpirationTime('7d')
-        .sign(encodedSecret);
-        
-    return token;
+    return AuthService.createToken(data);
 }
 
 export async function verifyToken(token: string): Promise<SessionData | null> {
-    try {
-        const { payload } = await jwtVerify(token, encodedSecret);
-        return {
-            userId: Number(payload.userId),
-            email: String(payload.email),
-            role: (String(payload.role || 'USER').toUpperCase() as SessionData['role']),
-            workspaceId: Number(payload.workspaceId || 1),
-            ip: payload.ip as string | undefined
-        };
-    } catch (e) {
-        return null;
-    }
+    return AuthService.verifyToken(token);
 }
 
 export async function getCurrentUser(): Promise<User | null> {
-    try {
-        const cookieStore = cookies();
-        const token = cookieStore.get('auth_token')?.value;
+    const dbUser = await AuthService.getCurrentUser();
+    if (!dbUser) return null;
 
-        if (!token) return null;
-
-        const session = await verifyToken(token);
-        if (!session) return null;
-
-        if (!process.env.DATABASE_URL) {
-            const user = db.prepare('SELECT id, email, name, role, workspace_id, two_factor_enabled, is_verified FROM users WHERE id = ?').get(session.userId) as User;
-            return user || null;
-        }
-
-        const dbUser = await prisma.user.findUnique({
-            where: { id: session.userId },
-            select: {
-                id: true,
-                email: true,
-                name: true,
-                role: true,
-                workspaceId: true,
-                twoFactorEnabled: true,
-                isVerified: true,
-            },
-        });
-
-        if (!dbUser) return null;
-
-        return {
-            id: dbUser.id,
-            email: dbUser.email,
-            name: dbUser.name,
-            role: dbUser.role,
-            workspace_id: dbUser.workspaceId || 1,
-            two_factor_enabled: dbUser.twoFactorEnabled ? 1 : 0,
-            is_verified: dbUser.isVerified ? 1 : 0,
-        };
-    } catch (e) {
-        return null;
-    }
+    return {
+        id: dbUser.id,
+        email: dbUser.email,
+        name: dbUser.name,
+        role: dbUser.role as User['role'],
+        workspace_id: dbUser.workspaceId || 1,
+        two_factor_enabled: dbUser.twoFactorEnabled ? 1 : 0,
+        is_verified: dbUser.isVerified ? 1 : 0,
+    };
 }
 
 export async function requireAuth(): Promise<User> {
@@ -114,129 +53,40 @@ export async function requireMaster(): Promise<User> {
     return user;
 }
 
-/**
- * IDOR Protection Helper: Verifies user owns resource or is a Master admin
- */
 export async function verifyResourceOwnership(
     userId: number,
     modelName: 'lead' | 'campaign' | 'gmailAccount' | 'template' | 'contact',
     resourceId: number
 ): Promise<boolean> {
-    if (!process.env.DATABASE_URL) return true;
-
-    try {
-        const user = await prisma.user.findUnique({ where: { id: userId } });
-        if (!user) return false;
-        if (user.role === 'MASTER') return true;
-
-        const resource = await (prisma as any)[modelName].findUnique({
-            where: { id: resourceId },
-            select: { userId: true },
-        });
-
-        return resource && resource.userId === userId;
-    } catch (e) {
-        return false;
-    }
+    return SecurityService.verifyResourceOwnership(userId, modelName, resourceId);
 }
 
 export async function loginUser(email: string, password: string): Promise<{ user: User; token: string } | null> {
-    if (!process.env.DATABASE_URL) {
-        const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as any;
-        if (!user) return null;
-
-        const isValid = await bcrypt.compare(password, user.password_hash);
-        if (!isValid) return null;
-
-        try {
-            db.prepare("UPDATE users SET last_login = strftime('%Y-%m-%d %H:%M:%S', 'now') WHERE id = ?").run(user.id);
-        } catch {}
-
-        const session: SessionData = {
-            userId: user.id,
-            email: user.email,
-            role: user.role,
-            workspaceId: user.workspace_id || 1,
-        };
-
-        const token = await createToken(session);
-
-        return {
-            user: {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role,
-                workspace_id: user.workspace_id || 1,
-                two_factor_enabled: user.two_factor_enabled || 0,
-                is_verified: user.is_verified ?? 1,
-            },
-            token,
-        };
-    }
-
-    const dbUser = await prisma.user.findUnique({ where: { email } });
-    if (!dbUser) return null;
-
-    const isValid = await bcrypt.compare(password, dbUser.passwordHash);
-    if (!isValid) return null;
-
-    await prisma.user.update({
-        where: { id: dbUser.id },
-        data: { lastLogin: new Date() },
-    });
-
-    const session: SessionData = {
-        userId: dbUser.id,
-        email: dbUser.email,
-        role: dbUser.role,
-        workspaceId: dbUser.workspaceId || 1,
-    };
-
-    const token = await createToken(session);
+    const result = await UserService.login(email, password);
+    if (!result) return null;
 
     return {
         user: {
-            id: dbUser.id,
-            email: dbUser.email,
-            name: dbUser.name,
-            role: dbUser.role,
-            workspace_id: dbUser.workspaceId || 1,
-            two_factor_enabled: dbUser.twoFactorEnabled ? 1 : 0,
-            is_verified: dbUser.isVerified ? 1 : 0,
+            id: result.user.id,
+            email: result.user.email,
+            name: result.user.name,
+            role: result.user.role as User['role'],
+            workspace_id: result.user.workspaceId || 1,
+            two_factor_enabled: result.user.twoFactorEnabled ? 1 : 0,
+            is_verified: result.user.isVerified ? 1 : 0,
         },
-        token,
+        token: result.token,
     };
 }
 
 export async function registerUser(email: string, password: string, name?: string): Promise<User> {
-    const hash = await bcrypt.hash(password, 10);
-
-    if (!process.env.DATABASE_URL) {
-        const result = db.prepare(
-            'INSERT INTO users (email, password_hash, name, role, workspace_id, is_verified) VALUES (?, ?, ?, ?, ?, 1)'
-        ).run(email, hash, name || null, 'user', 1);
-
-        const user = db.prepare('SELECT id, email, name, role, workspace_id, two_factor_enabled, is_verified FROM users WHERE id = ?').get(result.lastInsertRowid) as User;
-        return user;
-    }
-
-    const dbUser = await prisma.user.create({
-        data: {
-            email,
-            passwordHash: hash,
-            name: name || null,
-            role: 'USER',
-            workspaceId: 1,
-            isVerified: true,
-        },
-    });
+    const dbUser = await UserService.register(email, password, name);
 
     return {
         id: dbUser.id,
         email: dbUser.email,
         name: dbUser.name,
-        role: dbUser.role,
+        role: dbUser.role as User['role'],
         workspace_id: dbUser.workspaceId || 1,
         two_factor_enabled: 0,
         is_verified: 1,
@@ -244,16 +94,11 @@ export async function registerUser(email: string, password: string, name?: strin
 }
 
 export async function logoutUser() {
-    const cookieStore = cookies();
-    cookieStore.delete('auth_token');
-    cookieStore.delete('session');
+    await AuthService.clearAuthCookie();
 }
 
-export function getUserById(userId: number) {
-    if (!process.env.DATABASE_URL) {
-        return db.prepare('SELECT id, email, name, role, workspace_id, two_factor_enabled FROM users WHERE id = ?').get(userId) as any;
-    }
-    return prisma.user.findUnique({ where: { id: userId } });
+export async function getUserById(userId: number) {
+    return UserRepository.findById(userId);
 }
 
 export async function getUserId(): Promise<number> {

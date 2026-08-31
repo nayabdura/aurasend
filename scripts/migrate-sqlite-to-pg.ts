@@ -246,98 +246,54 @@ async function runMigration() {
     console.log('\n--- Step 7: Migrating Leads ---');
     const sqliteLeads = sqlite.prepare('SELECT * FROM leads').all() as any[];
     console.log(`Processing ${sqliteLeads.length} leads in batches...`);
-    for (let i = 0; i < sqliteLeads.length; i += 100) {
-      const batch = sqliteLeads.slice(i, i + 100);
-      for (const l of batch) {
-        await prisma.lead.upsert({
-          where: { id: l.id },
-          update: {
-            userId: l.user_id || 1,
-            workspaceId: l.workspace_id || 1,
-            campaignId: l.campaign_id || null,
-            name: l.name,
-            email: l.email,
-            website: l.website,
-            company: l.company,
-            intro: l.intro,
-            source: l.source,
-            status: l.status || 'pending',
-            leadType: l.lead_type || 'client',
-            temperature: l.temperature || 'Cold',
-            companyDomain: l.company_domain,
-            currentRole: l.current_role,
-            niche: l.niche,
-            previousWork: l.previous_work,
-            opened: Boolean(l.opened),
-            replied: Boolean(l.replied),
-            threadId: l.thread_id,
-            lastSentAt: l.last_sent_at ? BigInt(l.last_sent_at) : null,
-            openedAt: l.opened_at ? BigInt(l.opened_at) : null,
-            repliedAt: l.replied_at ? BigInt(l.replied_at) : null,
-            followUpCount: l.follow_up_count || 0,
-            followupType: l.followup_type,
-            emailScore: l.email_score || 0,
-            emailStatus: l.email_status,
-            validationStatus: l.validation_status,
-            isRoleAccount: Boolean(l.is_role_account),
-            isCatchAll: Boolean(l.is_catch_all),
-            isDisposable: Boolean(l.is_disposable),
-            isFullInbox: Boolean(l.is_full_inbox),
-            mxRecords: l.mx_records,
-            verificationDate: l.verification_date,
-            isValid: Boolean(l.is_valid !== undefined ? l.is_valid : 1),
-            sentAt: l.sent_at ? BigInt(l.sent_at) : null,
-            followup1SentAt: l.followup1_sent_at ? BigInt(l.followup1_sent_at) : null,
-            followup2SentAt: l.followup2_sent_at ? BigInt(l.followup2_sent_at) : null,
-            nextFollowupAt: l.next_followup_at ? BigInt(l.next_followup_at) : null,
-            isSuppressed: Boolean(l.is_suppressed),
-            suppressedReason: l.suppressed_reason,
-          },
-          create: {
-            id: l.id,
-            userId: l.user_id || 1,
-            workspaceId: l.workspace_id || 1,
-            campaignId: l.campaign_id || null,
-            name: l.name,
-            email: l.email,
-            website: l.website,
-            company: l.company,
-            intro: l.intro,
-            source: l.source,
-            status: l.status || 'pending',
-            leadType: l.lead_type || 'client',
-            temperature: l.temperature || 'Cold',
-            companyDomain: l.company_domain,
-            currentRole: l.current_role,
-            niche: l.niche,
-            previousWork: l.previous_work,
-            opened: Boolean(l.opened),
-            replied: Boolean(l.replied),
-            threadId: l.thread_id,
-            lastSentAt: l.last_sent_at ? BigInt(l.last_sent_at) : null,
-            openedAt: l.opened_at ? BigInt(l.opened_at) : null,
-            repliedAt: l.replied_at ? BigInt(l.replied_at) : null,
-            followUpCount: l.follow_up_count || 0,
-            followupType: l.followup_type,
-            emailScore: l.email_score || 0,
-            emailStatus: l.email_status,
-            validationStatus: l.validation_status,
-            isRoleAccount: Boolean(l.is_role_account),
-            isCatchAll: Boolean(l.is_catch_all),
-            isDisposable: Boolean(l.is_disposable),
-            isFullInbox: Boolean(l.is_full_inbox),
-            mxRecords: l.mx_records,
-            verificationDate: l.verification_date,
-            isValid: Boolean(l.is_valid !== undefined ? l.is_valid : 1),
-            sentAt: l.sent_at ? BigInt(l.sent_at) : null,
-            followup1SentAt: l.followup1_sent_at ? BigInt(l.followup1_sent_at) : null,
-            followup2SentAt: l.followup2_sent_at ? BigInt(l.followup2_sent_at) : null,
-            nextFollowupAt: l.next_followup_at ? BigInt(l.next_followup_at) : null,
-            isSuppressed: Boolean(l.is_suppressed),
-            suppressedReason: l.suppressed_reason,
-          },
-        });
-      }
+    for (let i = 0; i < sqliteLeads.length; i += 1000) {
+      const batch = sqliteLeads.slice(i, i + 1000).map((l) => ({
+        id: l.id,
+        userId: l.user_id || 1,
+        workspaceId: l.workspace_id || 1,
+        campaignId: l.campaign_id || null,
+        name: l.name || null,
+        email: l.email,
+        website: l.website || null,
+        company: l.company || null,
+        intro: l.intro || null,
+        source: l.source || null,
+        status: l.status || 'pending',
+        leadType: l.lead_type || 'client',
+        temperature: l.temperature || 'Cold',
+        companyDomain: l.company_domain || null,
+        currentRole: l.current_role || null,
+        niche: l.niche || null,
+        previousWork: l.previous_work || null,
+        opened: Boolean(l.opened),
+        replied: Boolean(l.replied),
+        threadId: l.thread_id || null,
+        lastSentAt: l.last_sent_at ? BigInt(l.last_sent_at) : null,
+        openedAt: l.opened_at ? BigInt(l.opened_at) : null,
+        repliedAt: l.replied_at ? BigInt(l.replied_at) : null,
+        followUpCount: l.follow_up_count || 0,
+        followupType: l.followup_type || null,
+        emailScore: l.email_score || 0,
+        emailStatus: l.email_status || null,
+        validationStatus: l.validation_status || null,
+        isRoleAccount: Boolean(l.is_role_account),
+        isCatchAll: Boolean(l.is_catch_all),
+        isDisposable: Boolean(l.is_disposable),
+        isFullInbox: Boolean(l.is_full_inbox),
+        mxRecords: l.mx_records || null,
+        verificationDate: l.verification_date || null,
+        isValid: Boolean(l.is_valid !== undefined ? l.is_valid : 1),
+        sentAt: l.sent_at ? BigInt(l.sent_at) : null,
+        followup1SentAt: l.followup1_sent_at ? BigInt(l.followup1_sent_at) : null,
+        followup2SentAt: l.followup2_sent_at ? BigInt(l.followup2_sent_at) : null,
+        nextFollowupAt: l.next_followup_at ? BigInt(l.next_followup_at) : null,
+        isSuppressed: Boolean(l.is_suppressed),
+        suppressedReason: l.suppressed_reason || null,
+      }));
+      await prisma.lead.createMany({
+        data: batch,
+        skipDuplicates: true,
+      });
     }
     const pgLeadsCount = await prisma.lead.count();
     reconciliationReport.push({
@@ -351,32 +307,21 @@ async function runMigration() {
     console.log('\n--- Step 8: Migrating Email Logs ---');
     const sqliteLogs = sqlite.prepare('SELECT * FROM email_logs').all() as any[];
     console.log(`Processing ${sqliteLogs.length} email logs...`);
-    for (let i = 0; i < sqliteLogs.length; i += 200) {
-      const batch = sqliteLogs.slice(i, i + 200);
-      for (const log of batch) {
-        await prisma.emailLog.upsert({
-          where: { id: log.id },
-          update: {
-            userId: log.user_id || 1,
-            workspaceId: log.workspace_id || 1,
-            leadId: log.lead_id || null,
-            gmailId: log.gmail_id || null,
-            type: log.type || 'sent',
-            timestamp: log.timestamp ? BigInt(log.timestamp) : BigInt(0),
-            messageId: log.message_id,
-          },
-          create: {
-            id: log.id,
-            userId: log.user_id || 1,
-            workspaceId: log.workspace_id || 1,
-            leadId: log.lead_id || null,
-            gmailId: log.gmail_id || null,
-            type: log.type || 'sent',
-            timestamp: log.timestamp ? BigInt(log.timestamp) : BigInt(0),
-            messageId: log.message_id,
-          },
-        });
-      }
+    for (let i = 0; i < sqliteLogs.length; i += 1000) {
+      const batch = sqliteLogs.slice(i, i + 1000).map((log) => ({
+        id: log.id,
+        userId: log.user_id || 1,
+        workspaceId: log.workspace_id || 1,
+        leadId: log.lead_id || null,
+        gmailId: log.gmail_id || null,
+        type: log.type || 'sent',
+        timestamp: log.timestamp ? BigInt(log.timestamp) : BigInt(0),
+        messageId: log.message_id || null,
+      }));
+      await prisma.emailLog.createMany({
+        data: batch,
+        skipDuplicates: true,
+      });
     }
     const pgLogsCount = await prisma.emailLog.count();
     reconciliationReport.push({

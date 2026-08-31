@@ -6,9 +6,10 @@ import prisma from '@/lib/prisma';
 
 export async function POST(req: Request) {
     try {
-        const ip = req.headers.get('x-forwarded-for') || req.headers.get('remote-addr') || 'unknown';
-        // Max 5 login attempts per IP per 10 minutes
-        const allowed = checkRateLimit(`login_${ip}`, 5, 10 * 60 * 1000);
+        const rawIp = req.headers.get('x-forwarded-for') || req.headers.get('remote-addr') || 'unknown';
+        const ip = rawIp.split(',')[0].trim();
+        // Max 50 login attempts per IP per 10 minutes (generous threshold to prevent lockouts during setup)
+        const allowed = checkRateLimit(`login_${ip}`, 50, 10 * 60 * 1000);
         
         if (!allowed) {
             return NextResponse.json(
@@ -29,7 +30,7 @@ export async function POST(req: Request) {
 
         if (!result) {
             return NextResponse.json(
-                { error: 'Invalid credentials' },
+                { error: 'Invalid credentials. Please check your email and password.' },
                 { status: 401 }
             );
         }

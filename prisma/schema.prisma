@@ -430,6 +430,8 @@ model Campaign {
   aiJobs              AiJob[]
   personalizedMessages PersonalizedMessage[]
 
+  @@index([userId, status])
+  @@index([workspaceId, status])
   @@map("campaigns")
 }
 
