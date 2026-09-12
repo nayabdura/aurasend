@@ -18,7 +18,7 @@ interface Lead {
     replied: number;
 }
 
-const fetcher = (url: string) => fetch(url).then(r => r.json());
+const fetcher = (url: string) => fetch(url).then(r => r.json()).then(data => (Array.isArray(data) ? data : [])).catch(() => []);
 
 export default function LeadsPage() {
     const [activeTab, setActiveTab] = useState<'contacts' | 'blacklist'>('contacts');
@@ -28,14 +28,15 @@ export default function LeadsPage() {
     // Ph16: Debounce search to avoid re-filtering on every keystroke
     const debouncedSearch = useDebouncedValue(search, 200);
 
-    const { data: leads = [], isLoading: loading, mutate: reloadLeads } = useSWR<Lead[]>('/api/leads', fetcher, {
+    const { data: rawLeads, isLoading: loading, mutate: reloadLeads } = useSWR<Lead[]>('/api/leads', fetcher, {
         revalidateOnFocus: false,
         dedupingInterval: 10_000,
     });
+    const leads = Array.isArray(rawLeads) ? rawLeads : [];
 
     // Derived filtered list — only re-computes when debounced search or filter changes
     const filteredLeads = useMemo(() => {
-        let filtered: Lead[] = leads;
+        let filtered: Lead[] = Array.isArray(leads) ? leads : [];
         if (debouncedSearch) {
             const q = debouncedSearch.toLowerCase();
             filtered = filtered.filter((l) =>

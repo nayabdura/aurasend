@@ -1,34 +1,66 @@
-
 import { NextResponse } from 'next/server';
-import db from '@/lib/db';
+import prisma from '@/lib/prisma';
 import { getEffectiveUserId, getUserId } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
         const userId = await getEffectiveUserId();
+        const where = userId ? { userId } : {};
 
-        let query = `
-            SELECT c.*, 
-            (SELECT COUNT(*) FROM leads l WHERE l.campaign_id = c.id) as lead_count,
-            (SELECT COUNT(*) FROM leads l WHERE l.campaign_id = c.id AND l.status NOT IN ('pending', 'processing_queue', 'invalid')) as sent_count,
-            (SELECT COUNT(*) FROM leads l WHERE l.campaign_id = c.id AND l.opened = 1) as opened_count,
-            (SELECT COUNT(*) FROM leads l WHERE l.campaign_id = c.id AND l.replied = 1) as replied_count
-            FROM campaigns c
-        `;
+        const list = await prisma.campaign.findMany({
+            where,
+            include: {
+                leads: {
+                    select: {
+                        id: true,
+                        status: true,
+                        opened: true,
+                        replied: true,
+                    },
+                },
+            },
+            orderBy: { id: 'desc' },
+        });
 
-        const params: any[] = [];
+        const campaigns = list.map((c) => {
+            const leadCount = c.leads.length;
+            const sentCount = c.leads.filter(
+                (l) => !['pending', 'processing_queue', 'invalid'].includes(l.status)
+            ).length;
+            const openedCount = c.leads.filter((l) => l.opened).length;
+            const repliedCount = c.leads.filter((l) => l.replied).length;
 
-        if (userId) {
-            query += ' WHERE c.user_id = ?';
-            params.push(userId);
-        }
+            return {
+                id: c.id,
+                user_id: c.userId,
+                workspace_id: c.workspaceId || 1,
+                name: c.name,
+                template_id: c.templateId,
+                template_id_b: c.templateIdB,
+                status: c.status,
+                send_window_start: c.sendWindowStart,
+                send_window_end: c.sendWindowEnd,
+                timezone: c.timezone,
+                delay_between_emails: c.delayBetweenEmails,
+                followup1_delay_hours: c.followup1DelayHours,
+                followup2_delay_hours: c.followup2DelayHours,
+                followup1_template_id: c.followup1TemplateId,
+                followup2_template_id: c.followup2TemplateId,
+                followup_enabled: c.followupEnabled ? 1 : 0,
+                created_at: c.createdAt,
+                updated_at: c.updatedAt,
+                lead_count: leadCount,
+                sent_count: sentCount,
+                opened_count: openedCount,
+                replied_count: repliedCount,
+            };
+        });
 
-        query += ' ORDER BY c.created_at DESC';
-
-        const campaigns = db.prepare(query).all(...params);
         return NextResponse.json(campaigns);
     } catch (e: any) {
-        console.error('GET Campaigns Error:', e);
+        console.error('[GET Campaigns Error]:', e);
         return NextResponse.json({ error: 'Failed to fetch campaigns.' }, { status: 500 });
     }
 }
@@ -42,43 +74,45 @@ export async function POST(req: Request) {
             if (authErr?.digest?.startsWith('NEXT_REDIRECT')) throw authErr;
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-        const { name, template_id, template_id_b, account_ids, send_start, send_end,
-            followup1_delay_hours, followup2_delay_hours,
-            followup1_template_id, followup2_template_id, followup_enabled } = await req.json();
+
+        const body = await req.json();
+        const {
+            name,
+            template_id,
+            template_id_b,
+            send_start,
+            send_end,
+            followup1_delay_hours,
+            followup2_delay_hours,
+            followup1_template_id,
+            followup2_template_id,
+            followup_enabled,
+        } = body;
 
         if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
 
-        const result = db.prepare(`
-            INSERT INTO campaigns 
-            (user_id, name, template_id, template_id_b, status, send_window_start, send_window_end,
-             followup1_delay_hours, followup2_delay_hours, followup1_template_id, followup2_template_id, followup_enabled)
-            VALUES (?, ?, ?, ?, 'paused', ?, ?, ?, ?, ?, ?, ?)
-        `).run(
-            userId, name, template_id || null, template_id_b || null,
-            send_start || '09:00', send_end || '18:00',
-            followup1_delay_hours || 48, followup2_delay_hours || 96,
-            followup1_template_id || null, followup2_template_id || null,
-            followup_enabled !== false ? 1 : 0
-        );
+        const created = await prisma.campaign.create({
+            data: {
+                userId,
+                workspaceId: 1,
+                name,
+                templateId: template_id ? Number(template_id) : null,
+                templateIdB: template_id_b ? Number(template_id_b) : null,
+                status: 'paused',
+                sendWindowStart: send_start || '09:00',
+                sendWindowEnd: send_end || '18:00',
+                followup1DelayHours: followup1_delay_hours ? Number(followup1_delay_hours) : 48,
+                followup2DelayHours: followup2_delay_hours ? Number(followup2_delay_hours) : 96,
+                followup1TemplateId: followup1_template_id ? Number(followup1_template_id) : null,
+                followup2TemplateId: followup2_template_id ? Number(followup2_template_id) : null,
+                followupEnabled: followup_enabled !== false,
+            },
+        });
 
-        const campaignId = result.lastInsertRowid;
-
-        if (account_ids && Array.isArray(account_ids)) {
-            // Ensure these accounts belong to the user (security check)
-            // Just insert, assuming frontend filtered correctly for now. 
-            // In strict mode, we'd verify ownership.
-
-            const insert = db.prepare("INSERT INTO campaign_accounts (campaign_id, gmail_account_id) VALUES (?, ?)");
-            const insertMany = db.transaction((ids: any[]) => {
-                for (const accId of ids) insert.run(campaignId, accId);
-            });
-            insertMany(account_ids);
-        }
-
-        return NextResponse.json({ success: true, id: campaignId });
+        return NextResponse.json({ success: true, id: created.id });
     } catch (e: any) {
         if (e?.digest?.startsWith('NEXT_REDIRECT') || e?.digest?.startsWith('NEXT_NOT_FOUND')) throw e;
-        console.error('POST Campaign Error:', e);
+        console.error('[POST Campaign Error]:', e);
         return NextResponse.json({ error: 'Failed to create campaign.' }, { status: 500 });
     }
 }

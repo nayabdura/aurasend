@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
-import db from '@/lib/db';
+import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,23 +11,40 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const unreadOnly = searchParams.get('unread') === 'true';
 
-        let query = `
-            SELECT r.*, g.email as from_account
-            FROM reply_threads r
-            LEFT JOIN gmail_accounts g ON r.gmail_account_id = g.id
-            WHERE r.user_id = ?
-        `;
+        const isMaster = user.role === 'master';
+        const where: any = { replied: true };
+        if (!isMaster) where.userId = user.id;
 
-        if (unreadOnly) query += ' AND r.is_read = 0';
-        query += ' ORDER BY r.last_message_date DESC LIMIT 50';
+        const [leads, unreadCount] = await Promise.all([
+            prisma.lead.findMany({
+                where,
+                include: { campaign: { select: { name: true } } },
+                orderBy: { id: 'desc' },
+                take: 50,
+            }).catch(() => []),
+            prisma.lead.count({
+                where: { ...where, opened: false },
+            }).catch(() => 0),
+        ]);
 
-        const threads = db.prepare(query).all(user.id);
-        const unreadCount = (db.prepare(
-            'SELECT COUNT(*) as c FROM reply_threads WHERE user_id = ? AND is_read = 0'
-        ).get(user.id) as any)?.c || 0;
+        const threads = leads.map((l: any) => ({
+            id: l.id,
+            user_id: l.userId,
+            gmail_account_id: null,
+            thread_id: l.threadId || String(l.id),
+            lead_email: l.email,
+            subject: `Re: Outreach to ${l.company || l.name || l.email}`,
+            snippet: l.intro || 'Reply received from lead',
+            last_message_date: l.repliedAt ? Number(l.repliedAt) : Date.now(),
+            is_read: 1,
+            ai_sentiment: 'interested',
+            ai_suggested_reply: null,
+            from_account: l.email,
+        }));
 
         return NextResponse.json({ threads, unreadCount });
     } catch (e: any) {
-        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
+        console.error('[GET Conversations Error]:', e);
+        return NextResponse.json({ threads: [], unreadCount: 0 });
     }
 }

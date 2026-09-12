@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TestingCenterClient from '../test/TestingCenterClient';
 
 // Global SWR Fetcher
-const fetcher = (url: string) => fetch(url).then(r => r.json());
+const fetcher = (url: string) => fetch(url).then(r => r.json()).catch(() => null);
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -275,9 +275,13 @@ export default function CampaignsPage() {
     const [view, setView] = useState<'list' | 'create' | 'templates' | 'testing'>('list');
     
     // SWR Cache hooks
-    const { data: campaigns = [], isLoading: loadingCampaigns } = useSWR('/api/campaigns', fetcher);
-    const { data: templates = [], isLoading: loadingTemplates } = useSWR('/api/templates', fetcher);
-    const { data: accounts = [], isLoading: loadingAccounts } = useSWR('/api/gmail/accounts', fetcher);
+    const { data: rawCampaigns, isLoading: loadingCampaigns } = useSWR('/api/campaigns', fetcher);
+    const { data: rawTemplates, isLoading: loadingTemplates } = useSWR('/api/templates', fetcher);
+    const { data: rawAccounts, isLoading: loadingAccounts } = useSWR('/api/gmail/accounts', fetcher);
+
+    const campaigns = Array.isArray(rawCampaigns) ? rawCampaigns : [];
+    const templates = Array.isArray(rawTemplates) ? rawTemplates : [];
+    const accounts = Array.isArray(rawAccounts) ? rawAccounts : [];
     const loading = loadingCampaigns || loadingTemplates || loadingAccounts;
 
     const [activeLogs, setActiveLogs] = useState<any>(null); // campaign whose logs to show

@@ -1,32 +1,53 @@
 import { NextResponse } from 'next/server';
-import db from '@/lib/db';
+import prisma from '@/lib/prisma';
 import { getEffectiveUserId } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
         const userId = await getEffectiveUserId();
+        const where = userId ? { userId } : {};
 
-        let query = `
-            SELECT e.*, 
-                   l.email as lead_email, l.name as lead_name, 
-                   g.email as gmail_address, c.name as campaign_name
-            FROM email_logs e
-            LEFT JOIN leads l ON e.lead_id = l.id
-            LEFT JOIN gmail_accounts g ON e.gmail_id = g.id
-            LEFT JOIN campaigns c ON l.campaign_id = c.id
-        `;
-        const params: any[] = [];
+        const list = await prisma.emailLog.findMany({
+            where,
+            include: {
+                lead: {
+                    select: {
+                        email: true,
+                        name: true,
+                        campaign: { select: { name: true } },
+                    },
+                },
+                gmailAccount: {
+                    select: { email: true },
+                },
+            },
+            orderBy: { timestamp: 'desc' },
+            take: 200,
+        });
 
-        if (userId) {
-            query += ` WHERE e.user_id = ?`;
-            params.push(userId);
-        }
+        const logs = list.map((e: any) => ({
+            id: e.id,
+            user_id: e.userId,
+            workspace_id: e.workspaceId || 1,
+            lead_id: e.leadId,
+            gmail_id: e.gmailId,
+            type: e.type,
+            timestamp: Number(e.timestamp),
+            message_id: e.messageId,
+            to_email: e.lead?.email || 'N/A',
+            subject: e.lead?.name ? `Outreach to ${e.lead.name}` : 'Cold Outreach',
+            created_at: e.createdAt,
+            lead_email: e.lead?.email || null,
+            lead_name: e.lead?.name || null,
+            gmail_address: e.gmailAccount?.email || null,
+            campaign_name: e.lead?.campaign?.name || null,
+        }));
 
-        query += ` ORDER BY e.timestamp DESC LIMIT 200`;
-
-        const logs = db.prepare(query).all(...params);
         return NextResponse.json(logs);
     } catch (e: any) {
-        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
+        console.error('[GET Logs Error]:', e);
+        return NextResponse.json([]);
     }
 }

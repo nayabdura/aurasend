@@ -1,44 +1,59 @@
-
 import { NextResponse } from 'next/server';
-import db from '@/lib/db';
+import prisma from '@/lib/prisma';
 import { getEffectiveUserId, getUserId } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
         const userId = await getEffectiveUserId();
+        const where = userId ? { userId } : {};
 
-        let query = "SELECT * FROM templates";
-        const params: any[] = [];
+        const list = await prisma.template.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+        });
 
-        if (userId) {
-            query += " WHERE user_id = ?";
-            params.push(userId);
-        }
+        const templates = list.map((t) => ({
+            id: t.id,
+            user_id: t.userId,
+            workspace_id: t.workspaceId || 1,
+            name: t.name,
+            subject: t.subject,
+            body: t.body,
+            created_at: t.createdAt,
+            updated_at: t.updatedAt,
+        }));
 
-        query += " ORDER BY created_at DESC";
-
-        const templates = db.prepare(query).all(...params);
         return NextResponse.json(templates);
     } catch (e: any) {
-        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
+        console.error('[GET Templates Error]:', e);
+        return NextResponse.json([]);
     }
 }
 
 export async function POST(req: Request) {
     try {
-        const userId = await getUserId(); // Strict ID for creation
+        const userId = await getUserId();
         const { name, subject, body } = await req.json();
 
         if (!name || !subject || !body) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
         }
 
-        const result = db.prepare(
-            "INSERT INTO templates (user_id, name, subject, body, created_at) VALUES (?, ?, ?, ?, ?)"
-        ).run(userId, name, subject, body, new Date().toISOString());
+        const created = await prisma.template.create({
+            data: {
+                userId,
+                workspaceId: 1,
+                name,
+                subject,
+                body,
+            },
+        });
 
-        return NextResponse.json({ success: true, id: result.lastInsertRowid });
+        return NextResponse.json({ success: true, id: created.id });
     } catch (e: any) {
-        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
+        console.error('[POST Template Error]:', e);
+        return NextResponse.json({ error: 'Failed to create template.' }, { status: 500 });
     }
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
-import db from '@/lib/db';
+import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,25 +11,34 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const campaignId = searchParams.get('campaign_id');
 
-        let query = `
-            SELECT f.*, t.name as template_name, t.subject as template_subject
-            FROM follow_ups f
-            LEFT JOIN templates t ON f.template_id = t.id
-            WHERE f.user_id = ?
-        `;
-        const params: any[] = [user.id];
-
+        const isMaster = user.role === 'master';
+        const where: any = {};
         if (campaignId) {
-            query += ' AND f.campaign_id = ?';
-            params.push(campaignId);
+            where.campaignId = Number(campaignId);
+        } else if (!isMaster) {
+            where.campaign = { userId: user.id };
         }
 
-        query += ' ORDER BY f.campaign_id, f.step_number ASC';
-        const followUps = db.prepare(query).all(...params);
+        const sequences = await prisma.sequence.findMany({
+            where,
+            orderBy: [{ campaignId: 'asc' }, { stepNumber: 'asc' }],
+        }).catch(() => []);
+
+        const followUps = sequences.map((s) => ({
+            id: s.id,
+            campaign_id: s.campaignId,
+            step_number: s.stepNumber,
+            delay_days: s.delayDays,
+            subject: s.subjectSpintax,
+            body: s.bodySpintax,
+            is_ab_test: s.isAbTest ? 1 : 0,
+            created_at: s.createdAt,
+        }));
 
         return NextResponse.json(followUps);
     } catch (e: any) {
-        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
+        console.error('[GET Followups Error]:', e);
+        return NextResponse.json([]);
     }
 }
 
@@ -38,28 +47,31 @@ export async function POST(req: Request) {
     try {
         const user = await requireAuth();
         const body = await req.json();
-        const { campaign_id, step_number, delay_days, delay_hours, send_time, subject, body: bodyText, template_id, stop_on_reply, stop_on_bounce } = body;
+        const { campaign_id, step_number, delay_days, subject, body: bodyText } = body;
 
         if (!campaign_id) return NextResponse.json({ error: 'campaign_id required' }, { status: 400 });
 
-        // Verify campaign belongs to user
-        const camp = db.prepare('SELECT id FROM campaigns WHERE id = ? AND user_id = ?').get(campaign_id, user.id);
+        const isMaster = user.role === 'master';
+        const camp = await prisma.campaign.findFirst({
+            where: isMaster ? { id: Number(campaign_id) } : { id: Number(campaign_id), userId: user.id },
+            select: { id: true },
+        });
+
         if (!camp) return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
 
-        const result = db.prepare(`
-            INSERT INTO follow_ups (user_id, campaign_id, step_number, delay_days, delay_hours, send_time, subject, body, template_id, stop_on_reply, stop_on_bounce)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(
-            user.id, campaign_id,
-            step_number || 1, delay_days || 3, delay_hours || 0,
-            send_time || '09:00', subject || '', bodyText || '',
-            template_id || null,
-            stop_on_reply !== false ? 1 : 0,
-            stop_on_bounce !== false ? 1 : 0
-        );
+        const created = await prisma.sequence.create({
+            data: {
+                campaignId: Number(campaign_id),
+                stepNumber: step_number || 1,
+                delayDays: delay_days || 3,
+                subjectSpintax: subject || '',
+                bodySpintax: bodyText || '',
+            },
+        });
 
-        return NextResponse.json({ id: result.lastInsertRowid, success: true });
+        return NextResponse.json({ id: created.id, success: true });
     } catch (e: any) {
-        return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
+        console.error('[POST Followup Error]:', e);
+        return NextResponse.json({ error: 'Failed to create follow-up.' }, { status: 500 });
     }
 }
