@@ -24,92 +24,93 @@ export default async function AdminPage() {
     let warmupAccounts = 0;
     let activeAccounts = 0;
 
-    if (process.env.DATABASE_URL) {
-        try {
-            const users = await prisma.user.findMany({
-                select: {
-                    id: true,
-                    email: true,
-                    name: true,
-                    role: true,
-                    plan: true,
-                    planStatus: true,
-                    createdAt: true,
-                    lastLogin: true,
-                },
-                orderBy: { id: 'desc' },
-            });
-            allUsers = users.map((u) => ({
-                id: u.id,
-                email: u.email,
-                name: u.name,
-                role: u.role,
-                plan: u.plan,
-                plan_status: u.planStatus,
-                created_at: u.createdAt,
-                last_login: u.lastLogin,
-            }));
+    try {
+        const users = await prisma.user.findMany({
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+                plan: true,
+                planStatus: true,
+                createdAt: true,
+                lastLogin: true,
+            },
+            orderBy: { id: 'desc' },
+        });
+        allUsers = users.map((u) => ({
+            id: u.id,
+            email: u.email,
+            name: u.name,
+            role: u.role,
+            plan: u.plan,
+            plan_status: u.planStatus,
+            created_at: u.createdAt,
+            last_login: u.lastLogin,
+        }));
 
-            const gmailAccounts = await prisma.gmailAccount.findMany({
-                include: { user: true },
-                orderBy: { id: 'desc' },
-            });
-            allGmailAccounts = gmailAccounts.map((g) => ({
-                id: g.id,
-                email: g.email,
-                status: g.status,
-                sent_today: g.sentToday,
-                daily_limit: g.dailyLimit,
-                auth_method: g.authMethod,
-                warmup_enabled: g.warmupEnabled ? 1 : 0,
-                owner_email: g.user?.email || null,
-            }));
+        const gmailAccounts = await prisma.gmailAccount.findMany({
+            include: { user: true },
+            orderBy: { id: 'desc' },
+        });
+        allGmailAccounts = gmailAccounts.map((g) => ({
+            id: g.id,
+            email: g.email,
+            status: g.status,
+            sent_today: g.sentToday,
+            daily_limit: g.dailyLimit,
+            auth_method: g.authMethod,
+            warmup_enabled: g.warmupEnabled ? 1 : 0,
+            owner_email: g.user?.email || null,
+        }));
 
-            const campaigns = await prisma.campaign.findMany({
-                include: { user: true },
-                orderBy: { id: 'desc' },
-            });
-            allCampaigns = campaigns.map((c) => ({
-                id: c.id,
-                name: c.name,
-                status: c.status,
-                created_at: c.createdAt,
-                owner_email: c.user?.email || null,
-            }));
+        const campaigns = await prisma.campaign.findMany({
+            include: { user: true },
+            orderBy: { id: 'desc' },
+        });
+        allCampaigns = campaigns.map((c) => ({
+            id: c.id,
+            name: c.name,
+            status: c.status,
+            created_at: c.createdAt,
+            owner_email: c.user?.email || null,
+        }));
 
-            totalLeads = await prisma.lead.count();
-            totalSentToday = gmailAccounts.reduce((acc, g) => acc + g.sentToday, 0);
-            totalSentAllTime = await prisma.emailLog.count({ where: { type: 'sent' } });
-            totalOpened = await prisma.lead.count({ where: { status: 'opened' } });
-            totalReplied = await prisma.lead.count({ where: { status: 'replied' } });
-            totalBounced = await prisma.lead.count({ where: { status: 'bounced' } });
-            activeCampaigns = campaigns.filter((c) => c.status === 'running').length;
-            warmupAccounts = gmailAccounts.filter((g) => g.warmupEnabled).length;
-            activeAccounts = gmailAccounts.filter((g) => g.status === 'active' && g.isConnected).length;
-        } catch (e) {
-            console.error('Error loading Admin dashboard data from Postgres:', e);
-        }
-    } else {
-        const db = require('@/lib/db').default;
-        try {
-            allUsers = db.prepare('SELECT id, email, name, role, plan, plan_status, created_at, last_login FROM users ORDER BY id DESC').all() as any[];
-            allGmailAccounts = db.prepare('SELECT g.id, g.email, g.status, g.sent_today, g.daily_limit, g.auth_method, g.warmup_enabled, u.email as owner_email FROM gmail_accounts g LEFT JOIN users u ON g.user_id = u.id ORDER BY g.id DESC').all() as any[];
-            allCampaigns = db.prepare('SELECT c.id, c.name, c.status, c.created_at, u.email as owner_email FROM campaigns c LEFT JOIN users u ON c.user_id = u.id ORDER BY c.id DESC').all() as any[];
-            initialBlogs = db.prepare('SELECT id, title, slug, is_published, created_at FROM blog_posts ORDER BY id DESC').all() as any[];
-            recentLogs = db.prepare('SELECT * FROM system_logs ORDER BY id DESC LIMIT 50').all() as any[];
+        const blogs = await prisma.blogPost.findMany({
+            orderBy: { id: 'desc' },
+            select: { id: true, title: true, slug: true, isPublished: true, createdAt: true },
+        }).catch(() => []);
+        initialBlogs = blogs.map((b) => ({
+            id: b.id,
+            title: b.title,
+            slug: b.slug,
+            is_published: b.isPublished ? 1 : 0,
+            created_at: b.createdAt,
+        }));
 
-            totalLeads = (db.prepare('SELECT COUNT(*) as c FROM leads').get() as any)?.c || 0;
-            totalSentToday = (db.prepare("SELECT SUM(sent_today) as c FROM gmail_accounts").get() as any)?.c || 0;
-            totalSentAllTime = (db.prepare("SELECT COUNT(*) as c FROM email_logs WHERE type = 'sent'").get() as any)?.c || 0;
-            totalOpened = (db.prepare('SELECT COUNT(*) as c FROM leads WHERE opened = 1').get() as any)?.c || 0;
-            totalReplied = (db.prepare('SELECT COUNT(*) as c FROM leads WHERE replied = 1').get() as any)?.c || 0;
-            totalBounced = (db.prepare("SELECT COUNT(*) as c FROM leads WHERE status = 'bounced'").get() as any)?.c || 0;
-            activeCampaigns = (db.prepare("SELECT COUNT(*) as c FROM campaigns WHERE status = 'running'").get() as any)?.c || 0;
-            warmupAccounts = (db.prepare("SELECT COUNT(*) as c FROM gmail_accounts WHERE warmup_enabled = 1").get() as any)?.c || 0;
-            activeAccounts = (db.prepare("SELECT COUNT(*) as c FROM gmail_accounts WHERE status = 'active' AND is_connected = 1").get() as any)?.c || 0;
-        } catch (e) {
-            console.error('Error loading Admin dashboard data from SQLite:', e);
-        }
+        const logs = await prisma.emailLog.findMany({
+            orderBy: { id: 'desc' },
+            take: 50,
+        }).catch(() => []);
+        recentLogs = logs.map((l) => ({
+            id: l.id,
+            type: l.type,
+            recipient: l.messageId || 'N/A',
+            status: l.type,
+            created_at: l.createdAt,
+        }));
+
+        totalLeads = await prisma.lead.count().catch(() => 0);
+        totalSentToday = gmailAccounts.reduce((acc, g) => acc + (g.sentToday || 0), 0);
+        totalSentAllTime = await prisma.emailLog.count({ where: { type: 'sent' } }).catch(() => 0);
+        totalOpened = await prisma.lead.count({ where: { opened: true } }).catch(() => 0);
+        totalReplied = await prisma.lead.count({ where: { replied: true } }).catch(() => 0);
+        totalBounced = await prisma.lead.count({ where: { status: 'bounced' } }).catch(() => 0);
+        activeCampaigns = campaigns.filter((c) => c.status === 'running').length;
+        warmupAccounts = gmailAccounts.filter((g) => g.warmupEnabled).length;
+        activeAccounts = gmailAccounts.filter((g) => g.status === 'active' && g.isConnected).length;
+    } catch (e) {
+        console.error('[AdminPage] Error loading admin dashboard data:', e);
     }
 
     const openRate = totalSentAllTime > 0 ? ((totalOpened / totalSentAllTime) * 100).toFixed(1) : '0.0';

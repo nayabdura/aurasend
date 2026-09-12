@@ -1,6 +1,6 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import { requireAuth } from '@/lib/auth';
-import db from '@/lib/db';
+import prisma from '@/lib/prisma';
 import EnrichmentClient from '@/app/enrichment/EnrichmentClient';
 
 export const dynamic = 'force-dynamic';
@@ -9,10 +9,33 @@ export default async function EnrichmentPage() {
     const user = await requireAuth();
 
     let contacts: any[] = [];
-    if (user.role === 'master') {
-        contacts = db.prepare('SELECT * FROM enriched_contacts ORDER BY id DESC LIMIT 500').all();
-    } else {
-        contacts = db.prepare('SELECT * FROM enriched_contacts WHERE user_id = ? ORDER BY id DESC LIMIT 500').all(user.id);
+    try {
+        const isMaster = user.role === 'master';
+        const list = await prisma.contact.findMany({
+            where: isMaster ? {} : { userId: user.id },
+            orderBy: { id: 'desc' },
+            take: 500,
+        });
+
+        contacts = list.map((c) => ({
+            id: c.id,
+            user_id: c.userId,
+            full_name: `${c.firstName || ''} ${c.lastName || ''}`.trim() || c.email.split('@')[0],
+            first_name: c.firstName,
+            last_name: c.lastName,
+            email: c.email,
+            company_name: c.company,
+            company_domain: c.email.split('@')[1] || null,
+            title: c.currentRole,
+            linkedin_url: null,
+            location: null,
+            source: 'Scraped',
+            status: c.replyStatus || 'active',
+            created_at: c.createdAt,
+        }));
+    } catch (e) {
+        console.error('[EnrichmentPage] Error fetching contacts:', e);
+        contacts = [];
     }
 
     return (

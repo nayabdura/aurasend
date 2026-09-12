@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import db from '@/lib/db';
+import prisma from '@/lib/prisma';
 import type { Metadata } from 'next';
 import { MarketingNav, MarketingFooter } from '@/components/MarketingLayout';
 import { ArrowRight, BookOpen, Bookmark, Clock, UserCircle2 } from 'lucide-react';
@@ -20,9 +20,28 @@ export const dynamic = 'force-dynamic';
 export default async function BlogPage() {
     let posts: any[] = [];
     try {
-        const result = await db.prepare('SELECT id, title, slug, excerpt, author, created_at FROM blog_posts WHERE is_published = 1 ORDER BY created_at DESC').all();
-        posts = Array.isArray(result) ? result : [];
+        const list = await prisma.blogPost.findMany({
+            where: { isPublished: true },
+            orderBy: { createdAt: 'desc' },
+            select: {
+                id: true,
+                title: true,
+                slug: true,
+                excerpt: true,
+                author: true,
+                createdAt: true,
+            },
+        });
+        posts = list.map((p) => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug,
+            excerpt: p.excerpt,
+            author: p.author,
+            created_at: p.createdAt,
+        }));
     } catch (e) {
+        console.error('[BlogPage] Error fetching posts:', e);
         posts = [];
     }
 

@@ -65,26 +65,27 @@ export const db = {
 
     const cleanSql = normalizeSql(sql);
     return {
-      all: (...args: any[]) => {
+      all: async (...args: any[]) => {
         try {
-          return (prisma as any).$queryRawUnsafe(cleanSql, ...args);
+          const rows = await (prisma as any).$queryRawUnsafe(cleanSql, ...args);
+          return Array.isArray(rows) ? rows : [];
         } catch (e: any) {
           console.error(`DB Query Error [all]: ${e.message}`, cleanSql);
           return [];
         }
       },
-      get: (...args: any[]) => {
+      get: async (...args: any[]) => {
         try {
-          const rows = (prisma as any).$queryRawUnsafe(cleanSql, ...args);
+          const rows = await (prisma as any).$queryRawUnsafe(cleanSql, ...args);
           return Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
         } catch (e: any) {
           console.error(`DB Query Error [get]: ${e.message}`, cleanSql);
           return null;
         }
       },
-      run: (...args: any[]) => {
+      run: async (...args: any[]) => {
         try {
-          const count = (prisma as any).$executeRawUnsafe(cleanSql, ...args);
+          const count = await (prisma as any).$executeRawUnsafe(cleanSql, ...args);
           return { changes: typeof count === 'number' ? count : 1, lastInsertRowid: 0 };
         } catch (e: any) {
           console.error(`DB Query Error [run]: ${e.message}`, cleanSql);
@@ -93,12 +94,12 @@ export const db = {
       },
     };
   },
-  exec: (sql: string) => {
+  exec: async (sql: string) => {
     if (!process.env.DATABASE_URL && sqliteDb) {
       return sqliteDb.exec(sql);
     }
     try {
-      return (prisma as any).$executeRawUnsafe(normalizeSql(sql));
+      return await (prisma as any).$executeRawUnsafe(normalizeSql(sql));
     } catch (e: any) {
       console.error(`DB Exec Error: ${e.message}`);
     }
@@ -107,22 +108,30 @@ export const db = {
 
 export default db;
 
-export function isEmailSuppressed(email: string): boolean {
+export async function isEmailSuppressed(email: string): Promise<boolean> {
   try {
-    const result = db.prepare('SELECT id FROM global_suppression WHERE LOWER(email) = LOWER(?)').get(email);
-    return !!result;
+    const found = await prisma.globalSuppression.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } },
+      select: { id: true },
+    });
+    return !!found;
   } catch (e) {
     return false;
   }
 }
 
-export function suppressEmail(email: string, reason: string = 'unsubscribed', userId?: number, campaignId?: number): void {
+export async function suppressEmail(email: string, reason: string = 'unsubscribed', userId?: number, campaignId?: number): Promise<void> {
   try {
     const domain = email.split('@')[1] || null;
-    db.prepare(`
-      INSERT INTO global_suppression (email, domain, reason, user_id, campaign_id)
-      VALUES (LOWER(?), ?, ?, ?, ?)
-    `).run(email, domain, reason, userId || null, campaignId || null);
+    await prisma.globalSuppression.create({
+      data: {
+        email: email.toLowerCase(),
+        domain,
+        reason,
+        userId: userId || null,
+        campaignId: campaignId || null,
+      },
+    });
   } catch (e) {
     // Already exists
   }

@@ -1,27 +1,36 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import { requireAuth } from '@/lib/auth';
-import { Ban, ShieldAlert, CheckCircle, Search, Trash2, PlusCircle, Globe, Mail } from 'lucide-react';
-import db from '@/lib/db';
+import { Ban, ShieldAlert, Search, Trash2, PlusCircle, Globe, Mail } from 'lucide-react';
+import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 export default async function SuppressionCenter() {
     const user = await requireAuth();
 
-    // Fetch suppressions based on role (Master sees all, Users see their workspace)
-    const query = user.role === 'master'
-        ? 'SELECT s.*, w.name as workspace_name FROM suppressions s LEFT JOIN workspaces w ON s.workspace_id = w.id ORDER BY s.created_at DESC'
-        : 'SELECT * FROM suppressions WHERE workspace_id = ? ORDER BY created_at DESC';
+    let suppressions: any[] = [];
+    try {
+        const list = await prisma.globalSuppression.findMany({
+            orderBy: { createdAt: 'desc' },
+        });
 
-    const suppressions = user.role === 'master'
-        ? db.prepare(query).all()
-        : db.prepare(query).all(user.workspace_id || 1);
+        suppressions = list.map((s) => ({
+            id: s.id,
+            domain_or_email: s.email,
+            reason: s.reason,
+            created_at: s.createdAt,
+            workspace_name: 'Global',
+        }));
+    } catch (e) {
+        console.error('[SuppressionCenter] Error fetching suppressions:', e);
+        suppressions = [];
+    }
 
     const stats = {
         total: suppressions.length,
-        bounces: suppressions.filter((s: any) => s.reason === 'hard_bounce').length,
+        bounces: suppressions.filter((s: any) => s.reason === 'hard_bounce' || s.reason === 'bounced').length,
         unsubscribes: suppressions.filter((s: any) => s.reason === 'unsubscribed').length,
-        manual: suppressions.filter((s: any) => s.reason === 'manual_block').length
+        manual: suppressions.filter((s: any) => s.reason === 'manual_block').length,
     };
 
     return (
@@ -128,7 +137,7 @@ function StatCard({ icon, title, value, subtitle, color }: any) {
 }
 
 function Badge({ reason }: { reason: string }) {
-    if (reason === 'hard_bounce') return <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold uppercase">Hard Bounce</span>;
+    if (reason === 'hard_bounce' || reason === 'bounced') return <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold uppercase">Hard Bounce</span>;
     if (reason === 'unsubscribed') return <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold uppercase">Unsubscribed</span>;
     return <span className="px-3 py-1 bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-50 rounded-full text-xs font-bold uppercase">Manual block</span>;
 }

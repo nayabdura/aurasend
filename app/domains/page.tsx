@@ -1,27 +1,42 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import { requireAuth } from '@/lib/auth';
-import { Globe, ShieldCheck, ShieldAlert, CheckCircle, Search, Trash2, PlusCircle, AlertTriangle } from 'lucide-react';
-import db from '@/lib/db';
+import { Globe, ShieldCheck, ShieldAlert, Trash2, PlusCircle, AlertTriangle, Search } from 'lucide-react';
+import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DomainsHealthCenter() {
     const user = await requireAuth();
 
-    // Fetch domains based on role
-    const query = user.role === 'master'
-        ? 'SELECT d.*, w.name as workspace_name FROM domains d LEFT JOIN workspaces w ON d.workspace_id = w.id ORDER BY d.health_score ASC'
-        : 'SELECT * FROM domains WHERE workspace_id = ? ORDER BY health_score ASC';
+    let domains: any[] = [];
+    try {
+        const isMaster = user.role === 'master';
+        const list = await prisma.domain.findMany({
+            where: isMaster ? {} : { workspaceId: user.workspace_id || 1 },
+            include: { workspace: { select: { name: true } } },
+            orderBy: { healthScore: 'asc' },
+        });
 
-    const domains = user.role === 'master'
-        ? db.prepare(query).all()
-        : db.prepare(query).all(user.workspace_id || 1);
+        domains = list.map((d) => ({
+            id: d.id,
+            domain_name: d.domainName,
+            health_score: d.healthScore,
+            spf_status: d.spfStatus || 'pass',
+            dkim_status: d.dkimStatus || 'pass',
+            dmarc_status: d.dmarcStatus || 'pass',
+            is_safe_mode: d.isSafeMode ? 1 : 0,
+            workspace_name: d.workspace?.name || 'Global',
+        }));
+    } catch (e) {
+        console.error('[DomainsHealthCenter] Error fetching domains:', e);
+        domains = [];
+    }
 
     const stats = {
         total: domains.length,
         critical: domains.filter((d: any) => d.health_score < 70).length,
         healthy: domains.filter((d: any) => d.health_score >= 90).length,
-        safe_mode: domains.filter((d: any) => d.is_safe_mode === 1).length
+        safe_mode: domains.filter((d: any) => d.is_safe_mode === 1).length,
     };
 
     return (
