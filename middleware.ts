@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify, SignJWT } from 'jose';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_super_secret_key_change_in_production!';
+const JWT_SECRET = process.env.JWT_SECRET || 'coldmail_jwt_super_secret_2024_change_in_production!';
 const encodedSecret = new TextEncoder().encode(JWT_SECRET);
 
 interface JwtSession {
