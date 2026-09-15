@@ -19,7 +19,7 @@ export default async function SuppressionCenter() {
             id: s.id,
             domain_or_email: s.email,
             reason: s.reason,
-            created_at: s.createdAt,
+            created_at: s.createdAt ? s.createdAt.toISOString() : null,
             workspace_name: 'Global',
         }));
     } catch (e) {

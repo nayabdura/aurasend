@@ -45,8 +45,8 @@ export default async function AdminPage() {
             role: u.role,
             plan: u.plan,
             plan_status: u.planStatus,
-            created_at: u.createdAt,
-            last_login: u.lastLogin,
+            created_at: u.createdAt ? u.createdAt.toISOString() : null,
+            last_login: u.lastLogin ? u.lastLogin.toISOString() : null,
         }));
 
         const gmailAccounts = await prisma.gmailAccount.findMany({
@@ -72,7 +72,7 @@ export default async function AdminPage() {
             id: c.id,
             name: c.name,
             status: c.status,
-            created_at: c.createdAt,
+            created_at: c.createdAt ? c.createdAt.toISOString() : null,
             owner_email: c.user?.email || null,
         }));
 
@@ -85,7 +85,7 @@ export default async function AdminPage() {
             title: b.title,
             slug: b.slug,
             is_published: b.isPublished ? 1 : 0,
-            created_at: b.createdAt,
+            created_at: b.createdAt ? b.createdAt.toISOString() : null,
         }));
 
         const logs = await prisma.emailLog.findMany({
@@ -97,7 +97,7 @@ export default async function AdminPage() {
             type: l.type,
             recipient: l.messageId || 'N/A',
             status: l.type,
-            created_at: l.createdAt,
+            created_at: l.createdAt ? l.createdAt.toISOString() : null,
         }));
 
         totalLeads = await prisma.lead.count().catch(() => 0);

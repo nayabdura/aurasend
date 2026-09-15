@@ -33,7 +33,7 @@ export default async function SenderInfrastructurePage() {
             signature: g.signature,
             smtp_host: g.smtpHost,
             smtp_port: g.smtpPort,
-            createdAt: g.createdAt,
+            createdAt: g.createdAt ? g.createdAt.toISOString() : null,
         }));
     } catch (e) {
         console.error('[SenderInfrastructurePage] Error fetching accounts:', e);
