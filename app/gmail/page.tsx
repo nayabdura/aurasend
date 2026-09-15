@@ -10,7 +10,7 @@ export default async function SenderInfrastructurePage() {
 
     let accounts: any[] = [];
     try {
-        const isMaster = user.role === 'master';
+        const isMaster = ['MASTER', 'ADMIN'].includes(String(user.role || '').toUpperCase());
         const list = await prisma.gmailAccount.findMany({
             where: isMaster ? {} : { userId: user.id },
             orderBy: { id: 'desc' },

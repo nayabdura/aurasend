@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({
-      plan: user.role === 'master' ? 'master' : 'active',
+      plan: ['MASTER', 'ADMIN'].includes(String(user.role || '').toUpperCase()) ? 'master' : 'active',
       usage: usageData,
     });
   } catch (e: any) {

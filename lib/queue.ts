@@ -1,13 +1,10 @@
 /**
- * Queue Module — Direct In-Process Email Sending
- * - Uses the full renderTemplate function for proper personalization
- * - Handles all variables: {{first_name}}, {{last_name}}, {{company_name}}, {{website}}, spintax
- * - Generates live Gemini AI personalized emails on-the-fly for every lead
+ * Queue Module — Direct In-Process Email Sending via Prisma Client (Neon PostgreSQL Ready)
  */
 
 import 'server-only';
 import { log } from './logging';
-import db from './db';
+import prisma from './prisma';
 import { sendEmailViaGmail, renderTemplate, processHtmlBody } from './gmail';
 import { generatePersonalizedEmail } from './gemini';
 
@@ -42,18 +39,21 @@ async function processSingleSend(job: SendJobData) {
     const { leadId, accountId, templateId } = job;
 
     // ── Load lead ─────────────────────────────────────────────────────────────
-    const lead = db.prepare('SELECT * FROM leads WHERE id = ?').get(leadId) as any;
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     if (!lead) throw new Error(`Lead ${leadId} not found`);
 
     // ── Global bounce check ───────────────────────────────────────────────────
-    const globalBounce = db.prepare('SELECT id FROM global_suppression WHERE email = ?').get(lead.email) as any;
+    const globalBounce = await prisma.globalSuppression.findFirst({
+        where: { email: { equals: lead.email, mode: 'insensitive' } },
+        select: { id: true },
+    });
     if (globalBounce) throw new Error(`Lead ${lead.email} is globally suppressed`);
 
     // ── Load account ──────────────────────────────────────────────────────────
-    const account = db.prepare('SELECT * FROM gmail_accounts WHERE id = ?').get(accountId) as any;
+    const account = await prisma.gmailAccount.findUnique({ where: { id: accountId } });
     if (!account) throw new Error(`Account ${accountId} not found`);
     if (!['active', 'paused'].includes(account.status)) throw new Error(`Account ${account.email} is blocked (status: ${account.status}). Fix it in Gmail Settings.`);
-    if (account.sent_today >= account.daily_limit) throw new Error(`Daily limit reached for ${account.email} (${account.sent_today}/${account.daily_limit})`);
+    if (account.sentToday >= account.dailyLimit) throw new Error(`Daily limit reached for ${account.email} (${account.sentToday}/${account.dailyLimit})`);
 
     if (['bounced', 'unsubscribed', 'replied'].includes(lead.status)) {
         log('info', `Skipping ${lead.email} — status: ${lead.status}`);
@@ -61,51 +61,81 @@ async function processSingleSend(job: SendJobData) {
     }
 
     // ── Blacklist / Suppression check ─────────────────────────────────────────
-    const suppressed = db
-        .prepare('SELECT id FROM suppressions WHERE (workspace_id = ? OR workspace_id IS NULL) AND domain_or_email = ?')
-        .get(lead.workspace_id ?? account.workspace_id ?? 1, lead.email) as any;
+    const suppressed = await prisma.globalSuppression.findFirst({
+        where: { email: { equals: lead.email, mode: 'insensitive' } },
+        select: { id: true },
+    });
     if (suppressed) {
-        db.prepare("UPDATE leads SET status = 'unsubscribed' WHERE id = ?").run(lead.id);
+        await prisma.lead.update({
+            where: { id: lead.id },
+            data: { status: 'unsubscribed' },
+        });
         log('info', `Suppressed/Blacklisted: ${lead.email}`);
         return;
     }
 
-    const blacklisted = db.prepare('SELECT id FROM blacklist WHERE email = ?').get(lead.email);
-    if (blacklisted) {
-        db.prepare("UPDATE leads SET status = 'unsubscribed' WHERE id = ?").run(lead.id);
-        log('info', `Blacklisted: ${lead.email}`);
-        return;
-    }
+    // ── Format lead object for template rendering ──────────────────────────────
+    const leadObj = {
+        id: lead.id,
+        user_id: lead.userId,
+        workspace_id: lead.workspaceId || 1,
+        email: lead.email,
+        name: lead.name,
+        first_name: lead.firstName || (lead.name ? lead.name.split(' ')[0] : lead.email.split('@')[0]),
+        last_name: lead.lastName || (lead.name ? lead.name.split(' ').slice(1).join(' ') : ''),
+        company: lead.company,
+        company_name: lead.company,
+        website: lead.website,
+        intro: lead.intro,
+        status: lead.status,
+    };
+
+    // ── Format account object for email transport ─────────────────────────────
+    const accountObj = {
+        id: account.id,
+        user_id: account.userId,
+        workspace_id: account.workspaceId || 1,
+        email: account.email,
+        name: account.name || account.email.split('@')[0],
+        auth_method: account.authMethod,
+        client_id: account.clientId,
+        client_secret: account.clientSecret,
+        access_token_encrypted: account.accessTokenEncrypted,
+        refresh_token_encrypted: account.refreshTokenEncrypted,
+        app_password_encrypted: account.appPasswordEncrypted,
+        smtp_host: account.smtpHost,
+        smtp_port: account.smtpPort,
+        signature: account.signature,
+        sent_today: account.sentToday,
+        daily_limit: account.dailyLimit,
+        status: account.status,
+        is_connected: account.isConnected ? 1 : 0,
+    };
 
     // ── Load template or AI Personalized Content ──────────────────────────────
     let subject_raw = '';
     let body_raw = '';
 
-    let aiData: any = null;
-    if (lead.notes) {
-        try {
-            aiData = typeof lead.notes === 'string' ? JSON.parse(lead.notes) : lead.notes;
-        } catch (e) {}
-    }
-
-    if (aiData && (aiData.subject || aiData.body)) {
-        subject_raw = aiData.subject || 'Quick question';
-        body_raw = aiData.body || '';
-        log('info', `✨ Using pre-generated Gemini AI email for lead #${leadId} (${lead.email})`);
+    if (lead.intro) {
+        body_raw = lead.intro;
+        subject_raw = `Quick question for ${leadObj.first_name}`;
+        log('info', `✨ Using pre-generated AI intro for lead #${leadId} (${lead.email})`);
     } else if (process.env.GEMINI_API_KEY) {
-        // Generate live Gemini AI personalized email on-the-fly for THIS specific lead!
         log('info', `🤖 Generating live Gemini AI personalized email for lead #${leadId} (${lead.email})...`);
         try {
             const aiRes = await generatePersonalizedEmail(
-                lead.user_id || account.user_id || 1,
-                lead,
-                'Analyze prospect role & company to craft a unique, high-converting outreach email solving their lead gen & sales growth pain points.'
+                lead.userId || account.userId || 1,
+                leadObj,
+                'Analyze prospect role & company to craft a unique, high-converting outreach email.'
             );
             if (aiRes.success && aiRes.data) {
                 subject_raw = aiRes.data.subject;
                 body_raw = aiRes.data.body;
                 try {
-                    db.prepare('UPDATE leads SET notes = ? WHERE id = ?').run(JSON.stringify(aiRes.data), lead.id);
+                    await prisma.lead.update({
+                        where: { id: lead.id },
+                        data: { intro: aiRes.data.body },
+                    });
                 } catch (e) {}
             }
         } catch (aiErr: any) {
@@ -114,11 +144,11 @@ async function processSingleSend(job: SendJobData) {
     }
 
     if (!subject_raw && !body_raw && templateId) {
-        const tpl = db.prepare('SELECT * FROM templates WHERE id = ?').get(templateId) as any;
+        const tpl = await prisma.template.findUnique({ where: { id: templateId } });
         if (tpl && tpl.subject && tpl.body) {
             subject_raw = tpl.subject;
             body_raw = tpl.body;
-            log('info', `Using template #${templateId}: "${tpl.name}" — Subject: "${tpl.subject.substring(0, 50)}"`);
+            log('info', `Using template #${templateId}: "${tpl.name}"`);
         }
     }
 
@@ -131,8 +161,8 @@ async function processSingleSend(job: SendJobData) {
     let body = body_raw;
 
     // ── Render template with ALL personalization variables ────────────────────
-    subject = renderTemplate(subject, lead, account);
-    body = renderTemplate(body, lead, account);
+    subject = renderTemplate(subject, leadObj, accountObj);
+    body = renderTemplate(body, leadObj, accountObj);
 
     body = processHtmlBody(body);
 
@@ -141,61 +171,62 @@ async function processSingleSend(job: SendJobData) {
         ? `<div style="margin-top:20px; color:#555; font-size:13px;">${signatureHtml}</div>`
         : '';
 
-    const pixel = '';
-    const footer = '';
-
-    const fullHtml = `${body}${signature}${footer}${pixel}`;
+    const fullHtml = `${body}${signature}`;
 
     // ── Send ──────────────────────────────────────────────────────────────────
     try {
-        const msg = await sendEmailViaGmail(account, lead.email, subject, fullHtml);
+        const msg = await sendEmailViaGmail(accountObj, lead.email, subject, fullHtml);
         const now = Date.now();
 
-        const updateTransaction = db.transaction(() => {
-            db.prepare("UPDATE leads SET status='sent', sent_at=?, last_sent_at=?, thread_id=?, follow_up_count = follow_up_count + 1 WHERE id=?")
-                .run(now, now, msg.threadId || msg.id, lead.id);
+        await prisma.$transaction([
+            prisma.lead.update({
+                where: { id: lead.id },
+                data: {
+                    status: 'sent',
+                    sentAt: BigInt(now),
+                    lastSentAt: BigInt(now),
+                    threadId: msg.threadId || msg.id,
+                    followUpCount: { increment: 1 },
+                },
+            }),
+            prisma.gmailAccount.update({
+                where: { id: account.id },
+                data: { sentToday: { increment: 1 } },
+            }),
+            prisma.emailLog.create({
+                data: {
+                    userId: account.userId || 1,
+                    workspaceId: account.workspaceId || 1,
+                    gmailId: account.id,
+                    leadId: lead.id,
+                    type: 'sent',
+                    timestamp: BigInt(now),
+                    messageId: msg.threadId || msg.id,
+                },
+            }),
+        ]);
 
-            db.prepare('UPDATE gmail_accounts SET sent_today = sent_today + 1 WHERE id=?').run(account.id);
-
-            db.prepare(`
-                INSERT INTO email_logs 
-                (user_id, gmail_account_id, lead_id, campaign_id, recipient_email, subject, body, status, sent_at, thread_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'sent', ?, ?)
-            `).run(
-                account.user_id || 1,
-                account.id,
-                lead.id,
-                job.campaignId || null,
-                lead.email,
-                subject,
-                fullHtml,
-                now,
-                msg.threadId || msg.id
-            );
-        });
-
-        updateTransaction();
         log('info', `✅ Successfully sent email to ${lead.email} via ${account.email}`);
     } catch (err: any) {
         log('error', `Failed to send to ${lead.email} via ${account.email}: ${err.message}`);
 
-        db.prepare("UPDATE leads SET status='bounced' WHERE id=?").run(lead.id);
-
-        db.prepare(`
-            INSERT INTO email_logs 
-            (user_id, gmail_account_id, lead_id, campaign_id, recipient_email, subject, body, status, sent_at, error_message)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 'bounced', ?, ?)
-        `).run(
-            account.user_id || 1,
-            account.id,
-            lead.id,
-            job.campaignId || null,
-            lead.email,
-            subject,
-            fullHtml,
-            Date.now(),
-            err.message
-        );
+        await prisma.$transaction([
+            prisma.lead.update({
+                where: { id: lead.id },
+                data: { status: 'bounced' },
+            }),
+            prisma.emailLog.create({
+                data: {
+                    userId: account.userId || 1,
+                    workspaceId: account.workspaceId || 1,
+                    gmailId: account.id,
+                    leadId: lead.id,
+                    type: 'bounced',
+                    timestamp: BigInt(Date.now()),
+                    messageId: err.message,
+                },
+            }),
+        ]).catch(() => {});
 
         throw err;
     }
@@ -204,4 +235,3 @@ async function processSingleSend(job: SendJobData) {
 export async function initQueueWorker(): Promise<void> {
     log('info', 'Queue worker initialized');
 }
-

@@ -11,7 +11,7 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const unreadOnly = searchParams.get('unread') === 'true';
 
-        const isMaster = user.role === 'master';
+        const isMaster = ['MASTER', 'ADMIN'].includes(String(user.role || '').toUpperCase());
         const where: any = { replied: true };
         if (!isMaster) where.userId = user.id;
 

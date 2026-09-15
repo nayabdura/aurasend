@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
-import db from '@/lib/db';
+import prisma from '@/lib/prisma';
 import bcrypt from 'bcrypt';
 
 export async function PUT(req: Request) {
@@ -9,14 +9,19 @@ export async function PUT(req: Request) {
         const { currentPassword, newPassword } = await req.json();
 
         if (currentPassword && newPassword) {
-            // Let's verify password
-            const userRec = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(user.id) as any;
-            if (!userRec || !(await bcrypt.compare(currentPassword, userRec.password_hash))) {
+            const userRec = await prisma.user.findUnique({
+                where: { id: user.id },
+                select: { passwordHash: true }
+            });
+            if (!userRec || !(await bcrypt.compare(currentPassword, userRec.passwordHash))) {
                 return NextResponse.json({ error: 'Incorrect current password' }, { status: 400 });
             }
 
             const hashed = await bcrypt.hash(newPassword, 10);
-            db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hashed, user.id);
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { passwordHash: hashed }
+            });
             return NextResponse.json({ success: true, message: 'Password updated successfully' });
         }
 
@@ -29,22 +34,22 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
     try {
         const user = await requireAuth();
-
         const { currentPassword } = await req.json();
 
-        const userRec = db.prepare('SELECT password_hash, role FROM users WHERE id = ?').get(user.id) as any;
-        if (!userRec || !(await bcrypt.compare(currentPassword, userRec.password_hash))) {
+        const userRec = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { passwordHash: true, role: true }
+        });
+        if (!userRec || !(await bcrypt.compare(currentPassword, userRec.passwordHash))) {
             return NextResponse.json({ error: 'Incorrect password' }, { status: 400 });
         }
 
-        if (userRec.role === 'master') {
+        const roleStr = String(userRec.role).toUpperCase();
+        if (roleStr === 'MASTER') {
             return NextResponse.json({ error: 'Master account cannot be deleted' }, { status: 403 });
         }
 
-        db.transaction(() => {
-            db.prepare('DELETE FROM users WHERE id = ?').run(user.id);
-            // the db should cascade safely; if not, we can delete dependent records manually if needed.
-        })();
+        await prisma.user.delete({ where: { id: user.id } });
 
         const response = NextResponse.json({ success: true, message: 'Account deleted' });
         response.cookies.delete('auth_token');

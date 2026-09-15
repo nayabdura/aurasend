@@ -5,11 +5,23 @@ import db from '@/lib/db';
 
 export async function POST(req: Request) {
     try {
-        const { email, password, name } = await req.json();
+        const body = await req.json();
+        const rawEmail = body.email;
+        const password = body.password;
+        const name = body.name ? String(body.name).trim() : undefined;
 
-        if (!email || !password) {
+        if (!rawEmail || !password) {
             return NextResponse.json(
                 { error: 'Email and password required' },
+                { status: 400 }
+            );
+        }
+
+        const email = String(rawEmail).toLowerCase().trim();
+
+        if (password.length < 8) {
+            return NextResponse.json(
+                { error: 'Password must be at least 8 characters long' },
                 { status: 400 }
             );
         }
@@ -19,7 +31,7 @@ export async function POST(req: Request) {
         if (process.env.DATABASE_URL) {
             existing = await prisma.user.findUnique({ where: { email } });
         } else {
-            existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+            existing = db.prepare('SELECT id FROM users WHERE LOWER(email) = LOWER(?)').get(email);
         }
 
         if (existing) {
@@ -62,11 +74,11 @@ export async function POST(req: Request) {
                 to: email,
                 subject: 'AuraSend - Your Verification Code',
                 html: `
-                    <div style="font-family: sans-serif; max-w-md mx-auto p-4">
-                        <h2>Welcome to AuraSend!</h2>
-                        <p>Your email verification code is:</p>
-                        <h1 style="color: #4f46e5; letter-spacing: 5px; font-size: 32px;">${otp}</h1>
-                        <p>Please enter this code on the verification page to complete your registration.</p>
+                    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px;">
+                        <h2 style="color: #1e293b;">Welcome to AuraSend!</h2>
+                        <p style="color: #475569;">Your email verification code is:</p>
+                        <h1 style="color: #4f46e5; letter-spacing: 6px; font-size: 36px; text-align: center; margin: 20px 0;">${otp}</h1>
+                        <p style="color: #64748b; font-size: 14px;">Please enter this code on the verification page to complete your registration.</p>
                     </div>
                 `
             });
@@ -76,7 +88,6 @@ export async function POST(req: Request) {
             console.error('\n==== SMTP DELIVERY FAILED ====');
             if (e.message.includes('Invalid login') || e.message.includes('BadCredentials')) {
                 console.error('ERROR: Gmail Authentication Failed. You MUST use a 16-character App Password instead of your regular Google password.');
-                console.error('See: https://myaccount.google.com/apppasswords');
             } else {
                 console.error('SMTP Error:', e.message);
             }

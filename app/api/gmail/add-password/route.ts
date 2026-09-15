@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import db from '@/lib/db';
+import prisma from '@/lib/prisma';
 import { getUserId } from '@/lib/auth';
 import nodemailer from 'nodemailer';
+import { encryptSecret } from '@/lib/crypto';
 
 export async function POST(req: Request) {
     try {
@@ -27,7 +28,7 @@ export async function POST(req: Request) {
         const trimmedPassword = appPassword.trim().replace(/\s+/g, '');
 
         const host = smtpHost || 'smtp.gmail.com';
-        const port = smtpPort || 587;
+        const port = Number(smtpPort) || 587;
 
         // Verify SMTP credentials
         const transport = nodemailer.createTransport({
@@ -63,49 +64,43 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: errorMessage }, { status: 401 });
         }
 
-        // Check if account already exists for this user
-        const existing = db.prepare(
-            'SELECT id FROM gmail_accounts WHERE user_id = ? AND email = ?'
-        ).get(userId, email);
+        const encryptedPass = encryptSecret(trimmedPassword);
 
-        if (existing) {
-            // Update existing account credentials
-            db.prepare(`
-                UPDATE gmail_accounts 
-                SET auth_method = ?, app_password = ?, smtp_host = ?, smtp_port = ?, 
-                    daily_limit = ?, is_connected = 1, status = 'active',
-                    name = COALESCE(NULLIF(?, ''), name)
-                WHERE user_id = ? AND email = ?
-            `).run(authMethod, trimmedPassword, host, port, dailyLimit || 20, name || '', userId, email);
-
-            return NextResponse.json({ success: true, updated: true });
-        }
-
-        // Insert new account (no OAuth fields needed)
-        db.prepare(`
-            INSERT INTO gmail_accounts (
-                user_id, email, name, auth_method, app_password,
-                smtp_host, smtp_port, daily_limit, is_connected, status,
-                client_id, client_secret
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', '')
-        `).run(
-            userId,
-            email,
-            name || '',
-            authMethod,
-            trimmedPassword,
-            host,
-            port,
-            dailyLimit || 20,
-            1,
-            'active'
-        );
+        // Upsert Gmail Account via Prisma
+        await prisma.gmailAccount.upsert({
+            where: {
+                userId_email: { userId, email },
+            },
+            create: {
+                userId,
+                email,
+                name: name || email.split('@')[0],
+                authMethod,
+                appPasswordEncrypted: encryptedPass,
+                smtpHost: host,
+                smtpPort: port,
+                dailyLimit: Number(dailyLimit) || 20,
+                status: 'active',
+                isConnected: true,
+                workspaceId: 1,
+            },
+            update: {
+                authMethod,
+                appPasswordEncrypted: encryptedPass,
+                smtpHost: host,
+                smtpPort: port,
+                dailyLimit: Number(dailyLimit) || 20,
+                status: 'active',
+                isConnected: true,
+                name: name || undefined,
+            },
+        });
 
         return NextResponse.json({ success: true });
     } catch (e: any) {
-        console.error('Add password account error:', e);
+        console.error('[Add Password Account Error]:', e);
         return NextResponse.json(
-            { error: 'An internal server error occurred.' },
+            { error: e.message || 'An internal server error occurred.' },
             { status: 500 }
         );
     }

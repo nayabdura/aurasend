@@ -1,6 +1,8 @@
 import 'server-only';
 
 import db from './db';
+import prisma from './prisma';
+import { encryptSecret } from './crypto';
 import { log } from './logging';
 import { verifyEmail } from './verification';
 import { eventBus } from './events';
@@ -92,26 +94,29 @@ export function renderTemplate(text: string, lead: any, account: any, introLine:
 export interface GmailAccount {
     id: number;
     user_id: number;
-    workspace_id: number;
+    workspace_id?: number;
     email: string;
-    client_id: string;
-    client_secret: string;
-    access_token: string;
-    refresh_token: string;
-    expiry_date: number;
+    client_id?: string | null;
+    client_secret?: string | null;
+    access_token?: string | null;
+    refresh_token?: string | null;
+    access_token_encrypted?: string | null;
+    refresh_token_encrypted?: string | null;
+    app_password_encrypted?: string | null;
+    expiry_date?: number | bigint | null;
     daily_limit: number;
     sent_today: number;
-    last_sent_date: string;
-    status: string;
-    is_connected: number;
-    warmup_enabled: number;
-    warmup_day: number;
-    signature?: string;
+    last_sent_date?: string | null;
+    status?: string;
+    is_connected?: number | boolean;
+    warmup_enabled?: number | boolean;
+    warmup_day?: number;
+    signature?: string | null;
     auth_method: string;
-    app_password?: string;
+    app_password?: string | null;
     smtp_host?: string;
     smtp_port?: number;
-    last_daily_reset_at?: number;
+    last_daily_reset_at?: number | bigint;
 }
 
 export interface Lead {
@@ -193,7 +198,8 @@ export async function getTokens(code: string, clientId: string, clientSecret: st
 }
 
 export async function refreshAccessToken(account: GmailAccount): Promise<string> {
-    if (Date.now() < account.expiry_date - 300000) {
+    const expiryDate = Number(account.expiry_date || 0);
+    if (account.access_token && expiryDate > 0 && Date.now() < expiryDate - 300000) {
         return account.access_token;
     }
 
@@ -204,9 +210,9 @@ export async function refreshAccessToken(account: GmailAccount): Promise<string>
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({
-                client_id: account.client_id,
-                client_secret: account.client_secret,
-                refresh_token: account.refresh_token,
+                client_id: account.client_id || '',
+                client_secret: account.client_secret || '',
+                refresh_token: account.refresh_token || '',
                 grant_type: 'refresh_token'
             })
         });
@@ -218,14 +224,31 @@ export async function refreshAccessToken(account: GmailAccount): Promise<string>
         const expiresIn = data.expires_in;
         const newExpiry = Date.now() + (expiresIn * 1000);
 
-        db.prepare('UPDATE gmail_accounts SET access_token = ?, expiry_date = ? WHERE id = ?')
-            .run(newAccessToken, newExpiry, account.id);
+        if (process.env.DATABASE_URL) {
+            await prisma.gmailAccount.update({
+                where: { id: account.id },
+                data: {
+                    accessTokenEncrypted: encryptSecret(newAccessToken),
+                    expiryDate: BigInt(newExpiry),
+                }
+            }).catch(() => {});
+        } else {
+            db.prepare('UPDATE gmail_accounts SET access_token = ?, expiry_date = ? WHERE id = ?')
+                .run(newAccessToken, newExpiry, account.id);
+        }
 
         return newAccessToken;
     } catch (error: any) {
         log('error', `Failed to refresh token: ${error.message}`);
         // Mark as auth_error AND set is_connected = 0 so the UI shows the reconnect button
-        db.prepare("UPDATE gmail_accounts SET status = 'auth_error', is_connected = 0 WHERE id = ?").run(account.id);
+        if (process.env.DATABASE_URL) {
+            await prisma.gmailAccount.update({
+                where: { id: account.id },
+                data: { status: 'auth_error', isConnected: false }
+            }).catch(() => {});
+        } else {
+            db.prepare("UPDATE gmail_accounts SET status = 'auth_error', is_connected = 0 WHERE id = ?").run(account.id);
+        }
         throw error;
     }
 }
@@ -874,7 +897,7 @@ export function checkAndResetDailyLimits() {
     const accounts = db.prepare("SELECT * FROM gmail_accounts").all() as GmailAccount[];
 
     for (const account of accounts) {
-        const lastReset = account.last_daily_reset_at || 0;
+        const lastReset = Number(account.last_daily_reset_at || 0);
         if (lastReset === 0) {
             // New account or newly migrated: initialize timer without wiping current sent_today
             db.prepare("UPDATE gmail_accounts SET last_daily_reset_at = ? WHERE id = ?").run(now, account.id);

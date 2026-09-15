@@ -11,7 +11,7 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const campaignId = searchParams.get('campaign_id');
 
-        const isMaster = user.role === 'master';
+        const isMaster = ['MASTER', 'ADMIN'].includes(String(user.role || '').toUpperCase());
         const where: any = {};
         if (campaignId) {
             where.campaignId = Number(campaignId);
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 
         if (!campaign_id) return NextResponse.json({ error: 'campaign_id required' }, { status: 400 });
 
-        const isMaster = user.role === 'master';
+        const isMaster = ['MASTER', 'ADMIN'].includes(String(user.role || '').toUpperCase());
         const camp = await prisma.campaign.findFirst({
             where: isMaster ? { id: Number(campaign_id) } : { id: Number(campaign_id), userId: user.id },
             select: { id: true },

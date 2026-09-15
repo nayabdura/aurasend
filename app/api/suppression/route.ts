@@ -1,16 +1,29 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
-import db, { suppressEmail, isEmailSuppressed } from '@/lib/db';
+import prisma from '@/lib/prisma';
+import { suppressEmail } from '@/lib/db';
 
 // GET — list all suppressed emails (user's own)
 export async function GET(request: Request) {
     try {
         const user = await requireAuth();
+        const isMaster = ['MASTER', 'ADMIN'].includes(String(user.role || '').toUpperCase());
 
-        // Master sees all, users see only their own
-        const suppressed = user.role === 'master'
-            ? db.prepare('SELECT * FROM global_suppression ORDER BY created_at DESC LIMIT 500').all()
-            : db.prepare('SELECT * FROM global_suppression WHERE user_id = ? ORDER BY created_at DESC LIMIT 500').all(user.id);
+        const list = await prisma.globalSuppression.findMany({
+            where: isMaster ? {} : { userId: user.id },
+            orderBy: { createdAt: 'desc' },
+            take: 500,
+        });
+
+        const suppressed = list.map((s) => ({
+            id: s.id,
+            email: s.email,
+            domain: s.domain,
+            reason: s.reason,
+            user_id: s.userId,
+            campaign_id: s.campaignId,
+            created_at: s.createdAt,
+        }));
 
         return NextResponse.json({ suppressed });
     } catch (error: any) {
@@ -35,7 +48,7 @@ export async function POST(request: Request) {
         }
 
         for (const email of emails) {
-            suppressEmail(email.trim().toLowerCase(), data.reason || 'manual', user.id);
+            await suppressEmail(email.trim().toLowerCase(), data.reason || 'manual', user.id);
         }
 
         return NextResponse.json({ success: true, count: emails.length });
@@ -48,11 +61,16 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
     try {
         const user = await requireAuth();
-        if (user.role !== 'master') {
+        const isMaster = ['MASTER', 'ADMIN'].includes(String(user.role || '').toUpperCase());
+        if (!isMaster) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
         const { email } = await request.json();
-        db.prepare('DELETE FROM global_suppression WHERE LOWER(email) = LOWER(?)').run(email);
+        if (email) {
+            await prisma.globalSuppression.deleteMany({
+                where: { email: { equals: email.trim().toLowerCase(), mode: 'insensitive' } },
+            });
+        }
         return NextResponse.json({ success: true });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });

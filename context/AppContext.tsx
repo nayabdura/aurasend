@@ -93,5 +93,5 @@ export function useCurrentUser(): User | null {
 
 /** Shortcut: check if user is master/admin */
 export function useIsMaster(): boolean {
-  return useApp().user?.role === 'master';
+  return ['MASTER', 'ADMIN'].includes(String(useApp().user?.role || '').toUpperCase());
 }

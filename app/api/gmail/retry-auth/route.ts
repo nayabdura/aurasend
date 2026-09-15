@@ -1,18 +1,28 @@
-
 import { NextResponse } from 'next/server';
-import db from '@/lib/db';
+import prisma from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
-import { GmailAccount } from '@/lib/gmail';
+import { decryptSecret, encryptSecret } from '@/lib/crypto';
 
 export async function POST() {
     try {
         const user = await getCurrentUser();
         if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
+        const isMaster = ['MASTER', 'ADMIN'].includes(String(user.role || '').toUpperCase());
+
         // Get all auth_error accounts for this user (or all if master)
-        const accounts: GmailAccount[] = user.role === 'master'
-            ? db.prepare("SELECT * FROM gmail_accounts WHERE status = 'auth_error' OR (is_connected = 0 AND status != 'disconnected' AND status != 'deleted')").all() as GmailAccount[]
-            : db.prepare("SELECT * FROM gmail_accounts WHERE user_id = ? AND (status = 'auth_error' OR (is_connected = 0 AND status != 'disconnected' AND status != 'deleted'))").all(user.id) as GmailAccount[];
+        const accounts = await prisma.gmailAccount.findMany({
+            where: {
+                ...(isMaster ? {} : { userId: user.id }),
+                OR: [
+                    { status: 'auth_error' },
+                    {
+                        isConnected: false,
+                        status: { notIn: ['disconnected', 'deleted'] }
+                    }
+                ]
+            }
+        });
 
         if (accounts.length === 0) {
             return NextResponse.json({ message: 'No accounts need reconnection.', fixed: 0, failed: 0, needsOAuth: [] });
@@ -24,27 +34,32 @@ export async function POST() {
 
         for (const account of accounts) {
             // Only OAuth accounts have refresh tokens to retry
-            if (account.auth_method !== 'oauth') {
-                // SMTP / App Password — just re-activate them, credentials are static
-                db.prepare("UPDATE gmail_accounts SET status = 'active', is_connected = 1 WHERE id = ?").run(account.id);
+            if (account.authMethod !== 'oauth') {
+                // SMTP / App Password — just re-activate them
+                await prisma.gmailAccount.update({
+                    where: { id: account.id },
+                    data: { status: 'active', isConnected: true }
+                });
                 fixed++;
                 continue;
             }
 
-            if (!account.refresh_token) {
+            const refreshToken = account.refreshTokenEncrypted ? decryptSecret(account.refreshTokenEncrypted) : null;
+
+            if (!refreshToken || !account.clientId || !account.clientSecret) {
                 needsOAuth.push(account.email);
                 continue;
             }
 
-            // Attempt to refresh the token using the stored refresh_token
+            // Attempt to refresh the token using stored refresh_token
             try {
                 const res = await fetch('https://oauth2.googleapis.com/token', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: new URLSearchParams({
-                        client_id: account.client_id,
-                        client_secret: account.client_secret,
-                        refresh_token: account.refresh_token,
+                        client_id: account.clientId,
+                        client_secret: account.clientSecret,
+                        refresh_token: refreshToken,
                         grant_type: 'refresh_token',
                     }),
                 });
@@ -52,17 +67,21 @@ export async function POST() {
                 const data = await res.json();
 
                 if (data.error) {
-                    // Token is revoked or invalid — needs full re-auth
                     needsOAuth.push(account.email);
                     failed++;
                 } else {
-                    // Success — update token and mark active
-                    const newExpiry = Date.now() + ((data.expires_in || 3600) * 1000);
-                    db.prepare(`
-                        UPDATE gmail_accounts 
-                        SET access_token = ?, expiry_date = ?, status = 'active', is_connected = 1
-                        WHERE id = ?
-                    `).run(data.access_token, newExpiry, account.id);
+                    const newExpiry = BigInt(Date.now() + ((data.expires_in || 3600) * 1000));
+                    const newAccessTokenEncrypted = encryptSecret(data.access_token);
+
+                    await prisma.gmailAccount.update({
+                        where: { id: account.id },
+                        data: {
+                            accessTokenEncrypted: newAccessTokenEncrypted,
+                            expiryDate: newExpiry,
+                            status: 'active',
+                            isConnected: true,
+                        }
+                    });
                     fixed++;
                 }
             } catch (e: any) {
@@ -73,6 +92,7 @@ export async function POST() {
 
         return NextResponse.json({ fixed, failed, needsOAuth, total: accounts.length });
     } catch (e: any) {
+        console.error('[retry-auth] Error:', e);
         return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }

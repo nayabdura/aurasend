@@ -8,9 +8,9 @@ export const dynamic = 'force-dynamic';
 export default async function DomainsHealthCenter() {
     const user = await requireAuth();
 
+    const isMaster = ['MASTER', 'ADMIN'].includes(String(user.role || '').toUpperCase());
     let domains: any[] = [];
     try {
-        const isMaster = user.role === 'master';
         const list = await prisma.domain.findMany({
             where: isMaster ? {} : { workspaceId: user.workspace_id || 1 },
             include: { workspace: { select: { name: true } } },
@@ -81,14 +81,14 @@ export default async function DomainsHealthCenter() {
                                     <th className="py-4 px-6">Domain</th>
                                     <th className="py-4 px-6">Health Score</th>
                                     <th className="py-4 px-6">DNS Records</th>
-                                    {user.role === 'master' && <th className="py-4 px-6">Workspace</th>}
+                                    {isMaster && <th className="py-4 px-6">Workspace</th>}
                                     <th className="py-4 px-6 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 text-slate-700 dark:text-zinc-50 text-sm">
                                 {domains.length === 0 ? (
                                     <tr>
-                                        <td colSpan={user.role === 'master' ? 5 : 4} className="py-12 text-center text-slate-500 dark:text-zinc-50">
+                                        <td colSpan={isMaster ? 5 : 4} className="py-12 text-center text-slate-500 dark:text-zinc-50">
                                             No domains attached. Connect Gmail accounts or manually add a checking domain.
                                         </td>
                                     </tr>
@@ -104,7 +104,7 @@ export default async function DomainsHealthCenter() {
                                                 <small className={`px-2 py-0.5 rounded font-bold ${d.dkim_status === 'pass' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>DKIM</small>
                                                 <small className={`px-2 py-0.5 rounded font-bold ${d.dmarc_status === 'pass' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>DMARC</small>
                                             </td>
-                                            {user.role === 'master' && (
+                                            {isMaster && (
                                                 <td className="py-4 px-6 text-slate-500 dark:text-zinc-50">{d.workspace_name || 'Global'}</td>
                                             )}
                                             <td className="py-4 px-6 text-right flex justify-end gap-2">

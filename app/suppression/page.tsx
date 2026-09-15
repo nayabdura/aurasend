@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 export default async function SuppressionCenter() {
     const user = await requireAuth();
 
+    const isMaster = ['MASTER', 'ADMIN'].includes(String(user.role || '').toUpperCase());
     let suppressions: any[] = [];
     try {
         const list = await prisma.globalSuppression.findMany({
@@ -75,14 +76,14 @@ export default async function SuppressionCenter() {
                                     <th className="py-4 px-6">Domain / Email</th>
                                     <th className="py-4 px-6">Reason</th>
                                     <th className="py-4 px-6">Date Added</th>
-                                    {user.role === 'master' && <th className="py-4 px-6">Workspace</th>}
+                                    {isMaster && <th className="py-4 px-6">Workspace</th>}
                                     <th className="py-4 px-6 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 text-slate-700 dark:text-zinc-50 text-sm">
                                 {suppressions.length === 0 ? (
                                     <tr>
-                                        <td colSpan={user.role === 'master' ? 5 : 4} className="py-12 text-center text-slate-500 dark:text-zinc-50">
+                                        <td colSpan={isMaster ? 5 : 4} className="py-12 text-center text-slate-500 dark:text-zinc-50">
                                             No blocks found. Your lists are clean!
                                         </td>
                                     </tr>
@@ -94,7 +95,7 @@ export default async function SuppressionCenter() {
                                                 <Badge reason={s.reason} />
                                             </td>
                                             <td className="py-4 px-6 text-slate-500 dark:text-zinc-50">{new Date(s.created_at).toLocaleDateString()}</td>
-                                            {user.role === 'master' && (
+                                            {isMaster && (
                                                 <td className="py-4 px-6 text-slate-500 dark:text-zinc-50">{s.workspace_name || 'Global'}</td>
                                             )}
                                             <td className="py-4 px-6 text-right">

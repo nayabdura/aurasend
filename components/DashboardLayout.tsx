@@ -163,7 +163,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     );
                 })}
 
-                {user?.role === 'master' && (
+                {['MASTER', 'ADMIN'].includes(String(user?.role || '').toUpperCase()) && (
                     <>
                         {(isMobile || sidebarOpen) && <div className="pt-3 pb-1 px-3"><p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Admin</p></div>}
                         <button

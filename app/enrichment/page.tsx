@@ -10,7 +10,7 @@ export default async function EnrichmentPage() {
 
     let contacts: any[] = [];
     try {
-        const isMaster = user.role === 'master';
+        const isMaster = ['MASTER', 'ADMIN'].includes(String(user.role || '').toUpperCase());
         const list = await prisma.contact.findMany({
             where: isMaster ? {} : { userId: user.id },
             orderBy: { id: 'desc' },
