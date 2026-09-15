@@ -49,9 +49,11 @@ export async function POST(req: Request) {
 
     } catch (error: any) {
         console.error('[AI Chat Route Error]:', error);
+        const user = await getCurrentUser().catch(() => null);
+        const fallbackReply = getFallbackReply('', user?.name || user?.email);
         return NextResponse.json({
             success: true,
-            reply: "I encountered a minor issue processing your request right now. You can navigate directly to [Campaigns](/campaigns) or [Email Accounts](/gmail) to manage your outreach!"
+            reply: fallbackReply
         });
     }
 }

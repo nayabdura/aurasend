@@ -6,15 +6,38 @@ export async function GET() {
     try {
         const userId = await getEffectiveUserId();
 
-        let query = "SELECT * FROM leads";
-        const params: any[] = [];
-        if (userId) {
-            query += " WHERE user_id = ?";
-            params.push(userId);
-        }
-        query += " ORDER BY id DESC";
+        let leads: any[] = [];
 
-        const leads = db.prepare(query).all(...params);
+        if (process.env.DATABASE_URL) {
+            const prisma = (await import('@/lib/prisma')).default;
+            const where: any = {};
+            if (userId) where.userId = userId;
+            const list = await prisma.lead.findMany({
+                where,
+                orderBy: { id: 'desc' },
+            });
+            leads = list.map((l) => ({
+                id: l.id,
+                name: l.name,
+                email: l.email,
+                website: l.website,
+                company: l.company,
+                lead_type: l.leadType,
+                status: l.status,
+                sent_at: l.sentAt ? Number(l.sentAt) : null,
+                opened_at: l.openedAt ? Number(l.openedAt) : null,
+                replied_at: l.repliedAt ? Number(l.repliedAt) : null,
+            }));
+        } else {
+            let query = "SELECT * FROM leads";
+            const params: any[] = [];
+            if (userId) {
+                query += " WHERE user_id = ?";
+                params.push(userId);
+            }
+            query += " ORDER BY id DESC";
+            leads = db.prepare(query).all(...params);
+        }
 
         // Generate CSV with timestamps
         const header = 'Name,Email,Website,Company,Type,Status,Sent At,Opened At,Replied At,Followup1 At,Followup2 At\n';

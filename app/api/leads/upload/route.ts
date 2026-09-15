@@ -54,35 +54,14 @@ export async function POST(req: Request) {
         }
 
         const campaignIdInt = campaign_id ? parseInt(campaign_id) : null;
+        let addedCount = 0;
 
-        // Use manual Check + Insert/Update to avoid SQLite constraint mismatch errors 
-        // if the database table was created before the UNIQUE index was added.
-        const checkStmt = db.prepare('SELECT id FROM leads WHERE user_id = ? AND email = ?');
+        if (process.env.DATABASE_URL) {
+            const prisma = (await import('@/lib/prisma')).default;
+            const { syncTableSequence } = await import('@/lib/dbSequenceSync');
 
-        const updateStmt = db.prepare(`
-            UPDATE leads SET 
-                campaign_id = COALESCE(@campaign_id, campaign_id),
-                status = 'pending',
-                is_valid = 1,
-                name = CASE WHEN @name != '' THEN @name ELSE name END,
-                company = CASE WHEN @company != '' THEN @company ELSE company END,
-                current_role = CASE WHEN @current_role != '' THEN @current_role ELSE current_role END,
-                niche = CASE WHEN @niche != '' THEN @niche ELSE niche END,
-                previous_work = CASE WHEN @previous_work != '' THEN @previous_work ELSE previous_work END
-            WHERE id = @id
-        `);
-
-        const insertStmt = db.prepare(`
-            INSERT INTO leads (user_id, name, email, website, company, intro, lead_type, status, campaign_id, current_role, niche, previous_work)
-            VALUES (@user_id, @name, @email, @website, @company, @intro, @type, 'pending', @campaign_id, @current_role, @niche, @previous_work)
-        `);
-
-        const insertTransaction = db.transaction((rows: any[]) => {
-            let addedCount = 0;
-
-            for (const row of rows) {
-                // Support various header capitalizations
-                const email = (row.email || row.Email || row.EMAIL || '').trim();
+            for (const row of records) {
+                const email = (row.email || row.Email || row.EMAIL || '').trim().toLowerCase();
                 if (!email || !email.includes('@')) continue;
 
                 const firstName = (row.first_name || row['first_name'] || row['First Name'] || row.firstName || '').trim();
@@ -108,48 +87,142 @@ export async function POST(req: Request) {
                     else intro = 'I found you online';
                 }
 
-                try {
-                    const existing = checkStmt.get(userId, email) as any;
+                const upsertData = {
+                    where: {
+                        userId_email: { userId, email }
+                    },
+                    create: {
+                        userId,
+                        email,
+                        name: name || undefined,
+                        company: company || undefined,
+                        website: website || undefined,
+                        intro: intro || undefined,
+                        leadType: type || 'client',
+                        campaignId: campaignIdInt || undefined,
+                        currentRole: currentRole || undefined,
+                        niche: niche || undefined,
+                        previousWork: previousWork || undefined,
+                        status: 'pending',
+                        isValid: true,
+                    },
+                    update: {
+                        campaignId: campaignIdInt || undefined,
+                        name: name || undefined,
+                        company: company || undefined,
+                        currentRole: currentRole || undefined,
+                        niche: niche || undefined,
+                        previousWork: previousWork || undefined,
+                        status: 'pending',
+                        isValid: true,
+                    }
+                };
 
-                    if (existing) {
-                        // Update existing lead
-                        updateStmt.run({
-                            id: existing.id,
-                            campaign_id: campaignIdInt,
-                            name,
-                            company,
-                            current_role: currentRole,
-                            niche,
-                            previous_work: previousWork,
-                        });
+                try {
+                    await prisma.lead.upsert(upsertData);
+                    addedCount++;
+                } catch (err: any) {
+                    if (err?.code === 'P2002' || String(err?.message).includes('Unique constraint failed') || String(err?.message).includes('leads_pkey')) {
+                        await syncTableSequence('leads');
+                        await prisma.lead.upsert(upsertData);
                         addedCount++;
                     } else {
-                        // Insert new lead
-                        insertStmt.run({
-                            user_id: userId,
-                            name,
-                            email,
-                            website,
-                            company,
-                            intro,
-                            type: type || 'client',
-                            campaign_id: campaignIdInt,
-                            current_role: currentRole,
-                            niche,
-                            previous_work: previousWork,
-                        });
-                        addedCount++;
+                        console.error('Lead row error:', err.message);
                     }
-                } catch (e: any) {
-                    console.error('Row error:', e.message, row);
                 }
             }
-            return { addedCount, total: rows.length };
-        });
 
-        const result = insertTransaction(records);
+            return NextResponse.json({ success: true, added: addedCount, total: records.length });
+        } else {
+            // Local SQLite fallback
+            const checkStmt = db.prepare('SELECT id FROM leads WHERE user_id = ? AND email = ?');
 
-        return NextResponse.json({ success: true, added: result.addedCount, total: result.total });
+            const updateStmt = db.prepare(`
+                UPDATE leads SET 
+                    campaign_id = COALESCE(@campaign_id, campaign_id),
+                    status = 'pending',
+                    is_valid = 1,
+                    name = CASE WHEN @name != '' THEN @name ELSE name END,
+                    company = CASE WHEN @company != '' THEN @company ELSE company END,
+                    current_role = CASE WHEN @current_role != '' THEN @current_role ELSE current_role END,
+                    niche = CASE WHEN @niche != '' THEN @niche ELSE niche END,
+                    previous_work = CASE WHEN @previous_work != '' THEN @previous_work ELSE previous_work END
+                WHERE id = @id
+            `);
+
+            const insertStmt = db.prepare(`
+                INSERT INTO leads (user_id, name, email, website, company, intro, lead_type, status, campaign_id, current_role, niche, previous_work)
+                VALUES (@user_id, @name, @email, @website, @company, @intro, @type, 'pending', @campaign_id, @current_role, @niche, @previous_work)
+            `);
+
+            const insertTransaction = db.transaction((rows: any[]) => {
+                for (const row of rows) {
+                    const email = (row.email || row.Email || row.EMAIL || '').trim();
+                    if (!email || !email.includes('@')) continue;
+
+                    const firstName = (row.first_name || row['first_name'] || row['First Name'] || row.firstName || '').trim();
+                    const lastName = (row.last_name || row['last_name'] || row['Last Name'] || row.lastName || '').trim();
+                    let name = (row.name || row.Name || row.NAME || '').trim();
+                    if (!name && (firstName || lastName)) {
+                        name = `${firstName} ${lastName}`.trim();
+                    }
+                    const company = (row.company || row.Company || row.COMPANY || row['Company Name'] || '').trim();
+                    const website = (row.website || row.Website || row.WEBSITE || row['Website URL'] || '').trim();
+                    const currentRole = (row.current_role || row['current_role'] || row['Current Role'] || row.role || row.Role || '').trim();
+                    const niche = (row.niche || row.Niche || row.NICHE || row.industry || row.Industry || '').trim();
+                    const previousWork = (
+                        row.previous_work || row['Previous Work'] || row.prev_work ||
+                        row.previous_or_current_work || row['Previous or Current Work'] ||
+                        row['Previous Work'] || row['Current Work'] || row.previousWork || ''
+                    ).trim();
+
+                    let intro = (row.intro || row.Intro || '').trim();
+                    if (!intro) {
+                        if (website) intro = `I checked out ${website}`;
+                        else if (company) intro = `I noticed ${company} is doing great work`;
+                        else intro = 'I found you online';
+                    }
+
+                    try {
+                        const existing = checkStmt.get(userId, email) as any;
+
+                        if (existing) {
+                            updateStmt.run({
+                                id: existing.id,
+                                campaign_id: campaignIdInt,
+                                name,
+                                company,
+                                current_role: currentRole,
+                                niche,
+                                previous_work: previousWork,
+                            });
+                            addedCount++;
+                        } else {
+                            insertStmt.run({
+                                user_id: userId,
+                                name,
+                                email,
+                                website,
+                                company,
+                                intro,
+                                type: type || 'client',
+                                campaign_id: campaignIdInt,
+                                current_role: currentRole,
+                                niche,
+                                previous_work: previousWork,
+                            });
+                            addedCount++;
+                        }
+                    } catch (e: any) {
+                        console.error('Row error:', e.message, row);
+                    }
+                }
+                return { addedCount, total: rows.length };
+            });
+
+            const result = insertTransaction(records);
+            return NextResponse.json({ success: true, added: result.addedCount, total: result.total });
+        }
     } catch (e: any) {
         // Re-throw Next.js internal errors (redirect, notFound, etc.) so the framework handles them
         if (e?.digest?.startsWith('NEXT_REDIRECT') || e?.digest?.startsWith('NEXT_NOT_FOUND')) throw e;

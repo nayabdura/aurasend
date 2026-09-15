@@ -48,30 +48,22 @@ export async function POST(req: Request) {
         const companyIdx = colIndex(['company', 'company name', 'organization', 'org']);
         const roleIdx = colIndex(['current_role', 'role', 'job_title', 'job title', 'title', 'position']);
 
-        const insertStmt = db.prepare(`
-            INSERT OR IGNORE INTO contacts (user_id, email, first_name, last_name, company, current_role, reply_status)
-            VALUES (?, ?, ?, ?, ?, ?, 'none')
-        `);
-
-        const checkStmt = db.prepare(`SELECT id FROM contacts WHERE user_id = ? AND email = ?`);
-
         let added = 0;
         let skipped = 0;
         let invalid = 0;
         const errors: string[] = [];
 
-        // Parse each data row
-        const insertMany = db.transaction(() => {
+        if (process.env.DATABASE_URL) {
+            const prisma = (await import('@/lib/prisma')).default;
+            const { syncTableSequence } = await import('@/lib/dbSequenceSync');
+
             for (let i = 1; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if (!line) continue;
 
-                // Handle quoted CSV values
                 const cols = parseCSVRow(line);
-
                 const rawEmail = (cols[emailIdx] || '').trim().toLowerCase().replace(/["']/g, '');
 
-                // Validate email format
                 if (!rawEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)) {
                     invalid++;
                     if (errors.length < 5) errors.push(`Row ${i + 1}: invalid email "${rawEmail}"`);
@@ -83,19 +75,83 @@ export async function POST(req: Request) {
                 const company = companyIdx >= 0 ? (cols[companyIdx] || '').trim().replace(/["']/g, '') : '';
                 const role = roleIdx >= 0 ? (cols[roleIdx] || '').trim().replace(/["']/g, '') : '';
 
-                // Check if already exists
-                const existing = checkStmt.get(userId, rawEmail);
-                if (existing) {
-                    skipped++;
-                    continue;
+                const upsertData = {
+                    where: {
+                        userId_email: {
+                            userId: userId || 1,
+                            email: rawEmail,
+                        }
+                    },
+                    create: {
+                        userId: userId || 1,
+                        email: rawEmail,
+                        firstName: firstName || undefined,
+                        lastName: lastName || undefined,
+                        company: company || undefined,
+                        currentRole: role || undefined,
+                        replyStatus: 'none',
+                    },
+                    update: {
+                        firstName: firstName || undefined,
+                        lastName: lastName || undefined,
+                        company: company || undefined,
+                        currentRole: role || undefined,
+                    }
+                };
+
+                try {
+                    await prisma.contact.upsert(upsertData);
+                    added++;
+                } catch (err: any) {
+                    if (err?.code === 'P2002' || String(err?.message).includes('Unique constraint failed') || String(err?.message).includes('contacts_pkey')) {
+                        await syncTableSequence('contacts');
+                        await prisma.contact.upsert(upsertData);
+                        added++;
+                    } else {
+                        console.error('Contact row upload error:', err.message);
+                    }
                 }
-
-                insertStmt.run(userId, rawEmail, firstName, lastName, company, role);
-                added++;
             }
-        });
+        } else {
+            const insertStmt = db.prepare(`
+                INSERT OR IGNORE INTO contacts (user_id, email, first_name, last_name, company, current_role, reply_status)
+                VALUES (?, ?, ?, ?, ?, ?, 'none')
+            `);
 
-        insertMany();
+            const checkStmt = db.prepare(`SELECT id FROM contacts WHERE user_id = ? AND email = ?`);
+
+            const insertMany = db.transaction(() => {
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+
+                    const cols = parseCSVRow(line);
+                    const rawEmail = (cols[emailIdx] || '').trim().toLowerCase().replace(/["']/g, '');
+
+                    if (!rawEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)) {
+                        invalid++;
+                        if (errors.length < 5) errors.push(`Row ${i + 1}: invalid email "${rawEmail}"`);
+                        continue;
+                    }
+
+                    const firstName = firstNameIdx >= 0 ? (cols[firstNameIdx] || '').trim().replace(/["']/g, '') : '';
+                    const lastName = lastNameIdx >= 0 ? (cols[lastNameIdx] || '').trim().replace(/["']/g, '') : '';
+                    const company = companyIdx >= 0 ? (cols[companyIdx] || '').trim().replace(/["']/g, '') : '';
+                    const role = roleIdx >= 0 ? (cols[roleIdx] || '').trim().replace(/["']/g, '') : '';
+
+                    const existing = checkStmt.get(userId, rawEmail);
+                    if (existing) {
+                        skipped++;
+                        continue;
+                    }
+
+                    insertStmt.run(userId, rawEmail, firstName, lastName, company, role);
+                    added++;
+                }
+            });
+
+            insertMany();
+        }
 
         return NextResponse.json({
             success: true,

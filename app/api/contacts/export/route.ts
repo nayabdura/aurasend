@@ -9,7 +9,31 @@ export async function GET(req: Request) {
     try {
         const user = await requireAuth();
 
-        const contacts = db.prepare('SELECT * FROM enriched_contacts WHERE user_id = ? ORDER BY id DESC').all(user.id) as any[];
+        let contacts: any[] = [];
+        if (process.env.DATABASE_URL) {
+            const prisma = (await import('@/lib/prisma')).default;
+            const where: any = {};
+            if (user?.id) where.userId = user.id;
+            const list = await prisma.contact.findMany({
+                where,
+                orderBy: { id: 'desc' },
+            });
+            contacts = list.map((c) => ({
+                id: c.id,
+                source: 'Platform',
+                name: `${c.firstName || ''} ${c.lastName || ''}`.trim() || c.email,
+                email: c.email,
+                phone: '',
+                current_role: c.currentRole || '',
+                company: c.company || '',
+                linkedin_url: '',
+                confidence_score: 100,
+                validation_status: c.emailValid ? 'valid' : 'pending',
+                created_at: c.createdAt ? c.createdAt.toISOString() : '',
+            }));
+        } else {
+            contacts = db.prepare('SELECT * FROM enriched_contacts WHERE user_id = ? ORDER BY id DESC').all(user.id) as any[];
+        }
 
         if (contacts.length === 0) {
             return new NextResponse('No contacts to export', { status: 404 });
