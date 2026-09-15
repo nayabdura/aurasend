@@ -43,64 +43,39 @@ export async function POST(req: Request) {
 
         const user = await registerUser(email, password, name);
 
-        // Generate OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        // Ensure user is marked verified in DB
         if (process.env.DATABASE_URL) {
             await prisma.user.update({
                 where: { id: user.id },
-                data: { verifyCode: otp, isVerified: false }
+                data: { isVerified: true, verifyCode: null }
             });
         } else {
-            db.prepare('UPDATE users SET verify_code = ?, is_verified = 0 WHERE id = ?').run(otp, user.id);
+            db.prepare('UPDATE users SET is_verified = 1, verify_code = NULL WHERE id = ?').run(user.id);
         }
 
-        // Send OTP
-        const nodemailer = require('nodemailer');
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: Number(process.env.SMTP_PORT) || 587,
-            secure: false, // true for 465
-            auth: {
-                user: process.env.SYSTEM_EMAIL || 'nayabdura@gmail.com',
-                pass: process.env.SYSTEM_EMAIL_PASSWORD || 'uaub lvhw xruu ylry' // Must be an App Password for Gmail!
-            }
-        });
-
-        let emailFailed = false;
-
-        try {
-            await transporter.sendMail({
-                from: '"AuraSend Security" <nayabdura@gmail.com>',
-                to: email,
-                subject: 'AuraSend - Your Verification Code',
-                html: `
-                    <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px;">
-                        <h2 style="color: #1e293b;">Welcome to AuraSend!</h2>
-                        <p style="color: #475569;">Your email verification code is:</p>
-                        <h1 style="color: #4f46e5; letter-spacing: 6px; font-size: 36px; text-align: center; margin: 20px 0;">${otp}</h1>
-                        <p style="color: #64748b; font-size: 14px;">Please enter this code on the verification page to complete your registration.</p>
-                    </div>
-                `
-            });
-            console.log(`[AuraSend Auth] Verification OTP sent successfully to ${email}`);
-        } catch (e: any) {
-            emailFailed = true;
-            console.error('\n==== SMTP DELIVERY FAILED ====');
-            if (e.message.includes('Invalid login') || e.message.includes('BadCredentials')) {
-                console.error('ERROR: Gmail Authentication Failed. You MUST use a 16-character App Password instead of your regular Google password.');
-            } else {
-                console.error('SMTP Error:', e.message);
-            }
-            console.log(`[AuraSend Auth] DEVELOPMENT FALLBACK -> OTP for ${email} is: ${otp}\n==============================\n`);
-        }
-
-        // DO NOT CREATE SESSION YET - must verify first
-        return NextResponse.json({
-            success: true,
-            requiresVerification: true,
+        // Auto-login on registration
+        const { createToken } = await import('@/lib/auth');
+        const { cookies } = await import('next/headers');
+        
+        const token = await createToken({
             userId: user.id,
             email: user.email,
-            devOtp: emailFailed ? otp : null
+            role: user.role,
+            workspaceId: user.workspace_id || 1
+        });
+
+        const cookieStore = cookies();
+        cookieStore.set('auth_token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7 // 7 days
+        });
+
+        return NextResponse.json({
+            success: true,
+            user
         });
     } catch (e: any) {
         console.error('Signup error:', e);

@@ -207,13 +207,6 @@ export default function LoginPage() {
                         <div className="text-center mb-8">
                             <h2 className="text-2xl font-bold text-white mb-2">Check your email</h2>
                             <p className="text-slate-400 text-sm mb-4">We sent a 6-digit confirmation code to <span className="text-blue-400">{email}</span></p>
-                            {devOtp && (
-                                <div className="bg-blue-500/20 border border-blue-500/30 rounded-xl p-4 text-blue-200 text-sm mt-4">
-                                    <strong className="block text-white mb-1">Development Notice</strong>
-                                    Google blocked the real email. Use this code for testing:<br />
-                                    <span className="text-2xl font-black tracking-widest text-white mt-2 block">{devOtp}</span>
-                                </div>
-                            )}
                         </div>
                     )}
 
