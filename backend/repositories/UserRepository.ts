@@ -1,6 +1,7 @@
 import 'server-only';
 import prisma from '../database/prisma';
 import { User, Role, PlanStatus } from '@prisma/client';
+import { syncTableSequence, syncAllSequences } from '@/lib/dbSequenceSync';
 
 export class UserRepository {
   static async findById(id: number): Promise<User | null> {
@@ -38,20 +39,48 @@ export class UserRepository {
         });
         targetWorkspaceId = createdWs.id;
       }
-    } catch {
-      // Fallback: continue with targetWorkspaceId
+    } catch (wsErr: any) {
+      if (wsErr?.code === 'P2002' || String(wsErr?.message).includes('Unique constraint failed on the fields: (id)')) {
+        await syncTableSequence('workspaces');
+        try {
+          const createdWs = await prisma.workspace.create({
+            data: { name: 'Default Workspace' },
+          });
+          targetWorkspaceId = createdWs.id;
+        } catch {
+          // Fallback to targetWorkspaceId
+        }
+      }
     }
 
-    return prisma.user.create({
-      data: {
-        email: data.email.toLowerCase().trim(),
-        passwordHash: data.passwordHash,
-        name: data.name || null,
-        role: data.role || 'USER',
-        workspaceId: targetWorkspaceId,
-        isVerified: data.isVerified !== undefined ? data.isVerified : true,
-      },
-    });
+    try {
+      return await prisma.user.create({
+        data: {
+          email: data.email.toLowerCase().trim(),
+          passwordHash: data.passwordHash,
+          name: data.name || null,
+          role: data.role || 'USER',
+          workspaceId: targetWorkspaceId,
+          isVerified: data.isVerified !== undefined ? data.isVerified : true,
+        },
+      });
+    } catch (err: any) {
+      if (err?.code === 'P2002' || String(err?.message).includes('Unique constraint failed on the fields: (id)')) {
+        console.warn('[UserRepository] Primary key sequence collision detected. Resynchronizing PostgreSQL sequences...');
+        await syncAllSequences();
+        return await prisma.user.create({
+          data: {
+            email: data.email.toLowerCase().trim(),
+            passwordHash: data.passwordHash,
+            name: data.name || null,
+            role: data.role || 'USER',
+            workspaceId: targetWorkspaceId,
+            isVerified: data.isVerified !== undefined ? data.isVerified : true,
+          },
+        });
+      }
+      throw err;
+    }
   }
 
   static async updateLastLogin(id: number, ip?: string): Promise<User> {
