@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
-import db from '@/lib/db';
+import prisma from '@/lib/prisma';
 import { getAutopilotConfig, updateAutopilotConfig, runAutopilot } from '@/lib/autopilot';
 
 export const dynamic = 'force-dynamic';
@@ -9,21 +9,21 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
     try {
         const user = await requireAuth();
-        const config = getAutopilotConfig(user.id);
+        const config = await getAutopilotConfig(user.id);
 
-        // Get recent autopilot actions
-        const recentActions = db.prepare(`
-            SELECT * FROM system_events 
-            WHERE user_id = ? AND type = 'autopilot_action'
-            ORDER BY timestamp DESC LIMIT 20
-        `).all(user.id) as any[];
+        const logs = await prisma.adminAuditLog.findMany({
+            where: { adminId: user.id, action: 'AUTOPILOT_ACTION' },
+            orderBy: { id: 'desc' },
+            take: 20,
+        }).catch(() => []);
 
-        const actions = recentActions.map(a => {
-            try { return { ...a, details: JSON.parse(a.details) }; } catch { return a; }
+        const actions = logs.map(a => {
+            try { return { ...a, details: a.details ? JSON.parse(a.details) : null }; } catch { return a; }
         });
 
         return NextResponse.json({ config, recentActions: actions });
     } catch (e: any) {
+        console.error('[GET /api/autopilot error]:', e);
         return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
@@ -34,11 +34,11 @@ export async function PUT(req: Request) {
         const user = await requireAuth();
         const body = await req.json();
 
-        updateAutopilotConfig(user.id, body);
-        const config = getAutopilotConfig(user.id);
+        const config = await updateAutopilotConfig(user.id, body);
 
         return NextResponse.json({ config, success: true });
     } catch (e: any) {
+        console.error('[PUT /api/autopilot error]:', e);
         return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
@@ -50,6 +50,7 @@ export async function POST() {
         const report = await runAutopilot(user.id);
         return NextResponse.json({ report, success: true });
     } catch (e: any) {
+        console.error('[POST /api/autopilot error]:', e);
         return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
     }
 }
