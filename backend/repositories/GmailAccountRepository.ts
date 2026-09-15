@@ -1,6 +1,7 @@
 import 'server-only';
 import prisma from '../database/prisma';
 import { GmailAccount } from '@prisma/client';
+import { syncTableSequence } from '@/lib/dbSequenceSync';
 
 export class GmailAccountRepository {
   static async findById(id: number, userId?: number): Promise<GmailAccount | null> {
@@ -44,7 +45,7 @@ export class GmailAccountRepository {
   }): Promise<GmailAccount> {
     const email = data.email.toLowerCase().trim();
 
-    return prisma.gmailAccount.upsert({
+    const upsertData = {
       where: {
         userId_email: {
           userId: data.userId,
@@ -76,7 +77,18 @@ export class GmailAccountRepository {
         status: data.status || 'pending_auth',
         isConnected: data.isConnected !== undefined ? data.isConnected : false,
       },
-    });
+    };
+
+    try {
+      return await prisma.gmailAccount.upsert(upsertData);
+    } catch (err: any) {
+      if (err?.code === 'P2002' || String(err?.message).includes('Unique constraint failed on the fields: (\'id\')') || String(err?.message).includes('id')) {
+        console.warn('[GmailAccountRepository] Sequence collision on gmail_accounts. Syncing sequence...');
+        await syncTableSequence('gmail_accounts');
+        return await prisma.gmailAccount.upsert(upsertData);
+      }
+      throw err;
+    }
   }
 
   static async updateTokens(

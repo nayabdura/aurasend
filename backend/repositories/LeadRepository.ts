@@ -1,6 +1,7 @@
 import 'server-only';
 import prisma from '../database/prisma';
 import { Lead } from '@prisma/client';
+import { syncTableSequence } from '@/lib/dbSequenceSync';
 
 export interface LeadFilter {
   userId: number;
@@ -68,26 +69,35 @@ export class LeadRepository {
   }
 
   static async create(data: Partial<Lead> & { userId: number; email: string }): Promise<Lead> {
-    return prisma.lead.create({
-      data: {
-        userId: data.userId,
-        workspaceId: data.workspaceId || 1,
-        campaignId: data.campaignId || null,
-        name: data.name || null,
-        email: data.email.toLowerCase().trim(),
-        website: data.website || null,
-        company: data.company || null,
-        intro: data.intro || null,
-        source: data.source || null,
-        status: data.status || 'pending',
-        leadType: data.leadType || 'client',
-        temperature: data.temperature || 'Cold',
-        companyDomain: data.companyDomain || null,
-        currentRole: data.currentRole || null,
-        niche: data.niche || null,
-        previousWork: data.previousWork || null,
-      },
-    });
+    const createData = {
+      userId: data.userId,
+      workspaceId: data.workspaceId || 1,
+      campaignId: data.campaignId || null,
+      name: data.name || null,
+      email: data.email.toLowerCase().trim(),
+      website: data.website || null,
+      company: data.company || null,
+      intro: data.intro || null,
+      source: data.source || null,
+      status: data.status || 'pending',
+      leadType: data.leadType || 'client',
+      temperature: data.temperature || 'Cold',
+      companyDomain: data.companyDomain || null,
+      currentRole: data.currentRole || null,
+      niche: data.niche || null,
+      previousWork: data.previousWork || null,
+    };
+
+    try {
+      return await prisma.lead.create({ data: createData });
+    } catch (err: any) {
+      if (err?.code === 'P2002' || String(err?.message).includes('Unique constraint failed on the fields: (\'id\')') || String(err?.message).includes('id')) {
+        console.warn('[LeadRepository] Sequence collision on leads. Syncing sequence...');
+        await syncTableSequence('leads');
+        return await prisma.lead.create({ data: createData });
+      }
+      throw err;
+    }
   }
 
   static async createManyBatch(leads: Array<Partial<Lead> & { userId: number; email: string }>): Promise<number> {
@@ -110,12 +120,24 @@ export class LeadRepository {
       previousWork: l.previousWork || null,
     }));
 
-    const result = await prisma.lead.createMany({
-      data: formatted,
-      skipDuplicates: true,
-    });
-
-    return result.count;
+    try {
+      const result = await prisma.lead.createMany({
+        data: formatted,
+        skipDuplicates: true,
+      });
+      return result.count;
+    } catch (err: any) {
+      if (err?.code === 'P2002' || String(err?.message).includes('Unique constraint failed on the fields: (\'id\')') || String(err?.message).includes('id')) {
+        console.warn('[LeadRepository] Sequence collision on leads batch. Syncing sequence...');
+        await syncTableSequence('leads');
+        const result = await prisma.lead.createMany({
+          data: formatted,
+          skipDuplicates: true,
+        });
+        return result.count;
+      }
+      throw err;
+    }
   }
 
   static async update(id: number, userId: number, data: Partial<Lead>): Promise<Lead> {

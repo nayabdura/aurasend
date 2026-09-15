@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { getUserId } from '@/lib/auth';
 import nodemailer from 'nodemailer';
 import { encryptSecret } from '@/lib/crypto';
+import { syncTableSequence } from '@/lib/dbSequenceSync';
 
 export async function POST(req: Request) {
     try {
@@ -67,7 +68,7 @@ export async function POST(req: Request) {
         const encryptedPass = encryptSecret(trimmedPassword);
 
         // Upsert Gmail Account via Prisma
-        await prisma.gmailAccount.upsert({
+        const upsertData = {
             where: {
                 userId_email: { userId, email },
             },
@@ -94,7 +95,19 @@ export async function POST(req: Request) {
                 isConnected: true,
                 name: name || undefined,
             },
-        });
+        };
+
+        try {
+            await prisma.gmailAccount.upsert(upsertData);
+        } catch (err: any) {
+            if (err?.code === 'P2002' || String(err?.message).includes('Unique constraint failed on the fields: (\'id\')') || String(err?.message).includes('id')) {
+                console.warn('[Gmail Add Password] Sequence collision on gmail_accounts. Syncing sequence...');
+                await syncTableSequence('gmail_accounts');
+                await prisma.gmailAccount.upsert(upsertData);
+            } else {
+                throw err;
+            }
+        }
 
         return NextResponse.json({ success: true });
     } catch (e: any) {

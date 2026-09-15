@@ -52,15 +52,16 @@ export async function syncTableSequence(tableName: string): Promise<void> {
   if (!process.env.DATABASE_URL) return;
 
   try {
+    // Attempt sequence reset via pg_get_serial_sequence
     await prisma.$executeRawUnsafe(`
       SELECT setval(
         pg_get_serial_sequence('${tableName}', 'id'),
-        COALESCE((SELECT MAX(id) FROM "${tableName}"), 1),
-        (SELECT MAX(id) FROM "${tableName}") IS NOT NULL
+        (SELECT COALESCE(MAX(id), 0) + 1 FROM "${tableName}"),
+        false
       );
     `);
   } catch {
-    // Fallback for explicit sequence name (e.g. users_id_seq)
+    // Fallback for explicit sequence name (e.g. gmail_accounts_id_seq, users_id_seq)
     try {
       await prisma.$executeRawUnsafe(`
         SELECT setval(

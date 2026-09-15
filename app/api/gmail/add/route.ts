@@ -3,6 +3,7 @@ import db from '@/lib/db';
 import prisma from '@/lib/prisma';
 import { getAuthUrl } from '@/lib/gmail';
 import { getUserId } from '@/lib/auth';
+import { syncTableSequence } from '@/lib/dbSequenceSync';
 
 export async function POST(req: Request) {
     try {
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
 
         // Upsert Gmail Account
         if (process.env.DATABASE_URL) {
-            await prisma.gmailAccount.upsert({
+            const upsertData = {
                 where: { userId_email: { userId, email } },
                 update: {
                     clientId: finalClientId,
@@ -46,7 +47,18 @@ export async function POST(req: Request) {
                     isConnected: false,
                     workspaceId: 1,
                 },
-            });
+            };
+            try {
+                await prisma.gmailAccount.upsert(upsertData);
+            } catch (err: any) {
+                if (err?.code === 'P2002' || String(err?.message).includes('Unique constraint failed on the fields: (\'id\')') || String(err?.message).includes('id')) {
+                    console.warn('[Gmail Add] Sequence collision on gmail_accounts. Syncing sequence...');
+                    await syncTableSequence('gmail_accounts');
+                    await prisma.gmailAccount.upsert(upsertData);
+                } else {
+                    throw err;
+                }
+            }
         } else {
             const existing = db.prepare('SELECT * FROM gmail_accounts WHERE user_id = ? AND email = ?').get(userId, email);
             if (existing) {
