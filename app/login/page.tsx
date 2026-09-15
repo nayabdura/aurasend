@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { LogIn, Mail, Lock, User, AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
 
@@ -18,6 +18,16 @@ export default function LoginPage() {
     const [userId, setUserId] = useState<number | null>(null);
     const [devOtp, setDevOtp] = useState<string | null>(null);
     const router = useRouter();
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('expired') || params.has('deleted')) {
+                setError('Session expired or account no longer exists. Please sign in again.');
+                fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+            }
+        }
+    }, []);
 
     async function handleVerification(e: React.FormEvent) {
         e.preventDefault();

@@ -42,14 +42,14 @@ export async function getCurrentUser(): Promise<User | null> {
 
 export async function requireAuth(): Promise<User> {
     const user = await getCurrentUser();
-    if (!user) redirect('/login');
+    if (!user) redirect('/login?expired=1');
     return user;
 }
 
 export async function requireMaster(): Promise<User> {
     const user = await requireAuth();
     const roleStr = String(user.role).toUpperCase();
-    if (roleStr !== 'MASTER' && roleStr !== 'ADMIN') redirect('/login');
+    if (roleStr !== 'MASTER' && roleStr !== 'ADMIN') redirect('/login?expired=1');
     return user;
 }
 

@@ -93,6 +93,17 @@ export async function middleware(request: NextRequest) {
         // Route is public — check if logged-in user accessing login page
         const token = request.cookies.get('auth_token')?.value;
         if (token && authOnlyRoutes.includes(pathname)) {
+            // If user is accessing login due to expired session/deleted account, clear token and render login
+            if (
+                request.nextUrl.searchParams.has('expired') ||
+                request.nextUrl.searchParams.has('logout') ||
+                request.nextUrl.searchParams.has('deleted')
+            ) {
+                const response = setSecurityHeaders(NextResponse.next());
+                response.cookies.delete('auth_token');
+                return response;
+            }
+
             try {
                 const { payload } = await jwtVerify(token, encodedSecret);
                 if (payload?.userId) {

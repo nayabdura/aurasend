@@ -12,7 +12,9 @@ export async function GET() {
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      const response = NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      response.cookies.delete('auth_token');
+      return response;
     }
 
     return NextResponse.json({

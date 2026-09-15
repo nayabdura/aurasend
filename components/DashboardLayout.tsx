@@ -26,6 +26,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const router = useRouter();
     const pathname = usePathname();
 
+    // Redirect if user session is invalid / deleted
+    useEffect(() => {
+        if (!loading && !user && typeof window !== 'undefined') {
+            fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
+                window.location.href = '/login?expired=1';
+            });
+        }
+    }, [loading, user]);
+
     // Auto-close mobile sidebar when navigating
     useEffect(() => {
         setMobileOpen(false);

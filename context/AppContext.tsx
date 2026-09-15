@@ -30,8 +30,15 @@ interface AppContextType extends AppState {
 // ─── Fetcher ─────────────────────────────────────────────────────────────────
 
 const fetcher = (url: string) =>
-  fetch(url, { credentials: 'same-origin' }).then(res => {
-    if (!res.ok) throw new Error('Not authenticated');
+  fetch(url, { credentials: 'same-origin' }).then(async res => {
+    if (!res.ok) {
+      if (res.status === 401) {
+        try {
+          await fetch('/api/auth/logout', { method: 'POST' });
+        } catch (_) {}
+      }
+      throw new Error('Not authenticated');
+    }
     return res.json();
   });
 
