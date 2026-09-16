@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle, AlertCircle, X } from 'lucide-react';
 
-export default function GmailPageClient() {
+function GmailPageClientContent() {
     const searchParams = useSearchParams();
     const [banner, setBanner] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -50,5 +50,13 @@ export default function GmailPageClient() {
                 <X size={16} />
             </button>
         </div>
+    );
+}
+
+export default function GmailPageClient() {
+    return (
+        <Suspense fallback={null}>
+            <GmailPageClientContent />
+        </Suspense>
     );
 }

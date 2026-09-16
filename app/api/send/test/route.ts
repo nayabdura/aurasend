@@ -9,11 +9,19 @@ export async function POST(req: Request) {
         const { email } = await req.json(); // Admin email to send to
         if (!email) return NextResponse.json({ error: 'Missing email' }, { status: 400 });
 
-        let account;
-        if (userId) {
-            account = db.prepare("SELECT * FROM gmail_accounts WHERE status = 'active' AND is_connected = 1 AND user_id = ? LIMIT 1").get(userId);
+        let account: any = null;
+
+        if (process.env.DATABASE_URL) {
+            const prisma = (await import('@/lib/prisma')).default;
+            const where: any = { isConnected: true, status: 'active' };
+            if (userId) where.userId = userId;
+            account = await prisma.gmailAccount.findFirst({ where });
         } else {
-            account = db.prepare("SELECT * FROM gmail_accounts WHERE status = 'active' AND is_connected = 1 LIMIT 1").get();
+            if (userId) {
+                account = db.prepare("SELECT * FROM gmail_accounts WHERE status = 'active' AND is_connected = 1 AND user_id = ? LIMIT 1").get(userId);
+            } else {
+                account = db.prepare("SELECT * FROM gmail_accounts WHERE status = 'active' AND is_connected = 1 LIMIT 1").get();
+            }
         }
 
         if (!account) return NextResponse.json({ error: 'No active Gmail connected for this user' }, { status: 400 });

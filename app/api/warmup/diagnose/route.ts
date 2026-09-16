@@ -12,14 +12,14 @@ export async function GET() {
         const userId = await getUserId();
 
         // Get all accounts for this user
-        const accounts = db.prepare(
+        const accounts = (await db.prepare(
             'SELECT * FROM gmail_accounts WHERE user_id = ? ORDER BY id'
-        ).all(userId) as any[];
+        ).all(userId)) as any[];
 
         const today = new Date().toISOString().split('T')[0];
         const currentHour = new Date().getHours();
 
-        const report = accounts.map(account => {
+        const report = await Promise.all(accounts.map(async account => {
             const warmupDay = account.warmup_day || 1;
             const warmupSentToday = account.warmup_sent_today || 0;
             const warmupLastDate = account.warmup_last_date || null;
@@ -30,27 +30,27 @@ export async function GET() {
             let templateStatus = 'MISSING';
             let templateName = null;
             if (account.warmup_template_id) {
-                const tpl = db.prepare('SELECT name FROM warmup_templates WHERE id = ? AND is_active = 1').get(account.warmup_template_id) as any;
+                const tpl = (await db.prepare('SELECT name FROM warmup_templates WHERE id = ? AND is_active = 1').get(account.warmup_template_id)) as any;
                 if (tpl) { templateStatus = 'OK'; templateName = tpl.name; }
                 else { templateStatus = 'ASSIGNED_BUT_INACTIVE'; }
             } else {
                 // Check global templates
-                const globalTpl = db.prepare('SELECT name FROM warmup_templates WHERE user_id = ? AND gmail_account_id IS NULL AND is_active = 1 LIMIT 1').get(userId) as any;
+                const globalTpl = (await db.prepare('SELECT name FROM warmup_templates WHERE user_id = ? AND gmail_account_id IS NULL AND is_active = 1 LIMIT 1').get(userId)) as any;
                 if (globalTpl) { templateStatus = 'USING_GLOBAL'; templateName = globalTpl.name; }
                 else { templateStatus = 'MISSING'; }
             }
 
             // Check dedicated contacts
-            const contactCount = (db.prepare("SELECT COUNT(*) as c FROM warmup_contacts WHERE gmail_account_id = ? AND status = 'active'").get(account.id) as any)?.c || 0;
+            const contactCount = ((await db.prepare("SELECT COUNT(*) as c FROM warmup_contacts WHERE gmail_account_id = ? AND status = 'active'").get(account.id)) as any)?.c || 0;
 
             // Check peer accounts (fallback)
-            const peerCount = (db.prepare("SELECT COUNT(*) as c FROM gmail_accounts WHERE user_id = ? AND id != ? AND is_connected = 1 AND status = 'active'").get(userId, account.id) as any)?.c || 0;
+            const peerCount = ((await db.prepare("SELECT COUNT(*) as c FROM gmail_accounts WHERE user_id = ? AND id != ? AND is_connected = 1 AND status = 'active'").get(userId, account.id)) as any)?.c || 0;
 
             // Count warmup logs today
-            const sentTodayFromLog = (db.prepare("SELECT COUNT(*) as c FROM warmup_logs WHERE gmail_account_id = ? AND DATE(timestamp, 'unixepoch') = DATE('now')").get(account.id) as any)?.c || 0;
+            const sentTodayFromLog = ((await db.prepare("SELECT COUNT(*) as c FROM warmup_logs WHERE gmail_account_id = ? AND DATE(timestamp, 'unixepoch') = DATE('now')").get(account.id)) as any)?.c || 0;
 
             // Last warmup log
-            const lastLog = db.prepare("SELECT to_email, subject, datetime(timestamp, 'unixepoch') as sent_at FROM warmup_logs WHERE gmail_account_id = ? ORDER BY timestamp DESC LIMIT 1").get(account.id) as any;
+            const lastLog = (await db.prepare("SELECT to_email, subject, datetime(timestamp, 'unixepoch') as sent_at FROM warmup_logs WHERE gmail_account_id = ? ORDER BY timestamp DESC LIMIT 1").get(account.id)) as any;
 
             // Build list of issues
             const issues: string[] = [];
@@ -87,7 +87,7 @@ export async function GET() {
                 can_send: canSend,
                 issues,
             };
-        });
+        }));
 
         return NextResponse.json({
             current_time: new Date().toISOString(),

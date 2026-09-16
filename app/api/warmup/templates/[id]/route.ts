@@ -15,11 +15,11 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
         // Ownership check
         if (userId) {
-            const existing = db.prepare('SELECT id FROM warmup_templates WHERE id = ? AND user_id = ?').get(id, userId);
+            const existing = await db.prepare('SELECT id FROM warmup_templates WHERE id = ? AND user_id = ?').get(id, userId);
             if (!existing) return NextResponse.json({ error: 'Not found or unauthorized' }, { status: 404 });
         }
 
-        db.prepare(`
+        await db.prepare(`
             UPDATE warmup_templates SET
                 gmail_account_id = COALESCE(?, gmail_account_id),
                 name = COALESCE(?, name),
@@ -54,9 +54,9 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
         let result;
         if (userId) {
-            result = db.prepare('DELETE FROM warmup_templates WHERE id = ? AND user_id = ?').run(id, userId);
+            result = await db.prepare('DELETE FROM warmup_templates WHERE id = ? AND user_id = ?').run(id, userId);
         } else {
-            result = db.prepare('DELETE FROM warmup_templates WHERE id = ?').run(id);
+            result = await db.prepare('DELETE FROM warmup_templates WHERE id = ?').run(id);
         }
 
         if (result.changes === 0) return NextResponse.json({ error: 'Not found' }, { status: 404 });

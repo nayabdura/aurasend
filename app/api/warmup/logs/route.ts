@@ -22,7 +22,7 @@ export async function GET(req: Request) {
         if (conditions.length) query += ' WHERE ' + conditions.join(' AND ');
         query += ` ORDER BY wl.timestamp DESC LIMIT ${limit}`;
 
-        const logs = db.prepare(query).all(...params);
+        const logs = await db.prepare(query).all(...params);
 
         // Stats per account
         const statsQuery = userId
@@ -36,8 +36,8 @@ export async function GET(req: Request) {
                FROM warmup_logs GROUP BY gmail_account_id`;
 
         const stats = userId
-            ? db.prepare(statsQuery).all(userId)
-            : db.prepare(statsQuery).all();
+            ? await db.prepare(statsQuery).all(userId)
+            : await db.prepare(statsQuery).all();
 
         return NextResponse.json({ logs, stats });
     } catch (e: any) {

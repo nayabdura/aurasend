@@ -9,11 +9,11 @@ export async function GET(req: Request, { params }: { params: { accountId: strin
 
         // Security check
         if (userId) {
-            const account = db.prepare('SELECT id FROM gmail_accounts WHERE id = ? AND user_id = ?').get(accountId, userId);
+            const account = await db.prepare('SELECT id FROM gmail_accounts WHERE id = ? AND user_id = ?').get(accountId, userId);
             if (!account) return NextResponse.json({ error: 'Not found' }, { status: 404 });
         }
 
-        const contacts = db.prepare(`
+        const contacts = await db.prepare(`
             SELECT id, email, name, status, sent_count, reply_count, created_at
             FROM warmup_contacts
             WHERE gmail_account_id = ?
@@ -33,7 +33,7 @@ export async function POST(req: Request, { params }: { params: { accountId: stri
 
         // Security check
         if (userId) {
-            const account = db.prepare('SELECT id FROM gmail_accounts WHERE id = ? AND user_id = ?').get(accountId, userId);
+            const account = await db.prepare('SELECT id FROM gmail_accounts WHERE id = ? AND user_id = ?').get(accountId, userId);
             if (!account) return NextResponse.json({ error: 'Not found' }, { status: 404 });
         }
 
@@ -51,21 +51,19 @@ export async function POST(req: Request, { params }: { params: { accountId: stri
             VALUES (?, ?, ?, 'active')
         `);
 
-        db.transaction(() => {
-            for (const c of contacts) {
-                if (!c.email) continue;
-                try {
-                    insert.run(accountId, c.email.trim(), c.name?.trim() || null);
-                    inserted++;
-                } catch (e: any) {
-                    if (e.message.includes('UNIQUE')) {
-                        skipped++;
-                    } else {
-                        throw e;
-                    }
+        for (const c of contacts) {
+            if (!c.email) continue;
+            try {
+                await insert.run(accountId, c.email.trim(), c.name?.trim() || null);
+                inserted++;
+            } catch (e: any) {
+                if (e.message && e.message.includes('UNIQUE')) {
+                    skipped++;
+                } else {
+                    throw e;
                 }
             }
-        })();
+        }
 
         return NextResponse.json({ success: true, inserted, skipped });
     } catch (e: any) {
@@ -80,7 +78,7 @@ export async function DELETE(req: Request, { params }: { params: { accountId: st
 
         // Security check
         if (userId) {
-            const account = db.prepare('SELECT id FROM gmail_accounts WHERE id = ? AND user_id = ?').get(accountId, userId);
+            const account = await db.prepare('SELECT id FROM gmail_accounts WHERE id = ? AND user_id = ?').get(accountId, userId);
             if (!account) return NextResponse.json({ error: 'Not found' }, { status: 404 });
         }
 
@@ -89,10 +87,10 @@ export async function DELETE(req: Request, { params }: { params: { accountId: st
 
         if (contactId) {
             // Delete one
-            db.prepare('DELETE FROM warmup_contacts WHERE gmail_account_id = ? AND id = ?').run(accountId, parseInt(contactId));
+            await db.prepare('DELETE FROM warmup_contacts WHERE gmail_account_id = ? AND id = ?').run(accountId, parseInt(contactId));
         } else {
             // Delete all
-            db.prepare('DELETE FROM warmup_contacts WHERE gmail_account_id = ?').run(accountId);
+            await db.prepare('DELETE FROM warmup_contacts WHERE gmail_account_id = ?').run(accountId);
         }
 
         return NextResponse.json({ success: true });

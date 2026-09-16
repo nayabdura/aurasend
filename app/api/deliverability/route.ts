@@ -9,21 +9,56 @@ export async function GET() {
     try {
         const user = await requireAuth();
 
-        const accounts = db.prepare(`
-            SELECT 
-                g.id, g.email, g.warmup_health_score, g.spam_risk, g.domain_health,
-                g.sent_today, g.daily_limit, g.warmup_enabled, g.status,
-                g.warmup_day, g.engagement_score,
-                COUNT(DISTINCT el.id) as total_sent,
-                COUNT(DISTINCT CASE WHEN l.opened = 1 THEN l.id END) as total_opens,
-                COUNT(DISTINCT CASE WHEN l.replied = 1 THEN l.id END) as total_replies,
-                COUNT(DISTINCT CASE WHEN l.status = 'bounced' THEN l.id END) as total_bounces
-            FROM gmail_accounts g
-            LEFT JOIN email_logs el ON el.gmail_id = g.id AND el.type = 'sent'
-            LEFT JOIN leads l ON el.lead_id = l.id
-            WHERE g.user_id = ?
-            GROUP BY g.id
-        `).all(user.id) as any[];
+        let accounts: any[] = [];
+
+        if (process.env.DATABASE_URL) {
+            const prisma = (await import('@/lib/prisma')).default;
+            const isMaster = ['MASTER', 'ADMIN'].includes(String(user.role || '').toUpperCase());
+            const list = await prisma.gmailAccount.findMany({
+                where: isMaster ? {} : { userId: user.id },
+            });
+
+            accounts = await Promise.all(list.map(async (g) => {
+                const totalSent = await prisma.emailLog.count({ where: { gmailId: g.id, type: 'sent' } }).catch(() => 0);
+                const totalOpens = await prisma.lead.count({ where: { campaignId: { not: null }, opened: true } }).catch(() => 0);
+                const totalReplies = await prisma.lead.count({ where: { campaignId: { not: null }, replied: true } }).catch(() => 0);
+                const totalBounces = await prisma.lead.count({ where: { campaignId: { not: null }, status: 'bounced' } }).catch(() => 0);
+
+                return {
+                    id: g.id,
+                    email: g.email,
+                    warmup_health_score: g.warmupHealthScore || 50,
+                    spam_risk: 0,
+                    domain_health: 'Good',
+                    sent_today: g.sentToday,
+                    daily_limit: g.dailyLimit,
+                    warmup_enabled: g.warmupEnabled ? 1 : 0,
+                    status: g.status,
+                    warmup_day: g.warmupDay,
+                    engagement_score: 80,
+                    total_sent: totalSent,
+                    total_opens: totalOpens,
+                    total_replies: totalReplies,
+                    total_bounces: totalBounces,
+                };
+            }));
+        } else {
+            accounts = db.prepare(`
+                SELECT 
+                    g.id, g.email, g.warmup_health_score, g.spam_risk, g.domain_health,
+                    g.sent_today, g.daily_limit, g.warmup_enabled, g.status,
+                    g.warmup_day, g.engagement_score,
+                    COUNT(DISTINCT el.id) as total_sent,
+                    COUNT(DISTINCT CASE WHEN l.opened = 1 THEN l.id END) as total_opens,
+                    COUNT(DISTINCT CASE WHEN l.replied = 1 THEN l.id END) as total_replies,
+                    COUNT(DISTINCT CASE WHEN l.status = 'bounced' THEN l.id END) as total_bounces
+                FROM gmail_accounts g
+                LEFT JOIN email_logs el ON el.gmail_id = g.id AND el.type = 'sent'
+                LEFT JOIN leads l ON el.lead_id = l.id
+                WHERE g.user_id = ?
+                GROUP BY g.id
+            `).all(user.id) as any[];
+        }
 
         // Compute derived metrics
         const enriched = accounts.map(acc => {

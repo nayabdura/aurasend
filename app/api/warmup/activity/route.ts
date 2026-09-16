@@ -36,10 +36,10 @@ export async function GET(request: Request) {
         query += ' ORDER BY wl.timestamp DESC LIMIT ?';
         params.push(limit);
 
-        const logs = db.prepare(query).all(...params) as any[];
+        const logs = (await db.prepare(query).all(...params)) as any[];
 
         // Per-account summary stats
-        const accountStats = db.prepare(`
+        const accountStats = (await db.prepare(`
             SELECT 
                 g.id,
                 g.email,
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
             WHERE g.user_id = ?
             GROUP BY g.id
             ORDER BY last_warmup_at DESC
-        `).all(user.id) as any[];
+        `).all(user.id)) as any[];
 
         return NextResponse.json({ logs, accountStats });
     } catch (error: any) {

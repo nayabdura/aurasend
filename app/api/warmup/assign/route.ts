@@ -14,11 +14,11 @@ export async function POST(req: Request) {
 
         // Ownership check
         if (userId) {
-            const account = db.prepare('SELECT id FROM gmail_accounts WHERE id = ? AND user_id = ?').get(gmail_account_id, userId);
+            const account = await db.prepare('SELECT id FROM gmail_accounts WHERE id = ? AND user_id = ?').get(gmail_account_id, userId);
             if (!account) return NextResponse.json({ error: 'Account not found or unauthorized' }, { status: 404 });
         }
 
-        db.prepare('UPDATE gmail_accounts SET warmup_template_id = ? WHERE id = ?')
+        await db.prepare('UPDATE gmail_accounts SET warmup_template_id = ? WHERE id = ?')
             .run(warmup_template_id || null, gmail_account_id);
 
         return NextResponse.json({ success: true });

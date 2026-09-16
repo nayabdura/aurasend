@@ -27,36 +27,36 @@ function getDailyTarget(day: number): number {
  * Pick the next template in rotation for a given account.
  * Uses round-robin based on rotation_order.
  */
-function pickTemplate(accountId: number, userId: number): WarmupTemplate | null {
+async function pickTemplate(accountId: number, userId: number): Promise<WarmupTemplate | null> {
     // 1. Get the specific template assigned to this account
-    const account = db.prepare('SELECT warmup_template_id FROM gmail_accounts WHERE id = ?').get(accountId) as any;
+    const account = (await db.prepare('SELECT warmup_template_id FROM gmail_accounts WHERE id = ?').get(accountId)) as any;
     if (account?.warmup_template_id) {
-        const tpl = db.prepare('SELECT * FROM warmup_templates WHERE id = ? AND is_active = 1').get(account.warmup_template_id) as WarmupTemplate | undefined;
+        const tpl = (await db.prepare('SELECT * FROM warmup_templates WHERE id = ? AND is_active = 1').get(account.warmup_template_id)) as WarmupTemplate | undefined;
         if (tpl) return tpl;
     }
 
     // 2. Fallback: pick from templates bound to this account
-    const accountTemplates = db.prepare(
+    const accountTemplates = (await db.prepare(
         'SELECT * FROM warmup_templates WHERE gmail_account_id = ? AND user_id = ? AND is_active = 1 ORDER BY rotation_order ASC'
-    ).all(accountId, userId) as WarmupTemplate[];
+    ).all(accountId, userId)) as WarmupTemplate[];
 
     if (accountTemplates.length > 0) {
         // Round-robin: count how many sends today, mod by template count
-        const sentToday = (db.prepare(
+        const sentToday = ((await db.prepare(
             "SELECT COUNT(*) as c FROM warmup_logs WHERE gmail_account_id = ? AND DATE(timestamp, 'unixepoch') = DATE('now')"
-        ).get(accountId) as any)?.c || 0;
+        ).get(accountId)) as any)?.c || 0;
         return accountTemplates[sentToday % accountTemplates.length];
     }
 
     // 3. Final fallback: global templates (gmail_account_id IS NULL)
-    const globalTemplates = db.prepare(
+    const globalTemplates = (await db.prepare(
         'SELECT * FROM warmup_templates WHERE gmail_account_id IS NULL AND user_id = ? AND is_active = 1 ORDER BY rotation_order ASC'
-    ).all(userId) as WarmupTemplate[];
+    ).all(userId)) as WarmupTemplate[];
 
     if (globalTemplates.length > 0) {
-        const sentToday = (db.prepare(
+        const sentToday = ((await db.prepare(
             "SELECT COUNT(*) as c FROM warmup_logs WHERE gmail_account_id = ? AND DATE(timestamp, 'unixepoch') = DATE('now')"
-        ).get(accountId) as any)?.c || 0;
+        ).get(accountId)) as any)?.c || 0;
         return globalTemplates[sentToday % globalTemplates.length];
     }
 
@@ -85,10 +85,10 @@ export async function processWarmupQueue(): Promise<{ processed: number; errors:
 
     try {
         // Get all accounts with warmup enabled
-        const accounts = db.prepare(`
+        const accounts = (await db.prepare(`
             SELECT * FROM gmail_accounts 
             WHERE warmup_enabled = 1 AND status = 'active' AND is_connected = 1
-        `).all() as GmailAccount[];
+        `).all()) as GmailAccount[];
 
         if (accounts.length === 0) {
             log('info', 'Warmup: No accounts with warmup enabled');
@@ -122,7 +122,7 @@ export async function processWarmupQueue(): Promise<{ processed: number; errors:
 
                 // Reset daily counter if new day
                 if (warmupLastDate !== today) {
-                    db.prepare('UPDATE gmail_accounts SET warmup_sent_today = 0, warmup_last_date = ?, warmup_day = warmup_day + 1 WHERE id = ?')
+                    await db.prepare('UPDATE gmail_accounts SET warmup_sent_today = 0, warmup_last_date = ?, warmup_day = warmup_day + 1 WHERE id = ?')
                         .run(today, account.id);
                 }
 
@@ -133,16 +133,16 @@ export async function processWarmupQueue(): Promise<{ processed: number; errors:
                 }
 
                 // Pick template
-                const template = pickTemplate(account.id, userId);
+                const template = await pickTemplate(account.id, userId);
                 if (!template) {
                     log('info', `Warmup: No template found for ${account.email}, skipping`);
                     continue;
                 }
 
                 // Fetch dedicated warmup contacts for this account
-                const dedicatedContacts = db.prepare(
+                const dedicatedContacts = (await db.prepare(
                     "SELECT email, name FROM warmup_contacts WHERE gmail_account_id = ? AND status = 'active'"
-                ).all(account.id) as { email: string, name: string | null }[];
+                ).all(account.id)) as { email: string, name: string | null }[];
 
                 let targetEmail: string;
                 let targetName: string;
@@ -154,9 +154,9 @@ export async function processWarmupQueue(): Promise<{ processed: number; errors:
                     targetName = targetContact.name || targetEmail.split('@')[0];
                 } else {
                     // Fallback to internal peer accounts if no dedicated list is provided
-                    const otherAccounts = db.prepare(
+                    const otherAccounts = (await db.prepare(
                         'SELECT email FROM gmail_accounts WHERE user_id = ? AND id != ? AND is_connected = 1 AND status = \'active\' LIMIT 5'
-                    ).all(userId, account.id) as { email: string }[];
+                    ).all(userId, account.id)) as { email: string }[];
 
                     if (otherAccounts.length > 0) {
                         targetEmail = otherAccounts[currentSent % otherAccounts.length].email;
@@ -184,24 +184,24 @@ export async function processWarmupQueue(): Promise<{ processed: number; errors:
                 const result = await sendEmailViaGmail(account, targetEmail, subject, htmlBody);
 
                 // Log it separately in warmup_logs
-                db.prepare(`
+                await db.prepare(`
                     INSERT INTO warmup_logs (user_id, gmail_account_id, warmup_template_id, to_email, subject, type, thread_id)
                     VALUES (?, ?, ?, ?, ?, 'warmup_send', ?)
                 `).run(userId, account.id, template.id, targetEmail, subject, result?.threadId || null);
 
                 // Increment sent_count if sent to a dedicated contact list
-                db.prepare(
+                await db.prepare(
                     "UPDATE warmup_contacts SET sent_count = sent_count + 1 WHERE gmail_account_id = ? AND email = ?"
                 ).run(account.id, targetEmail);
 
                 // Update warmup counters
-                db.prepare('UPDATE gmail_accounts SET warmup_sent_today = warmup_sent_today + 1 WHERE id = ?')
+                await db.prepare('UPDATE gmail_accounts SET warmup_sent_today = warmup_sent_today + 1 WHERE id = ?')
                     .run(account.id);
 
                 // Update health score — use ?? 0 so new accounts truly start at 0, not defaulting to 50
                 const currentHealth = acctAny.warmup_health_score ?? 0;
                 const newHealth = Math.min(100, currentHealth + 2);
-                db.prepare('UPDATE gmail_accounts SET warmup_health_score = ? WHERE id = ?')
+                await db.prepare('UPDATE gmail_accounts SET warmup_health_score = ? WHERE id = ?')
                     .run(newHealth, account.id);
 
                 log('info', `Warmup: Sent warmup email from ${account.email} to ${targetEmail} (Day ${warmupDay}, Template: ${template.name})`);
@@ -216,7 +216,7 @@ export async function processWarmupQueue(): Promise<{ processed: number; errors:
                 const acctAny = account as any;
                 const currentHealth = acctAny.warmup_health_score ?? 0;
                 const newHealth = Math.max(0, currentHealth - 5);
-                db.prepare('UPDATE gmail_accounts SET warmup_health_score = ? WHERE id = ?')
+                await db.prepare('UPDATE gmail_accounts SET warmup_health_score = ? WHERE id = ?')
                     .run(newHealth, account.id);
             }
         }

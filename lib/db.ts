@@ -28,6 +28,11 @@ function normalizeSql(sql: string): string {
   normalized = normalized.replace(/strftime\('%s',\s*'now'\)/gi, 'EXTRACT(EPOCH FROM NOW())::INTEGER');
   normalized = normalized.replace(/INSERT\s+OR\s+REPLACE\s+INTO/gi, 'INSERT INTO');
 
+  // Convert SQLite DATE/datetime functions to PostgreSQL equivalents
+  normalized = normalized.replace(/DATE\(([^,]+),\s*'unixepoch'\)/gi, "TO_CHAR(TO_TIMESTAMP($1), 'YYYY-MM-DD')");
+  normalized = normalized.replace(/DATE\('now'\)/gi, "TO_CHAR(NOW(), 'YYYY-MM-DD')");
+  normalized = normalized.replace(/datetime\(([^,]+),\s*'unixepoch'\)/gi, "TO_CHAR(TO_TIMESTAMP($1), 'YYYY-MM-DD HH24:MI:SS')");
+
   // Convert positional ? placeholders to PostgreSQL $1, $2, $3... when running against PostgreSQL
   if (process.env.DATABASE_URL && normalized.includes('?')) {
     let paramIdx = 1;

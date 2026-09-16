@@ -20,13 +20,13 @@ export async function PATCH(req: Request) {
 
         let result;
         if (userId) {
-            result = db.prepare(`
+            result = await db.prepare(`
                 UPDATE gmail_accounts 
                 SET warmup_send_start = ?, warmup_send_end = ?
                 WHERE id = ? AND user_id = ?
             `).run(start_time, end_time, account_id, userId);
         } else {
-            result = db.prepare(`
+            result = await db.prepare(`
                 UPDATE gmail_accounts 
                 SET warmup_send_start = ?, warmup_send_end = ?
                 WHERE id = ?

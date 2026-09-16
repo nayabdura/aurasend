@@ -19,7 +19,7 @@ export async function GET(req: Request) {
         if (conditions.length) query += ' WHERE ' + conditions.join(' AND ');
         query += ' ORDER BY gmail_account_id ASC, rotation_order ASC, created_at DESC';
 
-        const templates = db.prepare(query).all(...params);
+        const templates = await db.prepare(query).all(...params);
         return NextResponse.json(templates);
     } catch (e: any) {
         return NextResponse.json({ error: 'An internal error occurred.' }, { status: 500 });
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'name, subject, body are required' }, { status: 400 });
         }
 
-        const result = db.prepare(`
+        const result = await db.prepare(`
             INSERT INTO warmup_templates 
             (user_id, gmail_account_id, name, subject, body, followup1_subject, followup1_body, followup2_subject, followup2_body, rotation_order)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
